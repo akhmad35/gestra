@@ -1,0 +1,97 @@
+/* ===================================================
+   GESTRA — Materi Page Styles
+   =================================================== */
+
+.materi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.materi-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--gray-200);
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  display: block;
+  animation: fadeUp .4s ease both;
+}
+.materi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--blue-200);
+}
+
+.materi-thumbnail {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background-image:
+    linear-gradient(45deg, #e8e8e8 25%, transparent 25%),
+    linear-gradient(-45deg, #e8e8e8 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e8e8e8 75%),
+    linear-gradient(-45deg, transparent 75%, #e8e8e8 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-color: #f8f8f8;
+  position: relative;
+}
+
+.materi-card-footer {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.materi-card-info h4 {
+  font-size: .88rem;
+  font-weight: 800;
+  color: var(--gray-900);
+  margin-bottom: 3px;
+}
+.materi-card-info p {
+  font-size: .75rem;
+  color: var(--gray-400);
+  font-weight: 600;
+}
+
+.materi-card-link {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue-600);
+  border-radius: var(--radius-sm);
+  background: var(--blue-50);
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.materi-card:hover .materi-card-link {
+  background: var(--blue-600);
+  color: var(--white);
+}
+.materi-card-link svg { width: 16px; height: 16px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.materi-card:nth-child(1) { animation-delay: .05s; }
+.materi-card:nth-child(2) { animation-delay: .10s; }
+.materi-card:nth-child(3) { animation-delay: .15s; }
+.materi-card:nth-child(4) { animation-delay: .20s; }
+.materi-card:nth-child(5) { animation-delay: .25s; }
+.materi-card:nth-child(6) { animation-delay: .30s; }
+.materi-card:nth-child(7) { animation-delay: .35s; }
+.materi-card:nth-child(8) { animation-delay: .40s; }
+
+@media (max-width: 720px) {
+  .materi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 420px) {
+  .materi-grid { grid-template-columns: 1fr; }
+}

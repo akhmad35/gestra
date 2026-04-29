@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GESTRA — Kuis</title>
+  <meta name="description" content="Uji kemampuan menulismu dengan kuis interaktif di GESTRA." />
+  <link rel="stylesheet" href="../css/global.css" />
+  <link rel="stylesheet" href="../css/kuis.css" />
+</head>
+<body>
+
+  <!-- ── Navbar ── -->
+  <nav class="navbar">
+    <a href="beranda.html" class="navbar-brand">
+      <img src="../assets/images/logo.png" alt="Logo GESTRA" />
+      <span>GESTRA</span>
+    </a>
+    <div class="navbar-nav">
+      <a href="beranda.html" class="nav-btn active" id="nav-beranda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Beranda
+      </a>
+      <a href="profil.html" class="nav-btn inactive" id="nav-profil">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        Profil
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── Page Content ── -->
+  <div class="kuis-page">
+    <div class="kuis-card">
+
+      <!-- Mascot -->
+      <img src="../assets/images/mascot.png" alt="Maskot GESTRA" class="kuis-mascot" />
+
+      <!-- Content -->
+      <div class="kuis-content">
+        <div class="kuis-badge">
+          <div class="kuis-badge-icon">🧠</div>
+          <span>Quiz</span>
+        </div>
+
+        <h2>Halo Petualang Cilik!</h2>
+        <p>Mari temukan kekuatan belajarmu!</p>
+
+        <div class="kuis-actions">
+          <button class="btn-secondary" id="btn-kode-guru" onclick="showKodeModal()">
+            Masukkan Kode dari Guru
+          </button>
+          <a href="kuis-soal.html" class="btn-primary" id="btn-ikuti-kuis">
+            Ikuti Kuis
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Modal Kode Guru ── -->
+  <div id="kode-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeKodeModal()" id="btn-close-modal">✕</button>
+      <h3>Masukkan Kode Kuis</h3>
+      <p>Minta kode dari gurumu untuk memulai kuis khusus.</p>
+      <input
+        type="text"
+        id="input-kode"
+        class="form-input"
+        placeholder="Contoh: GURU-1234"
+        maxlength="10"
+        style="width:100%; margin:16px 0;"
+      />
+      <button class="btn-primary" style="width:100%;" onclick="submitKode()" id="btn-submit-kode">
+        Mulai Kuis
+      </button>
+    </div>
+  </div>
+
+  <script src="../js/kuis.js"></script>
+</body>
+</html>
