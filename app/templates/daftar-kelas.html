@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block title %}Daftar Kelas - GESTRA{% endblock %}
+{% block description %}Lihat dan bergabung ke kelas di GESTRA{% endblock %}
+{% block body_class %}kelas-page{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+  <a href="/beranda" class="navbar-brand">
+    <img src="{{ url_for('static', path='assets/images/logo.png') }}" alt="Logo GESTRA" />
+    <span>GESTRA</span>
+  </a>
+  <div class="navbar-nav">
+    <a href="/beranda" class="nav-btn {% if request.url.path == '/beranda' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Beranda
+    </a>
+    <a href="/kelas/daftar" class="nav-btn active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      Kelas
+    </a>
+    <a href="/profil" class="nav-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      Profil
+    </a>
+    <a href="/logout" class="nav-btn nav-logout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/>
+        <polyline points="17 17 22 12 17 7"/>
+        <line x1="12" y1="12" x2="22" y2="12"/>
+      </svg>
+      Keluar
+    </a>
+  </div>
+</nav>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/kelas.css') }}" />
+{% endblock %}
+
+{% block content %}
+<main class="kelas-container">
+  <!-- Header -->
+  <header class="kelas-header">
+    <div class="kelas-header-content">
+      <h1>Daftar Kelas</h1>
+      <p>Bergabunglah dengan kelas untuk memulai pembelajaran</p>
+    </div>
+  </header>
+
+  <!-- Bergabung Dengan Kode Kelas -->
+  <section class="bergabung-kode-section">
+    <div class="bergabung-kode-card">
+      <h2>Bergabung Dengan Kode Kelas</h2>
+      <form method="POST" action="/kelas/bergabung-kode" class="bergabung-kode-form">
+        <div class="form-group">
+          <input 
+            type="text" 
+            name="kode_kelas" 
+            placeholder="Masukkan kode kelas" 
+            maxlength="6"
+            required
+            class="input-field"
+          />
+          <button type="submit" class="btn btn-primary">Bergabung</button>
+        </div>
+        {% if error %}
+        <div class="error-message">{{ error }}</div>
+        {% endif %}
+      </form>
+    </div>
+  </section>
+
+  <!-- Daftar Kelas -->
+  <section class="kelas-list-section">
+    <h2>Daftar Semua Kelas</h2>
+    
+    {% if semua_kelas %}
+    <div class="kelas-grid">
+      {% for kelas in semua_kelas %}
+      <div class="kelas-card">
+        <div class="kelas-card-header">
+          <h3>{{ kelas.nama_kelas }}</h3>
+          {% if kelas.id in kelas_diikuti_ids %}
+          <span class="badge badge-success">Sudah Bergabung</span>
+          {% endif %}
+        </div>
+        
+        <p class="kelas-deskripsi">{{ kelas.deskripsi[:100] }}{% if kelas.deskripsi|length > 100 %}...{% endif %}</p>
+        
+        <div class="kelas-info">
+          <div class="info-item">
+            <span class="label">Kode Kelas:</span>
+            <span class="value">{{ kelas.kode_kelas }}</span>
+          </div>
+        </div>
+        
+        <a href="/kelas/{{ kelas.id }}/detail" class="btn btn-secondary">Lihat Detail</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      <p>Belum ada kelas yang tersedia</p>
+    </div>
+    {% endif %}
+  </section>
+</main>
+
+{% endblock %}

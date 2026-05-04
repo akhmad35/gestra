@@ -1,0 +1,161 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ kelas.nama_kelas }} - GESTRA{% endblock %}
+{% block description %}Detail kelas {{ kelas.nama_kelas }}{% endblock %}
+{% block body_class %}detail-kelas-page{% endblock %}
+
+{% block navbar %}
+<nav class="navbar">
+  <a href="/beranda" class="navbar-brand">
+    <img src="{{ url_for('static', path='assets/images/logo.png') }}" alt="Logo GESTRA" />
+    <span>GESTRA</span>
+  </a>
+  <div class="navbar-nav">
+    <a href="/beranda" class="nav-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Beranda
+    </a>
+    <a href="/kelas/daftar" class="nav-btn active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      Kelas
+    </a>
+    <a href="/profil" class="nav-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      Profil
+    </a>
+    <a href="/logout" class="nav-btn nav-logout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"/>
+        <polyline points="17 17 22 12 17 7"/>
+        <line x1="12" y1="12" x2="22" y2="12"/>
+      </svg>
+      Keluar
+    </a>
+  </div>
+</nav>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/kelas.css') }}" />
+{% endblock %}
+
+{% block content %}
+<main class="detail-kelas-container">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="/kelas/daftar">Kelas</a>
+    <span>/</span>
+    <span>{{ kelas.nama_kelas }}</span>
+  </div>
+
+  <!-- Header Detail Kelas -->
+  <header class="detail-header">
+    <div class="detail-header-content">
+      <h1>{{ kelas.nama_kelas }}</h1>
+      <p class="kode-kelas">Kode: <strong>{{ kelas.kode_kelas }}</strong></p>
+    </div>
+    
+    {% if sudah_bergabung %}
+    <span class="badge badge-success">Anda Sudah Bergabung</span>
+    {% else %}
+    <form method="POST" action="/kelas/{{ kelas.id }}/bergabung" style="display: inline;">
+      <button type="submit" class="btn btn-primary btn-bergabung">Bergabung ke Kelas</button>
+    </form>
+    {% endif %}
+  </header>
+
+  <div class="detail-content">
+    <!-- Main Content -->
+    <section class="main-content">
+      <!-- Deskripsi Kelas -->
+      <card class="info-card">
+        <h2>Tentang Kelas Ini</h2>
+        <p class="deskripsi-text">{{ kelas.deskripsi }}</p>
+      </card>
+
+      <!-- Informasi Kelas -->
+      <card class="info-card">
+        <h2>Informasi Kelas</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Guru Pengampu</span>
+            <span class="value">{{ guru.nama if guru else 'Belum ditentukan' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Jumlah Siswa</span>
+            <span class="value">{{ jumlah_siswa }} siswa</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Dibuat Pada</span>
+            <span class="value">{{ kelas.dibuat_pada.strftime('%d %B %Y') }}</span>
+          </div>
+        </div>
+      </card>
+
+      <!-- Materi Kelas (untuk nanti) -->
+      {% if sudah_bergabung %}
+      <card class="info-card">
+        <h2>Materi Pembelajaran</h2>
+        <p class="placeholder-text">Materi kelas akan ditampilkan di sini</p>
+      </card>
+      {% endif %}
+    </section>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <h3>Status Bergabung</h3>
+        {% if sudah_bergabung %}
+        <div class="status-badge status-bergabung">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+          </svg>
+          <span>Sudah Bergabung</span>
+        </div>
+        {% else %}
+        <div class="status-badge status-belum">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="2"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+          </svg>
+          <span>Belum Bergabung</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="sidebar-card">
+        <h3>Navigasi Cepat</h3>
+        <ul class="nav-list">
+          {% if sudah_bergabung %}
+          <li><a href="/kelas/{{ kelas.id }}/materi" class="nav-link">📚 Materi</a></li>
+          <li><a href="/kelas/{{ kelas.id }}/tugas" class="nav-link">✏️ Tugas</a></li>
+          <li><a href="/kelas/{{ kelas.id }}/diskusi" class="nav-link">💬 Diskusi</a></li>
+          {% else %}
+          <li><span class="nav-link disabled">📚 Materi (Bergabunglah untuk akses)</span></li>
+          <li><span class="nav-link disabled">✏️ Tugas (Bergabunglah untuk akses)</span></li>
+          <li><span class="nav-link disabled">💬 Diskusi (Bergabunglah untuk akses)</span></li>
+          {% endif %}
+        </ul>
+      </div>
+    </aside>
+  </div>
+</main>
+
+{% endblock %}
+
+{% block extra_js %}
+<style>
+  card {
+    display: block;
+  }
+</style>
+{% endblock %}

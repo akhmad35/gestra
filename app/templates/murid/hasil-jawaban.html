@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+
+{% block title %}Hasil Latihan - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 800px;
+        margin: 4rem auto;
+        padding: 0 1rem;
+    }
+
+    .result-card {
+        background: white;
+        padding: 3rem;
+        border-radius: 24px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        text-align: center;
+    }
+
+    .icon-success {
+        width: 80px;
+        height: 80px;
+        background: #d1fae5;
+        color: #10b981;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem auto;
+    }
+
+    .result-card h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-box {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        text-align: left;
+    }
+
+    .info-item {
+        margin-bottom: 1rem;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-item p {
+        font-size: 1.125rem;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .btn-back {
+        display: inline-block;
+        background: #1e293b;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="result-card">
+        <div class="icon-success">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h1>Latihan Selesai!</h1>
+        <p>Bagus sekali, kamu sudah mengumpulkan jawabanmu.</p>
+
+        <div class="info-box">
+            <div class="info-item">
+                <label>Judul Latihan</label>
+                <p>{{ latihan.judul }}</p>
+            </div>
+            <div class="info-item">
+                <label>Jawaban Kamu</label>
+                <p style="font-family: 'Courier New', Courier, monospace; background: white; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">{{ jawaban.jawaban }}</p>
+            </div>
+            <div class="info-item">
+                <label>Dikirim Pada</label>
+                <p>{{ jawaban.dikumpulkan_pada.strftime('%d/%m/%Y %H:%M') }}</p>
+            </div>
+        </div>
+
+        <a href="/murid/kelas/{{ kelas.id }}/latihan" class="btn-back">Kembali ke Daftar Latihan</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,307 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard Guru - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .welcome-section {
+        background: var(--primary-gradient);
+        border-radius: 24px;
+        padding: 3rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-section::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .welcome-section h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        color: #6366f1;
+    }
+
+    .stat-info h3 {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .stat-info p {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    .kelas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .kelas-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s;
+    }
+
+    .kelas-card:hover {
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-color: #6366f1;
+    }
+
+    .kelas-header {
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .kelas-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: var(--text-primary);
+    }
+
+    .kode-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: #e0e7ff;
+        color: #4338ca;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+        letter-spacing: 0.05em;
+    }
+
+    .kelas-body {
+        padding: 1.5rem;
+    }
+
+    .kelas-body p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .kelas-footer {
+        padding: 1.5rem;
+        padding-top: 0;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-outline {
+        flex: 1;
+        text-align: center;
+        padding: 0.625rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-outline:hover {
+        background: #f8fafc;
+        border-color: #6366f1;
+        color: #6366f1;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem;
+        background: white;
+        border-radius: 24px;
+        grid-column: 1 / -1;
+    }
+
+    .empty-state img {
+        width: 200px;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="welcome-section">
+        <h1>Halo, Guru {{ user.nama }}! 👋</h1>
+        <p>Kelola kelas dan pantau perkembangan belajar siswa Anda di sini.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </div>
+            <div class="stat-info">
+                <h3>Total Kelas</h3>
+                <p>{{ total_kelas }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div class="stat-info">
+                <h3>Total Siswa</h3>
+                <p>{{ total_siswa }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div class="stat-info">
+                <h3>Total Latihan</h3>
+                <p>{{ total_latihan }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <h2>Daftar Kelas Saya</h2>
+        <a href="/guru/kelas/buat" class="btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Buat Kelas Baru
+        </a>
+    </div>
+
+    <div class="kelas-grid">
+        {% if kelas_list %}
+            {% for kelas in kelas_list %}
+            <div class="kelas-card">
+                <div class="kelas-header">
+                    <h3>{{ kelas.nama_kelas }}</h3>
+                    <span class="kode-badge">KODE: {{ kelas.kode_kelas }}</span>
+                </div>
+                <div class="kelas-body">
+                    <p>{{ kelas.deskripsi or 'Tidak ada deskripsi.' }}</p>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.8125rem;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                        {{ kelas.enrollments|length }} Siswa Bergabung
+                    </div>
+                </div>
+                <div class="kelas-footer">
+                    <a href="/guru/kelas/{{ kelas.id }}/detail" class="btn-outline">Kelola Kelas</a>
+                    <a href="/guru/latihan/buat/{{ kelas.id }}" class="btn-outline">Tambah Latihan</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <h3>Belum ada kelas</h3>
+                <p>Mulai dengan membuat kelas pertama Anda untuk membagikan latihan ke siswa.</p>
+                <a href="/guru/kelas/buat" class="btn-primary" style="display: inline-flex; margin-top: 1rem;">Buat Kelas Sekarang</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

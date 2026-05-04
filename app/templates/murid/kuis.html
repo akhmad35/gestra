@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Pilih Kuis - GESTRA{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <a href="/dashboard/murid" class="btn-back">← Kembali</a>
+        <h1>Pilih Jenis Kuis</h1>
+    </div>
+
+    <div class="quiz-grid">
+        <a href="/kuis/ai" class="quiz-card">
+            <div class="icon">🤖</div>
+            <h3>Kuis AI</h3>
+            <p>Soal dibuat otomatis untuk latihan cepat.</p>
+        </a>
+
+        <a href="/kuis/guru" class="quiz-card">
+            <div class="icon">👨‍🏫</div>
+            <h3>Kuis Guru</h3>
+            <p>Masukkan kode dan password kuis dari guru.</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

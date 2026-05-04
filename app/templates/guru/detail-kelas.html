@@ -1,0 +1,245 @@
+{% extends "layout.html" %}
+
+{% block title %}Detail Kelas: {{ kelas.nama_kelas }} - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .header-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .header-info h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .kode-box {
+        background: #f1f5f9;
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        border: 2px dashed #cbd5e1;
+        text-align: center;
+    }
+
+    .kode-box label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+
+    .kode-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #6366f1;
+        letter-spacing: 0.1em;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 0.5rem;
+    }
+
+    .tab-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+        background: #eef2ff;
+        color: #6366f1;
+    }
+
+    .grid-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    .card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .latihan-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .latihan-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #f1f5f9;
+    }
+
+    .latihan-info h4 {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .latihan-info p {
+        margin: 0.25rem 0 0 0;
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .siswa-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .siswa-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .siswa-avatar {
+        width: 32px;
+        height: 32px;
+        background: #6366f1;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+
+    .btn-action {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-edit { background: #f1f5f9; color: #1e293b; }
+    .btn-delete { background: #fee2e2; color: #ef4444; }
+    .btn-view { background: #e0e7ff; color: #4338ca; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header-card">
+        <div class="header-info">
+            <h1>{{ kelas.nama_kelas }}</h1>
+            <p style="color: #64748b; margin-bottom: 1.5rem;">{{ kelas.deskripsi or 'Tidak ada deskripsi.' }}</p>
+            <div style="display: flex; gap: 1rem;">
+                <a href="/guru/kelas/{{ kelas.id }}/edit" class="btn-action btn-edit">Edit Kelas</a>
+                <form action="/guru/kelas/{{ kelas.id }}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kelas ini?')">
+                    <button type="submit" class="btn-action btn-delete" style="border: none; cursor: pointer;">Hapus Kelas</button>
+                </form>
+            </div>
+        </div>
+        <div class="kode-box">
+            <label>Bagikan Kode Ke Siswa</label>
+            <div class="kode-value">{{ kelas.kode_kelas }}</div>
+        </div>
+    </div>
+
+    <div class="grid-layout">
+        <div class="main-column">
+            <div class="card">
+                <div class="card-title">
+                    <h2>Daftar Latihan</h2>
+                    <a href="/guru/latihan/buat/{{ kelas.id }}" class="btn-action btn-view" style="background: #6366f1; color: white;">+ Tambah Latihan</a>
+                </div>
+                
+                <div class="latihan-list">
+                    {% if latihan_list %}
+                        {% for latihan in latihan_list %}
+                        <div class="latihan-item">
+                            <div class="latihan-info">
+                                <h4>{{ latihan.judul }}</h4>
+                                <p>{{ latihan.tipe_soal|capitalize }} • {{ latihan.tingkat_kesulitan|capitalize }}</p>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="/guru/latihan/{{ latihan.id }}/jawaban" class="btn-action btn-view">Hasil</a>
+                                <a href="/guru/latihan/{{ latihan.id }}/edit" class="btn-action btn-edit">Edit</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="text-align: center; color: #64748b; padding: 2rem;">Belum ada latihan di kelas ini.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="side-column">
+            <div class="card">
+                <div class="card-title">
+                    <h2>Siswa Bergabung ({{ siswa_list|length }})</h2>
+                </div>
+                <div class="siswa-list">
+                    {% if siswa_list %}
+                        {% for enrollment in siswa_list %}
+                        <div class="siswa-item">
+                            <div class="siswa-avatar">{{ enrollment.siswa.nama[0]|upper }}</div>
+                            <div class="siswa-info">
+                                <div style="font-weight: 600; font-size: 0.9375rem;">{{ enrollment.siswa.nama }}</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">Bergabung: {{ enrollment.bergabung_pada.strftime('%d/%m/%Y') }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="text-align: center; color: #64748b; padding: 1rem; font-size: 0.875rem;">Belum ada siswa.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

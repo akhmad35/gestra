@@ -1,0 +1,243 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard Murid - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .welcome-section {
+        background: var(--primary-gradient);
+        border-radius: 24px;
+        padding: 3rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-section h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .join-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin-bottom: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+
+    .join-info h2 {
+        font-size: 1.25rem;
+        margin: 0 0 0.5rem 0;
+        color: var(--text-primary);
+    }
+
+    .join-info p {
+        margin: 0;
+        color: var(--text-secondary);
+    }
+
+    .join-form {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .join-input {
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        width: 200px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .join-input:focus {
+        border-color: #10b981;
+        outline: none;
+    }
+
+    .btn-join {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-join:hover {
+        background: #059669;
+    }
+
+    .section-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .kelas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .kelas-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        transition: all 0.3s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .kelas-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        border-color: #10b981;
+    }
+
+    .kelas-header {
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .kelas-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        color: var(--text-primary);
+    }
+
+    .guru-info {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .kelas-body {
+        padding: 1.5rem;
+        flex: 1;
+    }
+
+    .kelas-body p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .kelas-footer {
+        padding: 1.5rem;
+    }
+
+    .btn-masuk {
+        display: block;
+        text-align: center;
+        background: #f1f5f9;
+        color: var(--text-primary);
+        padding: 0.75rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.2s;
+    }
+
+    .kelas-card:hover .btn-masuk {
+        background: #10b981;
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem;
+        background: white;
+        border-radius: 24px;
+        grid-column: 1 / -1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="welcome-section">
+        <h1>Semangat Belajar, {{ user.nama }}! 🚀</h1>
+        <p>Ayo bergabung ke kelas dan mulai kerjakan latihanmu hari ini.</p>
+    </div>
+
+    <div class="join-section">
+        <div class="join-info">
+            <h2>Punya Kode Kelas?</h2>
+            <p>Masukkan kode unik dari gurumu untuk bergabung ke kelas baru.</p>
+        </div>
+        <form action="/kelas/bergabung-kode" method="POST" class="join-form">
+            <input type="text" name="kode_kelas" placeholder="CONTOH: AB1234" class="join-input" required maxlength="6">
+            <button type="submit" class="btn-join">Gabung Kelas</button>
+        </form>
+    </div>
+
+    <div class="section-header">
+        <h2>Kelas Yang Saya Ikuti</h2>
+    </div>
+
+    <div class="kelas-grid">
+        {% if kelas_list %}
+            {% for kelas in kelas_list %}
+            <div class="kelas-card">
+                <div class="kelas-header">
+                    <h3>{{ kelas.nama_kelas }}</h3>
+                    <div class="guru-info">Guru: {{ kelas.guru.nama if kelas.guru else 'Anonim' }}</div>
+                </div>
+                <div class="kelas-body">
+                    <p>{{ kelas.deskripsi or 'Tidak ada deskripsi.' }}</p>
+                </div>
+                <div class="kelas-footer">
+                    <a href="/murid/kelas/{{ kelas.id }}/latihan" class="btn-masuk">Buka Kelas</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <h3>Kamu belum bergabung di kelas manapun</h3>
+                <p>Minta kode kelas ke gurumu dan masukkan di atas untuk mulai belajar.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

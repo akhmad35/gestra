@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+
+{% block title %}Buat Kelas Baru - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 4rem auto;
+        padding: 2.5rem;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .form-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+        border-color: #6366f1;
+        outline: none;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: opacity 0.2s;
+    }
+
+    .btn-submit:hover {
+        opacity: 0.9;
+    }
+
+    .btn-back {
+        display: block;
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Buat Kelas Baru</h1>
+        <p>Isi informasi di bawah untuk membuat ruang belajar baru.</p>
+    </div>
+
+    <form action="/guru/kelas/buat" method="POST">
+        <div class="form-group">
+            <label for="nama_kelas">Nama Kelas</label>
+            <input type="text" id="nama_kelas" name="nama_kelas" class="form-control" placeholder="Contoh: Matematika Dasar 1A" required>
+        </div>
+
+        <div class="form-group">
+            <label for="deskripsi">Deskripsi Kelas</label>
+            <textarea id="deskripsi" name="deskripsi" class="form-control" placeholder="Jelaskan apa yang akan dipelajari di kelas ini..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Buat Kelas Sekarang</button>
+    </form>
+
+    <a href="/guru/dashboard" class="btn-back">← Kembali ke Dashboard</a>
+</div>
+{% endblock %}

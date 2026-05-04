@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+
+{% block title %}Kerjakan Latihan - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 800px;
+        margin: 4rem auto;
+        padding: 0 1rem;
+    }
+
+    .soal-card {
+        background: white;
+        padding: 3rem;
+        border-radius: 24px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    .soal-header {
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 1.5rem;
+    }
+
+    .soal-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .instruksi {
+        font-size: 1.25rem;
+        color: #475569;
+        line-height: 1.6;
+        margin-bottom: 2.5rem;
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 16px;
+        border-left: 5px solid #10b981;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #1e293b;
+    }
+
+    .answer-input {
+        width: 100%;
+        padding: 1.5rem;
+        font-size: 1.25rem;
+        border: 3px solid #e2e8f0;
+        border-radius: 20px;
+        transition: all 0.2s;
+    }
+
+    .answer-input:focus {
+        border-color: #10b981;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .btn-submit {
+        width: 100%;
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 1.25rem;
+        border-radius: 16px;
+        font-size: 1.25rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-submit:hover {
+        background: #059669;
+        transform: scale(1.02);
+    }
+
+    .btn-submit:active {
+        transform: scale(0.98);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="soal-card">
+        <div class="soal-header">
+            <h1>{{ latihan.judul }}</h1>
+            <p style="color: #64748b;">Kelas: {{ kelas.nama_kelas }}</p>
+        </div>
+
+        <div class="instruksi">
+            {{ latihan.pertanyaan }}
+        </div>
+
+        <form action="/murid/latihan/{{ latihan.id }}/submit" method="POST">
+            <div class="form-group">
+                <label for="jawaban_text">Jawaban Kamu:</label>
+                <textarea id="jawaban_text" name="jawaban_text" class="answer-input" placeholder="Tulis jawabanmu di sini..." required rows="5">{{ jawaban_sebelumnya.jawaban if jawaban_sebelumnya else '' }}</textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Kumpulkan Jawaban</button>
+        </form>
+
+        <a href="/murid/kelas/{{ kelas.id }}/latihan" style="display: block; text-align: center; margin-top: 2rem; color: #64748b; text-decoration: none; font-weight: 600;">← Kembali</a>
+    </div>
+</div>
+{% endblock %}

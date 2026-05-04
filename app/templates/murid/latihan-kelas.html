@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+
+{% block title %}Latihan Kelas: {{ kelas.nama_kelas }} - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .header {
+        margin-bottom: 2rem;
+    }
+
+    .header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .header p {
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    .latihan-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .latihan-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s;
+    }
+
+    .latihan-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .status-badge {
+        align-self: flex-start;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .status-belum { background: #fee2e2; color: #ef4444; }
+    .status-sudah { background: #d1fae5; color: #10b981; }
+
+    .latihan-card h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.125rem;
+        color: #1e293b;
+    }
+
+    .latihan-card p {
+        font-size: 0.875rem;
+        color: #64748b;
+        flex: 1;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-action {
+        display: block;
+        text-align: center;
+        padding: 0.75rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.2s;
+    }
+
+    .btn-kerjakan { background: #10b981; color: white; }
+    .btn-lihat { background: #f1f5f9; color: #1e293b; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <a href="/murid/dashboard" style="text-decoration: none; color: #64748b; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Kembali ke Dashboard
+        </a>
+        <h1>{{ kelas.nama_kelas }}</h1>
+        <p>Selesaikan semua latihan untuk meningkatkan kemampuanmu!</p>
+    </div>
+
+    <div class="latihan-grid">
+        {% if latihan_list %}
+            {% for latihan in latihan_list %}
+            <div class="latihan-card">
+                {% if latihan.id in jawaban_dict %}
+                    <span class="status-badge status-sudah">Sudah Dikerjakan</span>
+                {% else %}
+                    <span class="status-badge status-belum">Belum Dikerjakan</span>
+                {% endif %}
+                
+                <h3>{{ latihan.judul }}</h3>
+                <p>{{ latihan.pertanyaan|truncate(100) }}</p>
+                
+                {% if latihan.id in jawaban_dict %}
+                    <a href="/murid/latihan/{{ latihan.id }}/hasil" class="btn-action btn-lihat">Lihat Hasil</a>
+                {% else %}
+                    <a href="/murid/latihan/{{ latihan.id }}/kerjakan" class="btn-action btn-kerjakan">Kerjakan</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; background: white; border-radius: 24px;">
+                <h3>Belum ada latihan</h3>
+                <p>Gurumu belum mengunggah latihan untuk kelas ini. Cek lagi nanti ya!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

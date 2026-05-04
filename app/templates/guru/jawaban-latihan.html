@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block title %}Jawaban Siswa - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .header {
+        margin-bottom: 2rem;
+    }
+
+    .header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .jawaban-table {
+        width: 100%;
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border-collapse: collapse;
+    }
+
+    .jawaban-table th {
+        background: #f8fafc;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 700;
+        color: #64748b;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        border-bottom: 2px solid #f1f5f9;
+    }
+
+    .jawaban-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.9375rem;
+        color: #1e293b;
+    }
+
+    .siswa-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .siswa-avatar {
+        width: 32px;
+        height: 32px;
+        background: #eef2ff;
+        color: #6366f1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.75rem;
+    }
+
+    .jawaban-text {
+        font-family: 'Courier New', Courier, monospace;
+        background: #f8fafc;
+        padding: 0.5rem;
+        border-radius: 8px;
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .status-dikirim { background: #e0e7ff; color: #4338ca; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <a href="/guru/kelas/{{ latihan.kelas_id }}/detail" style="text-decoration: none; color: #64748b; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Kembali ke Detail Kelas
+        </a>
+        <h1>Jawaban Siswa: {{ latihan.judul }}</h1>
+    </div>
+
+    <table class="jawaban-table">
+        <thead>
+            <tr>
+                <th>Nama Siswa</th>
+                <th>Jawaban</th>
+                <th>Waktu Pengumpulan</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if jawaban_list %}
+                {% for jawaban in jawaban_list %}
+                <tr>
+                    <td>
+                        <div class="siswa-cell">
+                            <div class="siswa-avatar">{{ jawaban.siswa.nama[0]|upper }}</div>
+                            {{ jawaban.siswa.nama }}
+                        </div>
+                    </td>
+                    <td><div class="jawaban-text" title="{{ jawaban.jawaban }}">{{ jawaban.jawaban }}</div></td>
+                    <td>{{ jawaban.dikumpulkan_pada.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td><span class="status-badge status-dikirim">Terkirim</span></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 3rem; color: #64748b;">Belum ada siswa yang menjawab.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
