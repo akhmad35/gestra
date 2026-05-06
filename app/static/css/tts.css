@@ -1,0 +1,333 @@
+/*
+ * ============================================================
+ *  GES-TTS Widget Styles
+ *  Zero visual impact pada konten utama.
+ *  Hanya styling untuk floating widget pengaturan TTS.
+ * ============================================================
+ */
+
+/* ─── Widget Container ───────────────────────────────────────────────────────── */
+#gestra-tts-widget {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 10000;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+}
+
+/* ─── FAB Button ─────────────────────────────────────────────────────────────── */
+#gestra-tts-fab {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: #4f46e5;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  outline-offset: 3px;
+}
+
+#gestra-tts-fab:hover {
+  background: #4338ca;
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+}
+
+#gestra-tts-fab:focus-visible {
+  outline: 2px solid #6366f1;
+}
+
+#gestra-tts-fab svg {
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+
+/* Status dot – hijau = ON, abu = OFF */
+#gestra-tts-status-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #9ca3af;
+  border: 2px solid #fff;
+  transition: background 0.3s ease;
+}
+
+#gestra-tts-status-dot.active {
+  background: #22c55e;
+}
+
+/* ─── Panel ──────────────────────────────────────────────────────────────────── */
+#gestra-tts-panel {
+  position: absolute;
+  bottom: 64px;
+  right: 0;
+  width: 288px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  padding: 1.25rem;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Panel header */
+.gestra-tts-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1f2937;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 0.75rem;
+}
+
+.gestra-tts-panel-header svg {
+  width: 18px;
+  height: 18px;
+  color: #4f46e5;
+  flex-shrink: 0;
+}
+
+/* ─── Row Layouts ────────────────────────────────────────────────────────────── */
+.gestra-tts-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.gestra-tts-col {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* ─── Label ──────────────────────────────────────────────────────────────────── */
+.gestra-tts-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.gestra-tts-label strong {
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+/* ─── Toggle Switch ──────────────────────────────────────────────────────────── */
+.gestra-tts-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 72px;
+  height: 30px;
+  border-radius: 30px;
+  border: none;
+  background: #d1d5db;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.gestra-tts-switch.on {
+  background: #4f46e5;
+}
+
+.gestra-tts-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.gestra-tts-switch.on .gestra-tts-thumb {
+  transform: translateX(38px);
+}
+
+.gestra-tts-switch-label {
+  position: absolute;
+  right: 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  transition: all 0.25s;
+  pointer-events: none;
+}
+
+.gestra-tts-switch.on .gestra-tts-switch-label {
+  right: auto;
+  left: 8px;
+}
+
+.gestra-tts-switch:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* ─── Range Slider ───────────────────────────────────────────────────────────── */
+input[type="range"]#gestra-tts-rate {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(
+    to right,
+    #4f46e5 0%,
+    #4f46e5 calc((var(--val, 0.9) - 0.5) / 1.0 * 100%),
+    #e5e7eb calc((var(--val, 0.9) - 0.5) / 1.0 * 100%),
+    #e5e7eb 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]#gestra-tts-rate::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4f46e5;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 6px rgba(79, 70, 229, 0.4);
+  cursor: pointer;
+}
+
+input[type="range"]#gestra-tts-rate::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4f46e5;
+  border: 2px solid #fff;
+  cursor: pointer;
+}
+
+.gestra-tts-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin-top: 0.15rem;
+}
+
+/* ─── Voice Select ───────────────────────────────────────────────────────────── */
+#gestra-tts-voice {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 0.82rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  appearance: auto;
+}
+
+#gestra-tts-voice:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* ─── Test Button ────────────────────────────────────────────────────────────── */
+.gestra-tts-test-btn {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 10px;
+  border: 1.5px solid #6366f1;
+  background: transparent;
+  color: #4f46e5;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.gestra-tts-test-btn:hover {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.gestra-tts-test-btn:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* ─── Dark Mode Support ──────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  #gestra-tts-panel {
+    background: rgba(31, 41, 55, 0.95);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .gestra-tts-panel-header,
+  .gestra-tts-label {
+    color: #f3f4f6;
+  }
+
+  .gestra-tts-panel-header {
+    border-bottom-color: rgba(255,255,255,0.1);
+  }
+
+  #gestra-tts-voice {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f3f4f6;
+  }
+
+  .gestra-tts-test-btn {
+    color: #a5b4fc;
+    border-color: #6366f1;
+  }
+
+  .gestra-tts-test-btn:hover {
+    background: #4f46e5;
+    color: #fff;
+  }
+
+  .gestra-tts-range-labels {
+    color: #6b7280;
+  }
+}
+
+/* ─── Mobile Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  #gestra-tts-widget {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  #gestra-tts-panel {
+    width: calc(100vw - 2rem);
+    right: -1rem;
+  }
+}

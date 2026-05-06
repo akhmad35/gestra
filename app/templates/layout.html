@@ -6,6 +6,7 @@
   <title>{% block title %}GESTRA{% endblock %}</title>
   <meta name="description" content="{% block description %}Aplikasi GESTRA{% endblock %}" />
   <link rel="stylesheet" href="{{ url_for('static', path='css/global.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/tts.css') }}" />
   {% block extra_css %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -41,6 +42,7 @@
   {% block content %}
   {% endblock %}
 
+  <script src="{{ url_for('static', path='js/tts.js') }}"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

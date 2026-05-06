@@ -23,7 +23,7 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
     if not user or not verify_password(password, user.password):
         return templates.TemplateResponse(request, "login.html", {"error": "Email atau password salah"})
     
-    response = RedirectResponse(url="/beranda", status_code=status.HTTP_303_SEE_OTHER)
+    response = RedirectResponse(url="/guru/dashboard", status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(key="user_email", value=user.email, path="/")
     return response
 
