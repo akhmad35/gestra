@@ -1,0 +1,22 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache (biar gak muncul folder __pycache__ di GitHub)
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Project specific: Folder debug (biar ribuan foto seg_x.png gak ikut ke-push)
+assets/debug/*.png
+
+# Sensitive files (kalau nanti kamu pakai database atau API Key)
+.env
