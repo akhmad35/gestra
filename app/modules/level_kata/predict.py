@@ -4,17 +4,17 @@ import cv2
 import tensorflow as tf
 import string
 
-# Konfigurasi Environment (Hemat RAM & Bersih)
+# Konfigurasi Environment
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
-# Path model relatif terhadap root proyek
+# Path models
 MODEL_PATH = "models/CNN_Dataset_Huruf_Kecil_New.keras"
 model = tf.keras.models.load_model(MODEL_PATH, compile=False)
 labels = list(string.ascii_lowercase)
 
+# Fungsi untuk melakukan preprocess pada canvas
 def preprocess(img):
-    """Pra-pemrosesan gambar huruf individu sesuai input model (64x64x3)."""
     # Resize
     img = cv2.resize(img, (64, 64), interpolation=cv2.INTER_AREA)
     img = img.astype("float32")
@@ -23,11 +23,11 @@ def preprocess(img):
     if len(img.shape) == 2:
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
     
-    # Tambahkan dimensi batch (1, 64, 64, 3)
+    # Menambahkan dimensi batch (1, 64, 64, 3)
     return np.expand_dims(img, axis=0)
 
+# Fungsi untuk prediksi huruf
 def predict_word(letters):
-    """Prediksi rangkaian gambar huruf menjadi satu string kata."""
     predicted_word = ""
     
     for i, letter_img in enumerate(letters):

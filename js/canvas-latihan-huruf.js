@@ -2,12 +2,6 @@
    GESTRA — Canvas Latihan JavaScript
    =================================================== */
 
-// function showKuisSelesaiModal() {
-//   const modal = document.getElementById('modal-selesai');
-//   modal.style.display = 'flex';
-//   speak('Horee! Kuis Selesai!');
-// }
-
 function closeKuisSelesaiModal() {
   document.getElementById('modal-selesai').style.display = 'none';
 }
@@ -20,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/* ── TTS helper ── */
+/* TTS helper */
 function speak(text) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
@@ -121,7 +115,7 @@ function onResults(results) {
             prevPoint = null;
         }
     } else {
-        prevPoint = null;
+        prevPoint = null;   
         smoothPoint = null;
     }
 }

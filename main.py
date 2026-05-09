@@ -7,30 +7,21 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
-# --- 1. IMPORT MODUL MODULAR ---
-# Level Huruf
 from app.modules.level_huruf.predict import predict_from_canvas 
-
-# Level Kata
 from app.modules.level_kata.predict import predict_word
 from app.modules.level_kata.segmenter import segment_letters
 from app.modules.level_kata.validator import validate_word
 
 app = FastAPI(title="GESTRA Multi-Level API")
-
-# --- 2. SETUP PATH & STATIC FILES ---
-# Menggunakan absolute path agar Jinja2 & StaticFiles tidak "tersesat"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app.mount("/css", StaticFiles(directory=os.path.join(BASE_DIR, "css")), name="css")
 app.mount("/js", StaticFiles(directory=os.path.join(BASE_DIR, "js")), name="js")
 app.mount("/assets", StaticFiles(directory=os.path.join(BASE_DIR, "assets")), name="assets")
 
-# Setup template
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "pages"))
 
-# --- 3. ROUTE HALAMAN (GET) ---
+# Route Website
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -98,7 +89,7 @@ async def predict_word_api(request: Request):
             if len(letter_img.shape) == 2:
                 letter_img = cv2.cvtColor(letter_img, cv2.COLOR_GRAY2RGB)
             
-            # --- BAGIAN PERBESAR (SCALING PROPORSIAL) ---
+            # BAGIAN PERBESAR (SCALING PROPORSIAL)
             h_orig, w_orig = letter_img.shape[:2]
             
             # Kita set target tinggi huruf sekitar 75% dari tinggi kanvas (900px)
@@ -115,7 +106,7 @@ async def predict_word_api(request: Request):
 
             # Resize dengan kualitas tinggi (LANCZOS4) agar garis tetap smooth
             letter_resized = cv2.resize(letter_img, (new_w, new_h), interpolation=cv2.INTER_LANCZOS4)
-            # --------------------------------------------
+            #-----------------------------------------
 
             # C. Hitung Offset Tengah yang baru
             y_off = (900 - new_h) // 2

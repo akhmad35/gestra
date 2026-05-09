@@ -5,11 +5,11 @@ def segment_letters(canvas):
     """Segmentasi kata menjadi daftar gambar huruf individu."""
     orig_h, orig_w = canvas.shape[:2]
     
-    # 1. Grayscale & Thresholding (Invert agar tulisan jadi putih untuk kontur)
+    # Grayscale & Thresholding
     gray = cv2.cvtColor(canvas, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
 
-    # 2. Cari kontur huruf
+    # Cari kontur huruf
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     initial_boxes = []
@@ -20,10 +20,10 @@ def segment_letters(canvas):
 
     if not initial_boxes: return []
 
-    # 3. Urutkan box dari kiri ke kanan
+    # Urutkan box dari kiri ke kanan
     initial_boxes.sort(key=lambda b: b[0])
 
-    # 4. Gabungkan box yang tumpang tindih (Penting untuk huruf 'i' atau 'j')
+    # Gabungkan box 
     merged_boxes = []
     curr = initial_boxes[0]
     for next_box in initial_boxes[1:]:

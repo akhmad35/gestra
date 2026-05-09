@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-/* ── TTS helper ── */
+/* TTS helper */
 function speak(text) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
