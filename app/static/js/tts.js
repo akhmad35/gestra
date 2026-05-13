@@ -1,17 +1,25 @@
 /**
  * ============================================================
  *  GES-TTS: Text-to-Speech Aksesibilitas Disleksia
- *  Versi: 2.0 – Audio-Only, Zero Visual Impact
+ *  Versi: 3.0 – Production-Ready, All Bugs Fixed
  * ============================================================
  *
- *  Cara kerja:
- *  1. Satu event listener di `document` (event delegation) menangkap
- *     semua interaksi hover & click pada elemen interaktif.
- *  2. Debounce 300ms pada hover mencegah spam suara saat kursor bergerak cepat.
- *  3. Guard `lastText` mencegah pengulangan suara teks yang sama berturut-turut.
- *  4. `speechSynthesis.cancel()` selalu dijalankan sebelum utterance baru.
- *  5. Semua efek visual dinonaktifkan — fitur ini murni audio feedback.
- *  6. Preferensi pengguna (aktif/nonaktif, rate, suara) disimpan di localStorage.
+ *  Perbaikan v3.0:
+ *  [FIX-1]  Nested element spam: guard lastTarget mencegah re-trigger
+ *           pada elemen yang sama saat kursor pindah ke child.
+ *  [FIX-2]  Debounce kini closure murni, tidak lagi berbagi state.debTimer.
+ *  [FIX-3]  Chromium cancel() race condition: speak() dibungkus setTimeout(50ms).
+ *  [FIX-4]  loadVoices() tidak lagi dipanggil sebelum widget dirender.
+ *  [FIX-5]  Memory leak: listener "klik di luar" & keydown menggunakan
+ *           AbortController agar bisa di-cleanup.
+ *  [FIX-6]  Panel toggle stabil: listener "klik di luar" dipasang dengan
+ *           setTimeout(0) agar bubble dari klik FAB selesai lebih dulu.
+ *  [FIX-7]  getElementText: prioritaskan [data-tts], lalu aria-label,
+ *           lalu heading child (h1–h4), baru fallback innerText.
+ *  [FIX-8]  Slider range background update via CSS custom property --val.
+ *  [FIX-9]  aria-expanded selalu menggunakan string eksplisit 'true'/'false'.
+ *  [FIX-10] Panel [hidden] vs display:flex — dikelola via CSS class .is-open,
+ *           bukan atribut hidden bawaan HTML.
  */
 
 (function () {
@@ -26,11 +34,11 @@
   // ─── Konstanta ───────────────────────────────────────────────────────────────
   const STORAGE_KEY = {
     ENABLED: 'gestra-tts-enabled',
-    RATE:    'gestra-tts-rate',
-    VOICE:   'gestra-tts-voice',
+    RATE: 'gestra-tts-rate',
+    VOICE: 'gestra-tts-voice',
   };
 
-  // Selector elemen interaktif yang menjadi target TTS
+  /** Selector elemen interaktif target TTS */
   const INTERACTIVE_SELECTOR = [
     'a[href]',
     'button',
@@ -46,40 +54,59 @@
     '[data-tts]',
   ].join(', ');
 
-  const DEBOUNCE_DELAY = 300; // ms
-  const DEFAULT_RATE   = 0.9; // ramah disleksia (0.8–1.0)
+  const DEBOUNCE_DELAY = 300; // ms — hover debounce
+  const SPEAK_DELAY = 50;  // ms — Chromium cancel() race condition fix [FIX-3]
+  const DEFAULT_RATE = 0.9; // ramah disleksia (0.8–1.0)
 
   // ─── State ───────────────────────────────────────────────────────────────────
   const state = {
-    enabled:  localStorage.getItem(STORAGE_KEY.ENABLED) !== 'false', // default ON
-    rate:     parseFloat(localStorage.getItem(STORAGE_KEY.RATE)) || DEFAULT_RATE,
-    voice:    localStorage.getItem(STORAGE_KEY.VOICE) || '',
-    voices:   [],
-    lastText: '',             // guard anti-pengulangan teks
-    debTimer: null,           // referensi debounce timer
+    enabled: localStorage.getItem(STORAGE_KEY.ENABLED) !== 'false', // default ON
+    rate: parseFloat(localStorage.getItem(STORAGE_KEY.RATE)) || DEFAULT_RATE,
+    voice: localStorage.getItem(STORAGE_KEY.VOICE) || '',
+    voices: [],
+    lastText: '',   // guard anti-pengulangan teks
+    lastTarget: null, // [FIX-1] guard anti-spam nested element
   };
+
+  // AbortController untuk lifecycle listener [FIX-5]
+  let outsideClickController = null;
 
   // ─── Utilitas ─────────────────────────────────────────────────────────────────
 
   /**
-   * Ambil teks label dari sebuah elemen.
-   * Prioritas: aria-label → innerText → textContent
+   * [FIX-2] Debounce murni via closure — tidak berbagi state global.
+   */
+  function createDebounce(fn, delay) {
+    let timer = null;
+    return function (...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+  }
+
+  /**
+   * [FIX-7] Ambil teks label dari elemen dengan prioritas yang lebih cerdas.
+   * Prioritas: [data-tts] → aria-label → heading child (h1–h4) → innerText line pertama
    */
   function getElementText(el) {
+    // 1. Atribut data-tts sebagai override manual
+    const dataTts = el.getAttribute('data-tts');
+    if (dataTts && dataTts.trim()) return dataTts.trim();
+
+    // 2. aria-label
     const ariaLabel = el.getAttribute('aria-label');
     if (ariaLabel && ariaLabel.trim()) return ariaLabel.trim();
 
-    const inner = (el.innerText || el.textContent || '').trim();
-    // Ambil hanya baris pertama / teks pendek agar tidak membaca paragraf panjang
-    return inner.split('\n')[0].trim().substring(0, 120);
-  }
+    // 3. Heading child — representatif untuk card/section
+    const heading = el.querySelector('h1, h2, h3, h4');
+    if (heading) {
+      const headingText = (heading.innerText || heading.textContent || '').trim();
+      if (headingText) return headingText.substring(0, 100);
+    }
 
-  /** Debounce wrapper */
-  function debounce(fn, delay) {
-    return function (...args) {
-      clearTimeout(state.debTimer);
-      state.debTimer = setTimeout(() => fn.apply(this, args), delay);
-    };
+    // 4. Fallback: baris pertama innerText, maks 100 karakter
+    const inner = (el.innerText || el.textContent || '').trim();
+    return inner.split('\n')[0].trim().substring(0, 100);
   }
 
   // ─── Speech Engine ────────────────────────────────────────────────────────────
@@ -87,44 +114,53 @@
   function speak(text) {
     if (!state.enabled || !text) return;
 
-    // Guard: jangan ulangi teks yang baru saja dibaca
+    // Guard: jangan ulangi teks yang sedang/baru dibaca
     if (text === state.lastText && window.speechSynthesis.speaking) return;
 
     state.lastText = text;
 
-    // Hentikan ucapan sebelumnya
+    // [FIX-3] Chromium: cancel() + jeda 50ms sebelum speak() baru
     window.speechSynthesis.cancel();
+    setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = state.rate;
+      utterance.lang = 'id-ID';
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = state.rate;
-    utterance.lang = 'id-ID'; // fallback bahasa Indonesia
+      // Pasang voice pilihan jika tersedia
+      if (state.voice && state.voices.length) {
+        const matched = state.voices.find(v => v.name === state.voice);
+        if (matched) utterance.voice = matched;
+      }
 
-    // Pasang voice pilihan jika tersedia
-    if (state.voice && state.voices.length) {
-      const matched = state.voices.find(v => v.name === state.voice);
-      if (matched) utterance.voice = matched;
-    }
-
-    window.speechSynthesis.speak(utterance);
+      window.speechSynthesis.speak(utterance);
+    }, SPEAK_DELAY);
   }
 
   // ─── Event Delegation ─────────────────────────────────────────────────────────
 
-  // Hover dengan debounce
-  const onHover = debounce(function (e) {
+  /**
+   * [FIX-1] Hover handler: cegah spam saat kursor pindah ke child element
+   * dalam elemen yang sama — bandingkan target hasil closest() dengan lastTarget.
+   */
+  const onHover = createDebounce(function (e) { // [FIX-2] closure debounce
     const target = e.target.closest(INTERACTIVE_SELECTOR);
     if (!target) return;
+
+    // Abaikan jika masih di elemen yang sama (pindah ke child)
+    if (target === state.lastTarget) return;
+    state.lastTarget = target;
+
+    // Abaikan elemen dalam widget TTS sendiri
+    if (target.closest('#gestra-tts-widget')) return;
 
     const text = getElementText(target);
     if (text) speak(text);
   }, DEBOUNCE_DELAY);
 
-  // Click langsung (tidak di-debounce agar responsif)
+  /** Click handler — tidak di-debounce agar responsif */
   function onClick(e) {
     const target = e.target.closest(INTERACTIVE_SELECTOR);
     if (!target) return;
-
-    // Kecualikan klik pada widget TTS sendiri agar tidak tumpang-tindih
     if (target.closest('#gestra-tts-widget')) return;
 
     const text = getElementText(target);
@@ -133,56 +169,83 @@
 
   // Pasang listener di document — otomatis support dynamic content
   document.addEventListener('mouseover', onHover, { passive: true });
-  document.addEventListener('click',     onClick,  { passive: false });
+  document.addEventListener('click', onClick, { passive: false });
 
-  // Hentikan suara saat kursor meninggalkan elemen
-  document.addEventListener('mouseout', function (e) {
+  // Reset lastTarget & lastText saat kursor keluar dari elemen
+  document.addEventListener('mouseleave', function (e) {
     const leaving = e.target.closest(INTERACTIVE_SELECTOR);
-    if (leaving) {
-      // Reset lastText agar teks yang sama bisa dibaca lagi saat re-hover
+    if (leaving && leaving === state.lastTarget) {
+      state.lastTarget = null;
       state.lastText = '';
     }
+  }, { passive: true, capture: true }); // capture agar dapat mouseleave pada semua child
+
+  // Escape: hentikan suara
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') window.speechSynthesis.cancel();
   }, { passive: true });
 
   // ─── Muat Daftar Voice ────────────────────────────────────────────────────────
 
+  /**
+   * [FIX-4] loadVoices() aman dipanggil kapan saja.
+   * Akan mencari elemen select hanya jika sudah ada di DOM.
+   */
   function loadVoices() {
-    state.voices = window.speechSynthesis.getVoices();
+    const available = window.speechSynthesis.getVoices();
+    if (!available.length) return; // belum siap, tunggu onvoiceschanged
+
+    state.voices = available;
+
     const sel = document.getElementById('gestra-tts-voice');
-    if (!sel || !state.voices.length) return;
+    if (!sel) return; // widget belum dirender — normal, akan dipanggil lagi setelah render
 
     sel.innerHTML = '<option value="">Default (sistem)</option>';
     state.voices.forEach(v => {
       const opt = document.createElement('option');
-      opt.value       = v.name;
+      opt.value = v.name;
       opt.textContent = `${v.name} (${v.lang})`;
-      opt.selected    = v.name === state.voice;
+      opt.selected = v.name === state.voice;
       sel.appendChild(opt);
     });
   }
 
-  // Chrome memuat voices async
+  // Chrome memuat voices secara async
   window.speechSynthesis.onvoiceschanged = loadVoices;
-  loadVoices();
+  // Tidak dipanggil di sini — dipanggil setelah widget dirender [FIX-4]
 
   // ─── UI Widget ────────────────────────────────────────────────────────────────
 
   function injectWidget() {
+    // Cegah duplikasi jika dipanggil dua kali
+    if (document.getElementById('gestra-tts-widget')) return;
+
     const widget = document.createElement('div');
     widget.id = 'gestra-tts-widget';
     widget.setAttribute('aria-label', 'Panel Pengaturan Suara TTS');
 
     widget.innerHTML = /* html */ `
-      <button id="gestra-tts-fab" title="Pengaturan Suara Aksesibilitas" aria-label="Buka Pengaturan Suara">
+      <button
+        id="gestra-tts-fab"
+        title="Pengaturan Suara Aksesibilitas"
+        aria-label="Buka Pengaturan Suara"
+        aria-expanded="false"
+        aria-controls="gestra-tts-panel"
+      >
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span id="gestra-tts-status-dot" class="${state.enabled ? 'active' : ''}"></span>
+        <span id="gestra-tts-status-dot" class="${state.enabled ? 'active' : ''}" aria-hidden="true"></span>
       </button>
 
-      <div id="gestra-tts-panel" role="dialog" aria-modal="false" aria-label="Pengaturan TTS" hidden>
+      <div
+        id="gestra-tts-panel"
+        role="dialog"
+        aria-modal="false"
+        aria-label="Pengaturan Suara Aksesibilitas"
+      >
         <div class="gestra-tts-panel-header">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -196,12 +259,12 @@
           <button
             id="gestra-tts-toggle"
             role="switch"
-            aria-checked="${state.enabled}"
+            aria-checked="${state.enabled ? 'true' : 'false'}"
             class="gestra-tts-switch ${state.enabled ? 'on' : ''}"
-            aria-label="Toggle TTS ${state.enabled ? 'aktif' : 'nonaktif'}"
+            aria-label="Suara aksesibilitas ${state.enabled ? 'aktif' : 'nonaktif'}"
           >
-            <span class="gestra-tts-thumb"></span>
-            <span class="gestra-tts-switch-label">${state.enabled ? 'ON' : 'OFF'}</span>
+            <span class="gestra-tts-thumb" aria-hidden="true"></span>
+            <span class="gestra-tts-switch-label" aria-hidden="true">${state.enabled ? 'ON' : 'OFF'}</span>
           </button>
         </div>
 
@@ -215,9 +278,13 @@
             id="gestra-tts-rate"
             min="0.5" max="1.5" step="0.1"
             value="${state.rate}"
-            aria-label="Atur kecepatan bicara"
+            style="--val: ${state.rate}"
+            aria-label="Atur kecepatan bicara, saat ini ${state.rate.toFixed(1)} kali"
+            aria-valuemin="0.5"
+            aria-valuemax="1.5"
+            aria-valuenow="${state.rate}"
           />
-          <div class="gestra-tts-range-labels">
+          <div class="gestra-tts-range-labels" aria-hidden="true">
             <span>Lambat</span><span>Cepat</span>
           </div>
         </div>
@@ -229,85 +296,132 @@
           </select>
         </div>
 
-        <button id="gestra-tts-test" class="gestra-tts-test-btn" aria-label="Coba suara">
+        <button id="gestra-tts-test" class="gestra-tts-test-btn" aria-label="Coba contoh suara">
           ▶ Coba Suara
         </button>
       </div>
     `;
 
     document.body.appendChild(widget);
+
+    // [FIX-4] Muat voice setelah widget ada di DOM
     loadVoices();
+
     bindWidgetEvents(widget);
   }
 
+  function setPanelOpen(fab, panel, isOpen) {
+    // [FIX-10] Kelola visibility via CSS class .is-open, bukan atribut [hidden]
+    panel.classList.toggle('is-open', isOpen);
+    // [FIX-9] aria-expanded selalu string eksplisit
+    fab.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+
   function bindWidgetEvents(widget) {
-    const fab    = widget.querySelector('#gestra-tts-fab');
-    const panel  = widget.querySelector('#gestra-tts-panel');
+    const fab = widget.querySelector('#gestra-tts-fab');
+    const panel = widget.querySelector('#gestra-tts-panel');
     const toggle = widget.querySelector('#gestra-tts-toggle');
-    const dot    = widget.querySelector('#gestra-tts-status-dot');
-    const rate   = widget.querySelector('#gestra-tts-rate');
+    const dot = widget.querySelector('#gestra-tts-status-dot');
+    const rateEl = widget.querySelector('#gestra-tts-rate');
     const rateDisplay = widget.querySelector('#gestra-tts-rate-display');
-    const voice  = widget.querySelector('#gestra-tts-voice');
+    const voiceSel = widget.querySelector('#gestra-tts-voice');
     const testBtn = widget.querySelector('#gestra-tts-test');
 
-    // Buka / tutup panel
+    // ── Buka / Tutup Panel ─────────────────────────────────────────────────────
     fab.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen = !panel.hidden;
-      panel.hidden = isOpen;
-      fab.setAttribute('aria-expanded', !isOpen);
-    });
+      const willOpen = !panel.classList.contains('is-open');
+      setPanelOpen(fab, panel, willOpen);
 
-    // Tutup saat klik di luar
-    document.addEventListener('click', (e) => {
-      if (!panel.hidden && !widget.contains(e.target)) {
-        panel.hidden = true;
-        fab.setAttribute('aria-expanded', false);
+      if (willOpen) {
+        // [FIX-6] Pasang listener "klik di luar" SETELAH event bubble selesai
+        attachOutsideClickListener(fab, panel, widget);
+      } else {
+        detachOutsideClickListener();
       }
     });
 
-    // Toggle ON/OFF
+    // ── Toggle ON/OFF ──────────────────────────────────────────────────────────
     toggle.addEventListener('click', () => {
       state.enabled = !state.enabled;
-      localStorage.setItem(STORAGE_KEY.ENABLED, state.enabled);
+      localStorage.setItem(STORAGE_KEY.ENABLED, String(state.enabled));
 
-      toggle.setAttribute('aria-checked', state.enabled);
-      toggle.setAttribute('aria-label', `Toggle TTS ${state.enabled ? 'aktif' : 'nonaktif'}`);
+      // [FIX-9] String eksplisit untuk aria-checked
+      toggle.setAttribute('aria-checked', state.enabled ? 'true' : 'false');
+      toggle.setAttribute('aria-label', `Suara aksesibilitas ${state.enabled ? 'aktif' : 'nonaktif'}`);
       toggle.classList.toggle('on', state.enabled);
       toggle.querySelector('.gestra-tts-switch-label').textContent = state.enabled ? 'ON' : 'OFF';
       dot.classList.toggle('active', state.enabled);
 
-      if (!state.enabled) window.speechSynthesis.cancel();
-      else speak('Suara aksesibilitas diaktifkan.');
+      if (!state.enabled) {
+        window.speechSynthesis.cancel();
+      } else {
+        state.lastText = ''; // izinkan speak() berjalan
+        speak('Suara aksesibilitas diaktifkan.');
+      }
     });
 
-    // Rate slider
-    rate.addEventListener('input', () => {
-      state.rate = parseFloat(rate.value);
+    // ── Rate Slider ────────────────────────────────────────────────────────────
+    rateEl.addEventListener('input', () => {
+      state.rate = parseFloat(rateEl.value);
+
+      // [FIX-8] Update CSS custom property agar track slider berubah warna
+      rateEl.style.setProperty('--val', state.rate);
+      rateEl.setAttribute('aria-valuenow', state.rate);
+
       rateDisplay.textContent = state.rate.toFixed(1) + '×';
-      localStorage.setItem(STORAGE_KEY.RATE, state.rate);
+      localStorage.setItem(STORAGE_KEY.RATE, String(state.rate));
     });
 
-    // Voice selector
-    voice.addEventListener('change', () => {
-      state.voice = voice.value;
+    // ── Voice Selector ─────────────────────────────────────────────────────────
+    voiceSel.addEventListener('change', () => {
+      state.voice = voiceSel.value;
       localStorage.setItem(STORAGE_KEY.VOICE, state.voice);
     });
 
-    // Test button
+    // ── Test Button ────────────────────────────────────────────────────────────
     testBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      state.lastText = ''; // paksa baca ulang
+      state.lastText = ''; // paksa baca ulang meski teks sama
       speak('Halo! Ini adalah contoh suara untuk pengguna GESTRA.');
     });
+  }
 
-    // Tombol Escape menutup panel
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        panel.hidden = true;
-        window.speechSynthesis.cancel();
-      }
-    });
+  // ─── Outside Click — dengan AbortController [FIX-5][FIX-6] ──────────────────
+
+  function attachOutsideClickListener(fab, panel, widget) {
+    // Bersihkan controller lama jika ada
+    detachOutsideClickListener();
+
+    outsideClickController = new AbortController();
+    const { signal } = outsideClickController;
+
+    // [FIX-6] setTimeout(0) agar event bubble dari klik FAB selesai dulu
+    setTimeout(() => {
+      if (signal.aborted) return;
+
+      document.addEventListener('click', (e) => {
+        if (!widget.contains(e.target)) {
+          setPanelOpen(fab, panel, false);
+          detachOutsideClickListener();
+        }
+      }, { signal, passive: false });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          setPanelOpen(fab, panel, false);
+          window.speechSynthesis.cancel();
+          detachOutsideClickListener();
+        }
+      }, { signal, passive: true });
+    }, 0);
+  }
+
+  function detachOutsideClickListener() {
+    if (outsideClickController) {
+      outsideClickController.abort();
+      outsideClickController = null;
+    }
   }
 
   // ─── Bootstrap ────────────────────────────────────────────────────────────────

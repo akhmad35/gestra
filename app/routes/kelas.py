@@ -116,13 +116,13 @@ async def bergabung_kelas(
     
     if enrollment:
         return RedirectResponse(
-            url=f"/kelas/{kelas_id}/detail",
+            url=f"/murid/kelas/{kelas_id}/latihan",
             status_code=status.HTTP_303_SEE_OTHER
         )
     else:
         # Sudah bergabung sebelumnya
         return RedirectResponse(
-            url=f"/kelas/{kelas_id}/detail",
+            url=f"/murid/kelas/{kelas_id}/latihan",
             status_code=status.HTTP_303_SEE_OTHER
         )
 
@@ -157,7 +157,7 @@ async def bergabung_dengan_kode(
     # Cek apakah sudah bergabung
     if check_siswa_di_kelas(db, kelas.id, user.id):
         return RedirectResponse(
-            url=f"/kelas/{kelas.id}/detail",
+            url=f"/murid/kelas/{kelas.id}/latihan",
             status_code=status.HTTP_303_SEE_OTHER
         )
     
@@ -165,6 +165,6 @@ async def bergabung_dengan_kode(
     siswa_bergabung_kelas(db, kelas.id, user.id)
     
     return RedirectResponse(
-        url=f"/kelas/{kelas.id}/detail",
+        url=f"/murid/kelas/{kelas.id}/latihan",
         status_code=status.HTTP_303_SEE_OTHER
     )

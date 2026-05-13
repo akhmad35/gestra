@@ -1,8 +1,13 @@
 /*
  * ============================================================
- *  GES-TTS Widget Styles
+ *  GES-TTS Widget Styles — v3.0
  *  Zero visual impact pada konten utama.
  *  Hanya styling untuk floating widget pengaturan TTS.
+ *
+ *  Perbaikan v3.0:
+ *  [FIX-8]  Slider track background update via CSS custom property --val.
+ *  [FIX-10] Panel visibility dikontrol via .is-open (bukan [hidden]),
+ *           mencegah konflik antara CSS display:flex dan atribut hidden.
  * ============================================================
  */
 
@@ -68,12 +73,19 @@
 }
 
 /* ─── Panel ──────────────────────────────────────────────────────────────────── */
+
+/*
+ * [FIX-10] Panel default: tersembunyi (display:none).
+ * Tidak menggunakan atribut [hidden] karena berpotensi override oleh
+ * browser stylesheet. Visibility dikontrol murni via class .is-open.
+ */
 #gestra-tts-panel {
+  display: none; /* Tersembunyi secara default */
   position: absolute;
   bottom: 64px;
   right: 0;
   width: 288px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(0, 0, 0, 0.08);
@@ -82,9 +94,23 @@
   box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.12),
     0 2px 8px rgba(0, 0, 0, 0.06);
-  display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  /* Animasi open/close */
+  transform-origin: bottom right;
+  opacity: 0;
+  transform: scale(0.95) translateY(6px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* [FIX-10] Panel tampil saat .is-open aktif */
+#gestra-tts-panel.is-open {
+  display: flex;
+  opacity: 1;
+  transform: scale(1) translateY(0);
 }
 
 /* Panel header */
@@ -140,7 +166,6 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
   width: 72px;
   height: 30px;
   border-radius: 30px;
@@ -157,17 +182,18 @@
 }
 
 .gestra-tts-thumb {
-  width: 20px;
-  height: 20px;
+  position: absolute;
+  left: 4px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-  transition: transform 0.25s ease;
-  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .gestra-tts-switch.on .gestra-tts-thumb {
-  transform: translateX(38px);
+  transform: translateX(42px);
 }
 
 .gestra-tts-switch-label {
@@ -178,6 +204,7 @@
   color: #fff;
   transition: all 0.25s;
   pointer-events: none;
+  user-select: none;
 }
 
 .gestra-tts-switch.on .gestra-tts-switch-label {
@@ -191,7 +218,14 @@
 }
 
 /* ─── Range Slider ───────────────────────────────────────────────────────────── */
-input[type="range"]#gestra-tts-rate {
+/*
+ * [FIX-8] Gunakan CSS custom property --val yang diupdate via JavaScript
+ * setiap kali slider di-drag, agar track fill bergerak secara real-time.
+ * Rumus: (nilai - min) / (max - min) * 100%
+ *        = (--val - 0.5) / (1.5 - 0.5) * 100%
+ *        = (--val - 0.5) * 100%
+ */
+#gestra-tts-rate {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
@@ -200,15 +234,15 @@ input[type="range"]#gestra-tts-rate {
   background: linear-gradient(
     to right,
     #4f46e5 0%,
-    #4f46e5 calc((var(--val, 0.9) - 0.5) / 1.0 * 100%),
-    #e5e7eb calc((var(--val, 0.9) - 0.5) / 1.0 * 100%),
+    #4f46e5 calc((var(--val, 0.9) - 0.5) * 100%),
+    #e5e7eb calc((var(--val, 0.9) - 0.5) * 100%),
     #e5e7eb 100%
   );
   outline: none;
   cursor: pointer;
 }
 
-input[type="range"]#gestra-tts-rate::-webkit-slider-thumb {
+#gestra-tts-rate::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 18px;
@@ -218,15 +252,25 @@ input[type="range"]#gestra-tts-rate::-webkit-slider-thumb {
   border: 2px solid #fff;
   box-shadow: 0 1px 6px rgba(79, 70, 229, 0.4);
   cursor: pointer;
+  transition: transform 0.15s ease;
 }
 
-input[type="range"]#gestra-tts-rate::-moz-range-thumb {
+#gestra-tts-rate::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+#gestra-tts-rate::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
   background: #4f46e5;
   border: 2px solid #fff;
   cursor: pointer;
+}
+
+#gestra-tts-rate:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
 }
 
 .gestra-tts-range-labels {
@@ -250,6 +294,7 @@ input[type="range"]#gestra-tts-rate::-moz-range-thumb {
   outline: none;
   cursor: pointer;
   appearance: auto;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 #gestra-tts-voice:focus {
@@ -285,17 +330,27 @@ input[type="range"]#gestra-tts-rate::-moz-range-thumb {
 /* ─── Dark Mode Support ──────────────────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   #gestra-tts-panel {
-    background: rgba(31, 41, 55, 0.95);
+    background: rgba(31, 41, 55, 0.97);
     border-color: rgba(255, 255, 255, 0.08);
   }
 
-  .gestra-tts-panel-header,
-  .gestra-tts-label {
+  .gestra-tts-panel-header {
     color: #f3f4f6;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
   }
 
-  .gestra-tts-panel-header {
-    border-bottom-color: rgba(255,255,255,0.1);
+  .gestra-tts-label {
+    color: #d1d5db;
+  }
+
+  #gestra-tts-rate {
+    background: linear-gradient(
+      to right,
+      #6366f1 0%,
+      #6366f1 calc((var(--val, 0.9) - 0.5) * 100%),
+      #374151 calc((var(--val, 0.9) - 0.5) * 100%),
+      #374151 100%
+    );
   }
 
   #gestra-tts-voice {
@@ -316,6 +371,17 @@ input[type="range"]#gestra-tts-rate::-moz-range-thumb {
 
   .gestra-tts-range-labels {
     color: #6b7280;
+  }
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  #gestra-tts-panel,
+  #gestra-tts-fab,
+  .gestra-tts-switch,
+  .gestra-tts-thumb,
+  .gestra-tts-test-btn {
+    transition: none;
   }
 }
 

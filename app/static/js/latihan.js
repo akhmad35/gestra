@@ -66,8 +66,19 @@ function mulaiLatihan() {
     showToast('Pilih huruf atau angka terlebih dahulu!');
     return;
   }
+
+  // Tentukan mode berdasarkan tab yang aktif
+  let mode = 'number';
+  if (currentTab === 'hurufBesar') mode = 'upper';
+  if (currentTab === 'hurufKecil') mode = 'lower';
+
   speak(`Ayo tulis huruf ${selectedChar}`);
   showToast(`Ayo tulis: ${selectedChar} 🎉`);
+
+  // TUNGGU sebentar agar toast/suara sempat muncul, lalu pindah halaman
+  setTimeout(() => {
+    window.location.href = `/canvas-latihan-huruf.html?target=${selectedChar}&mode=${mode}`;
+  }, 800); // pindah setelah 0.8 detik
 }
 
 /* ── Toast notification ── */
@@ -121,4 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
     heading.style.cursor = 'pointer';
     heading.addEventListener('click', () => speak(heading.textContent.trim()));
   }
+
+  function mulaiLatihanTarget(char, mode) {
+    // Mode bisa: 'number', 'upper', atau 'lower'
+    window.location.href = `canvas-latihan-huruf.html?target=${char}&mode=${mode}`;
+}
 });

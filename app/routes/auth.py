@@ -71,7 +71,7 @@ async def set_peran(request: Request, role: str = Form(...), db: Session = Depen
     if user:
         update_user_role(db, user.id, role)
         
-    return RedirectResponse(url="/beranda", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/guru/dashboard", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/logout")
 async def logout(request: Request):
