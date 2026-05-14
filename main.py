@@ -77,7 +77,7 @@ async def save_canvas(request: Request):
             canvas_1200[y_off:y_off+h_limit, x_off:x_off+w_limit] = letter_res[:h_limit, :w_limit]
             
             # SIMPAN DEBUG
-            cv2.imwrite(os.path.join(BASE_DIR, "assets", "debug", "vsi_ai_final.png"), canvas_1200)
+            cv2.imwrite(os.path.join(BASE_DIR, "assets", "debug", "hasil_input_gambar.png"), canvas_1200)
             
             # PREDIKSI (Cukup panggil sekali di sini)
             prediction, confidence = predict_from_canvas(canvas_1200, mode)
