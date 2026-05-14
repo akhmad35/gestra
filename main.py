@@ -7,9 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from app.modules.level_huruf.predict import predict_from_canvas 
-from app.modules.level_kata.predict import predict_word
-from app.modules.level_kata.segmenter import segment_letters
+from app.modules.level_huruf.predict import predict_from_canvas
 from app.modules.level_kata.validator import validate_word
 
 app = FastAPI(title="GESTRA Multi-Level API")
@@ -37,101 +35,102 @@ async def render_page(request: Request, page_name: str):
         name=f"{page_name}.html"
     )
 
-# [LEVEL HURUF] Endpoint untuk latihan per-huruf
+# [LEVEL HURUF] Update Endpoint /save
 @app.post("/save")
 async def save_canvas(request: Request):
     data = await request.json()
-    mode = data.get("mode")
-    target = data.get("target")
-    image_data = data.get("image")
+    mode, target, image_data = data.get("mode"), data.get("target"), data.get("image")
 
-    # Decode image dari Base64
+    # 1. Decode Image
     encoded_data = image_data.split(',')[1]
     nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
     canvas = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    canvas = cv2.resize(canvas, (1200, 900), interpolation=cv2.INTER_LANCZOS4)
 
-    prediction, confidence = predict_from_canvas(canvas, mode)
-    is_correct = str(prediction).strip().lower() == str(target).strip().lower()
+    # 2. Preprocessing
+    gray = cv2.cvtColor(canvas, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Inisialisasi default
+    prediction = "Kosong"
+    confidence = 0.0
+
+    if contours:
+        valid_boxes = [cv2.boundingRect(c) for c in contours if cv2.boundingRect(c)[2] * cv2.boundingRect(c)[3] > 50]
+        
+        if valid_boxes:
+            # Hitung Bounding Box Gabungan
+            min_x = min([box[0] for box in valid_boxes])
+            min_y = min([box[1] for box in valid_boxes])
+            max_x = max([box[0] + box[2] for box in valid_boxes])
+            max_y = max([box[1] + box[3] for box in valid_boxes])
+            
+            letter_crop = cv2.bitwise_not(thresh[min_y:max_y, min_x:max_x])
+            canvas_1200 = np.ones((900, 1200, 3), dtype=np.uint8) * 255
+            letter_res = cv2.cvtColor(letter_crop, cv2.COLOR_GRAY2BGR)
+            
+            nh, nw = letter_res.shape[:2]
+            y_off, x_off = max(0, (900 - nh) // 2), max(0, (1200 - nw) // 2)
+            h_limit, w_limit = min(nh, 900 - y_off), min(nw, 1200 - x_off)
+            
+            canvas_1200[y_off:y_off+h_limit, x_off:x_off+w_limit] = letter_res[:h_limit, :w_limit]
+            
+            # SIMPAN DEBUG
+            cv2.imwrite(os.path.join(BASE_DIR, "assets", "debug", "vsi_ai_final.png"), canvas_1200)
+            
+            # PREDIKSI (Cukup panggil sekali di sini)
+            prediction, confidence = predict_from_canvas(canvas_1200, mode)
+
+    # Ambil prediksi asli dari model
+    prediction, confidence = predict_from_canvas(canvas_1200, mode)
+    
+    # Debug huruf level kata
+    print(f"Target: {target}")
+    print(f"AI Guess: {prediction}")
+    print(f"Confidence: {confidence * 100:.2f}%")
+
+    target_clean = str(target).strip().lower()
+    pred_clean = str(prediction).strip().lower()
+
+    original_guess = prediction 
+
+    if pred_clean != target_clean and pred_clean not in ["kosong", "error", "tidak jelas"]:
+        prediction = "Tidak Jelas"
+    
+    is_correct = (pred_clean == target_clean)
 
     return {
         "target": target,
         "prediction": prediction,
-        "confidence": round(float(confidence) * 100, 2),
+        "original_guess": original_guess,
+        "confidence": round(float(confidence * 100)),
         "correct": is_correct
     }
 
-# [LEVEL KATA] Endpoint untuk latihan per-kata
+# [LEVEL KATA] Update Endpoint /predict-word
 @app.post("/predict-word")
-async def predict_word_api(request: Request):
-    try:
-        data = await request.json()
-        target, image_data = data.get("target"), data.get("image")
+async def final_word_validation(request: Request):
+    data = await request.json()
+    target = data.get("target")
+    prediction = data.get("prediction")
+    individual_scores = data.get("individual_scores", []) # Ambil array skor
 
-        # 1. Decode & Resize Main Canvas
-        encoded_data = image_data.split(',')[1]
-        nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
-        canvas = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        canvas = cv2.resize(canvas, (1200, 900), interpolation=cv2.INTER_LANCZOS4)
+    if individual_scores:
+        # Hitung rata-rata: (Total Nilai Huruf) / Jumlah Huruf
+        final_score = sum(individual_scores) / len(individual_scores)
+        is_correct = final_score >= 80 
+    else:
+        is_correct, score_raw = validate_word(prediction, target)
+        final_score = score_raw * 100
 
-        # 2. Segmentasi
-        letters = segment_letters(canvas)
-        if not letters:
-            return {"prediction": "Kosong", "score": 0, "correct": False}
-
-        processed_letters = []
-        debug_dir = os.path.join(BASE_DIR, "assets", "debug")
-
-        for i, letter_img in enumerate(letters):
-            # A. Buat Kanvas Putih 1200x900 (3 Channel)
-            canvas_1200 = np.ones((900, 1200, 3), dtype=np.uint8) * 255
-            
-            # B. FIX: Paksa potongan huruf jadi RGB
-            if len(letter_img.shape) == 2:
-                letter_img = cv2.cvtColor(letter_img, cv2.COLOR_GRAY2RGB)
-            
-            # BAGIAN PERBESAR (SCALING PROPORSIAL)
-            h_orig, w_orig = letter_img.shape[:2]
-            
-            # Kita set target tinggi huruf sekitar 75% dari tinggi kanvas (900px)
-            # Jadi target_h = 675px agar ada padding atas-bawah yang pas
-            target_h = 675 
-            scale = target_h / h_orig
-            
-            # Cek juga lebarnya, jangan sampai setelah di-scale malah melebihi 1200px
-            if (w_orig * scale) > 1000:
-                scale = 1000 / w_orig
-                
-            new_w = int(w_orig * scale)
-            new_h = int(h_orig * scale)
-
-            # Resize dengan kualitas tinggi (LANCZOS4) agar garis tetap smooth
-            letter_resized = cv2.resize(letter_img, (new_w, new_h), interpolation=cv2.INTER_LANCZOS4)
-            #-----------------------------------------
-
-            # C. Hitung Offset Tengah yang baru
-            y_off = (900 - new_h) // 2
-            x_off = (1200 - new_w) // 2
-            
-            # D. Tempel ke tengah kanvas 1200x900
-            canvas_1200[y_off:y_off+new_h, x_off:x_off+new_w] = letter_resized
-            processed_letters.append(canvas_1200)
-
-            # E. Simpan Debug
-            cv2.imwrite(os.path.join(debug_dir, f"seg_{i}.png"), canvas_1200)
-
-        # 3. Prediksi & Validasi
-        predicted_result = predict_word(processed_letters)
-        is_correct, score = validate_word(predicted_result, target)
-
-        return {
-            "prediction": predicted_result,
-            "score": round(score, 2),
-            "correct": is_correct,
-            "debug_images": [f"/assets/debug/seg_{i}.png" for i in range(len(letters))]
-        }
-    except Exception as e:
-        print(f"🚨 Error: {e}")
-        return {"error": str(e), "correct": False}
+    return {
+        "prediction": prediction,
+        "score": round(final_score),
+        "correct": is_correct,
+        "target": target,
+        "total_letters": len(prediction)
+    }
     
 if __name__ == "__main__":
     print("GESTRA System Berjalan di http://127.0.0.1:8000")

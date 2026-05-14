@@ -48,9 +48,19 @@
         </div>
       </div>
 
-      <div class="target-box">
-        <span class="target-char" id="display-target">-</span>
+      <div class="target-box" style="flex-direction: column; gap: 8px;">
+        <div style="font-size: 1rem; color: #64748b; letter-spacing: 1.5px; font-weight: 600;">
+          <span id="word-target-display" style="color: #3B82F6; font-size: 2.0rem; font-weight: bold; padding: 0 4px;">-</span>
+        </div>
+
+        <div id="instruction-display" style="font-size: 1.6rem; color: #1e293b; margin-bottom: 5px;">
+          Tulis huruf ke-<span id="current-step-dash">1</span>: 
+          <span id="active-letter-target" style="font-weight: 1200; color: #3B82F6; background: #eff6ff; padding: 2px 14px; border-radius: 8px; border: 1px solid #dbeafe;">-</span>
+        </div>
+
+        <div id="word-ribbon" style="display: flex; gap: 10px; min-height: 80px; align-items: center; justify-content: center;">
       </div>
+</div>
 
       <div class="workspace-grid">
         <div class="workspace-box">
