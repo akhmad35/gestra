@@ -2,14 +2,14 @@
    GESTRA — Latihan Kata (Category Selection)
    =================================================== */
 
-// Database kata per kategori
+// Data statis kata per kategori
 const KATEGORI_KATA = {
-    'Buah': ['apel', 'mangga', 'pisang', 'jeruk', 'nanas', 'melon'],
-    'Hewan': ['kucing', 'anjing', 'gajah', 'singa', 'kuda', 'zebra'],
-    'Benda': ['meja', 'kursi', 'buku', 'lampu', 'tas', 'botol'],
-    'Hari': ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'],
-    'Warna': ['merah', 'biru', 'hijau', 'kuning', 'ungu', 'putih'],
-    'Negara': ['jepang', 'korea', 'rusia', 'china', 'mesir', 'india']
+    'Buah': ['Apel', 'Mangga', 'Pisang', 'Jeruk', 'Nanas', 'Melon'],
+    'Hewan': ['Kucing', 'Anjing', 'Gajah', 'Singa', 'Kuda', 'Zebra'],
+    'Benda': ['Meja', 'Kursi', 'Buku', 'Lampu', 'Tas', 'Botol'],
+    'Hari': ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+    'Warna': ['Hijau', 'Merah', 'Kuning', 'Biru', 'Oren', 'Ungu'],
+    'Negara': ['Brazil', 'Indonesia', 'Jepang', 'Kanada', 'Spanyol']
 };
 
 let selectedCategory = null;
@@ -58,7 +58,6 @@ function speak(text) {
     window.speechSynthesis.speak(utt);
 }
 
-// Di dalam canvas-latihan-kata.js kamu:
 async function periksaTulisan() {
     const dataURL = paintCanvas.toDataURL('image/png');
     

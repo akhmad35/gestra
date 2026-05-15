@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/* TTS helper */
 function speak(text) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
@@ -179,19 +178,18 @@ function showModalResult(data) {
     // 1. Logika penentuan teks judul
     if (data.correct) {
         title.innerText = `Bagus! Prediksi: ${data.prediction}`;
-        title.style.color = "#16a34a"; // Warna hijau
+        title.style.color = "#16a34a";
         speak(`Bagus! Prediksi benar, ini adalah ${data.prediction}`);
     } else {
         title.innerText = `Coba Lagi! Prediksi: ${data.prediction}`;
-        title.style.color = "#dc2626"; // Warna merah
+        title.style.color = "#dc2626";
         speak(`Coba lagi, sistem melihat ini sebagai ${data.prediction}`);
     }
 
     // 2. Logika menampilkan akurasi (confidence)
-    // Pastikan key 'confidence' ada di JSON yang dikirim app.py
     if (data.confidence !== undefined) {
-        confidenceText.innerText = `Tingkat Keyakinan Sistem: ${data.confidence}%`;
-        confidenceText.style.display = "block"; // Pastikan tidak tersembunyi
+        confidenceText.innerText = `Nilai Kamu ${data.confidence}`;
+        confidenceText.style.display = "block";
     } else {
         confidenceText.innerText = "Akurasi tidak tersedia";
     }

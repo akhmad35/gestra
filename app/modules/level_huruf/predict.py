@@ -14,7 +14,7 @@ LOADED_MODELS = {}
 MODEL_PATHS = {
     "number": {
         "path": "models/CNN_Dataset_Huruf_Nomor.keras",
-        "labels": ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        "labels": list(string.digits)
     },
     "upper": {
         "path": "models/CNN_Dataset_Huruf_Besar_New.keras",

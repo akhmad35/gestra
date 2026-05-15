@@ -35,16 +35,9 @@ const octx = cameraOverlay.getContext('2d');
 // Ambil parameter kata dari URL
 const urlParams = new URLSearchParams(window.location.search);
 const targetWord = urlParams.get('target') || 'mangga';
-const latihanId = urlParams.get('latihan_id');
-const kelasId = urlParams.get('kelas_id');
 
 // Update Tampilan Target di UI
 const targetDisplay = document.querySelector('.target-char');
-if(targetDisplay) {
-    targetDisplay.innerText = targetWord.toUpperCase();
-    targetDisplay.style.fontSize = "3.5rem"; 
-    targetDisplay.style.letterSpacing = "8px";
-}
 
 // Set ukuran canvas (SAMA PERSIS DENGAN VERSI HURUF)
 paintCanvas.width = 640; paintCanvas.height = 480;
@@ -141,26 +134,178 @@ const camera = new Camera(video, {
 });
 camera.start();
 
-// --- Logika Fetch ke Endpoint Kata ---
+let currentLetterIndex = 0;
+let collectedPredictions = "";
+let letterScores = [];
+
+// Inisialisasi tampilan awal
+function initWordTraining() {
+    // Inisialisasi array skor dengan nilai 100 untuk tiap huruf
+    if (letterScores.length === 0) {
+        letterScores = new Array(targetWord.length).fill(100);
+    }
+    
+    // Target Kata pada Canvas Latihan Kata
+    const wordDisplay = document.getElementById('word-target-display');
+    if (wordDisplay) wordDisplay.innerText = targetWord;
+
+    // Urutan Tulisan Huruf
+    const stepDisplay = document.getElementById('current-step-dash');
+    if (stepDisplay) stepDisplay.innerText = currentLetterIndex + 1;
+
+    // Huruf Yang Akan Ditulis
+    const letterDisplay = document.getElementById('active-letter-target');
+    if (letterDisplay) letterDisplay.innerText = targetWord[currentLetterIndex];
+
+    updateRibbon();
+}
+
+function updateRibbon() {
+    const ribbon = document.getElementById('word-ribbon');
+    ribbon.innerHTML = "";
+    
+    // Tampilkan placeholder untuk seluruh kata
+    for (let i = 0; i < targetWord.length; i++) {
+        const box = document.createElement('div');
+        box.style = "width: 50px; height: 60px; border: 2px dashed #cbd5e1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: #3B82F6;";
+        
+        if (i < collectedPredictions.length) {
+            box.innerText = collectedPredictions[i];
+            box.style.border = "2px solid #3B82F6";
+            box.style.background = "#eff6ff";
+        } else if (i === currentLetterIndex) {
+            box.style.border = "2px solid #F59E0B"; // Highlight huruf aktif
+            box.innerText = "?";
+        }
+        ribbon.appendChild(box);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initWordTraining(); 
+});
+
 async function periksaTulisan() {
     const dataURL = paintCanvas.toDataURL('image/png');
+    const btn = document.querySelector('.btn-primary');
+
+    const currentTarget = targetWord[currentLetterIndex];
+    let modeKirim = "lower";
+    if(!isNaN(currentTarget) && currentTarget.trim() !== "") {
+        modeKirim = "number";
+    } else if (currentTarget === currentTarget.toUpperCase() && currentTarget !== currentTarget.toLowerCase()) {
+        modeKirim = "upper";
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Mengecek";
+
+    try {
+        const response = await fetch("/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                mode: modeKirim,
+                target: currentTarget,
+                image: dataURL
+            })
+        });
+        
+        const data = await response.json();
+
+        // Debug huruf level kata
+        console.group(`%c GESTRA DEBUG: Huruf ${targetWord[currentLetterIndex].toUpperCase()} `, 'background: #222; color: #bada55');
+        console.log(`Target Terdaftar: ${data.target}`);
+        console.log(`Tebakan Asli AI: ${data.original_guess}`);
+        console.log(`Confidence: ${data.confidence}%`);
+        console.log(`Status Akhir: ${data.prediction}`);
+        console.groupEnd();
+
+        const errorStates = ["Kamu salah menulis huruf", "Tidak Jelas", "Kosong", "Error"];
+        
+        // Penalti nilai
+        if (errorStates.includes(data.prediction)) {
+            // Kurangi 10 poin
+            letterScores[currentLetterIndex] = Math.max(0, letterScores[currentLetterIndex] - 10);
+            console.log(`Penalty! Skor huruf ${targetWord[currentLetterIndex]} jadi: ${letterScores[currentLetterIndex]}`);
+
+            let errorTitle = (data.prediction === "Kamu salah menulis huruf") ? "Ups! Salah Huruf" : "Kurang Jelas";
+            speak(`Ayo coba lagi, tulis huruf ${targetWord[currentLetterIndex]}`);
+            
+            showRetryModal(errorTitle, targetWord[currentLetterIndex]);
+            resetCanvas();
+            btn.disabled = false;
+            btn.innerText = "Kirim Huruf";
+            return;
+        }
+
+        collectedPredictions += data.prediction;
+        updateRibbon(); 
+
+        currentLetterIndex++;
+
+        if (currentLetterIndex < targetWord.length) {
+            setTimeout(() => {
+                speak(`Bagus! Sekarang tulis huruf ${targetWord[currentLetterIndex]}`);
+                resetCanvas();
+                initWordTraining();
+                btn.disabled = false;
+                btn.innerText = "Kirim Huruf";
+            }, 500);
+        } else {
+            setTimeout(() => {
+                finalValidation();
+            }, 800);
+        }
+    } catch (error) {
+        alert("Gagal terhubung ke server");
+        btn.disabled = false;
+        btn.innerText = "Kirim Huruf";
+    }
+}
+
+function showRetryModal(errorTitle, targetChar) {
+    const modal = document.getElementById("modal-selesai");
+    const title = document.getElementById("modal-title");
+    const confidenceText = document.getElementById("modal-confidence");
+    const btnSelesai = modal.querySelector(".btn-cek-nilai");
+
+    title.innerText = errorTitle;
+    title.style.color = "#dc2626";
     
+    confidenceText.innerHTML = `Coba lagi, tulis ulang huruf: <span style="color: #3B82F6; font-size: 2.5rem; font-weight: 900; display: block; margin-top: 10px;">${targetChar}</span>`;
+    
+    if (btnSelesai) btnSelesai.style.display = "none";
+
+    const imgContainer = document.getElementById("debug-images-container");
+    if (imgContainer) imgContainer.innerHTML = "";
+
+    modal.style.display = "flex";
+}
+
+function closeKuisSelesaiModal() {
+    const modal = document.getElementById('modal-selesai');
+    const btnSelesai = modal.querySelector(".btn-cek-nilai");
+    
+    modal.style.display = 'none';
+    if (btnSelesai) btnSelesai.style.display = "inline-block"; // Munculkan kembali untuk modal akhir
+    resetCanvas();
+}
+
+async function finalValidation() {
     try {
         const response = await fetch("/predict-word", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 target: targetWord,
-                image: dataURL,
-                latihan_id: latihanId ? parseInt(latihanId) : null,
-                kelas_id: kelasId ? parseInt(kelasId) : null
+                image: dataURL
             })
         });
-        
         const data = await response.json();
         showModalResult(data);
     } catch (error) {
-        alert("Gagal terhubung ke server FastAPI");
+        alert("Gagal validasi akhir");
     }
 }
 
@@ -168,47 +313,22 @@ function showModalResult(data) {
     const modal = document.getElementById("modal-selesai");
     const title = document.getElementById("modal-title");
     const confidenceText = document.getElementById("modal-confidence");
-
-    // --- TAMBAHKAN LOGIKA UNTUK MENAMPILKAN GAMBAR ---
-    // Buat kontainer untuk gambar jika belum ada di modal
-    let imgContainer = document.getElementById("debug-images-container");
-    if (!imgContainer) {
-        imgContainer = document.createElement("div");
-        imgContainer.id = "debug-images-container";
-        imgContainer.style.display = "flex";
-        imgContainer.style.gap = "10px";
-        imgContainer.style.justifyContent = "center";
-        imgContainer.style.margin = "15px 0";
-        // Masukkan sebelum modal-actions
-        const actions = document.querySelector(".modal-actions");
-        actions.parentNode.insertBefore(imgContainer, actions);
-    }
     
-    // Kosongkan dan isi dengan gambar baru (ditambah timestamp agar tidak kena cache browser)
-    imgContainer.innerHTML = "";
-    if (data.debug_images) {
-        data.debug_images.forEach(path => {
-            const img = document.createElement("img");
-            img.src = `${path}?t=${new Date().getTime()}`; 
-            img.style.width = "50px";
-            img.style.border = "1px solid #ddd";
-            img.style.borderRadius = "5px";
-            imgContainer.appendChild(img);
-        });
-    }
+    const btnSelesai = modal.querySelector(".btn-cek-nilai");
+    if (btnSelesai) btnSelesai.style.display = "inline-block";
 
     if (data.correct) {
-        title.innerText = `Hebat! Kamu menulis: ${data.prediction}`;
+        title.innerText = `Hebat! Kamu Menulis Tanpa Banyak Kesalahan!`;
         title.style.color = "#16a34a";
         speak(`Luar biasa! Kamu berhasil menulis kata ${targetWord}`);
     } else {
-        title.innerText = `Hampir! Sistem membaca: ${data.prediction}`;
+        title.innerText = `Coba Lagi!`;
         title.style.color = "#dc2626";
         speak(`Ayo coba lagi, tulis kata ${targetWord} dengan lebih rapi`);
     }
 
-    const similarity = Math.round(data.score * 100);
-    confidenceText.innerText = `Skor Kemiripan: ${similarity}% | Terdeteksi ${data.total_letters} huruf`;
+    const similarity = Math.round(data.score);
+    confidenceText.innerText = `Nilai Kamu: ${similarity}`;
     
     modal.style.display = "flex";
 }
