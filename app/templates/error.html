@@ -60,6 +60,7 @@
   </style>
 </head>
 <body>
+  {% include "components/back_button.html" %}
   <div class="error-container">
     <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="10"></circle>
@@ -70,5 +71,6 @@
     <p>{{ message }}</p>
     <a href="/kelas/daftar">Kembali ke Daftar Kelas</a>
   </div>
+  <script src="{{ url_for('static', path='js/back-button.js') }}"></script>
 </body>
 </html>

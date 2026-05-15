@@ -35,6 +35,8 @@ const octx = cameraOverlay.getContext('2d');
 const urlParams = new URLSearchParams(window.location.search);
 const targetChar = urlParams.get('target') || 'A';
 const currentMode = urlParams.get('mode') || 'upper';
+const latihanId = urlParams.get('latihan_id');
+const kelasId = urlParams.get('kelas_id');
 
 // Update Tampilan Target di UI
 document.querySelector('.target-char').innerText = targetChar;
@@ -149,7 +151,9 @@ async function periksaTulisan() {
             body: JSON.stringify({
                 mode: currentMode,
                 target: targetChar,
-                image: dataURL
+                image: dataURL,
+                latihan_id: latihanId ? parseInt(latihanId) : null,
+                kelas_id: kelasId ? parseInt(kelasId) : null
             })
         });
         

@@ -11,7 +11,8 @@ from app.services.latihan import (
     get_latihan_by_id,
     submit_jawaban,
     get_jawaban_siswa,
-    get_jawaban_by_siswa
+    get_jawaban_by_siswa,
+    get_all_jawaban_by_siswa
 )
 from app.schemas.latihan import JawabanCreate
 
@@ -201,5 +202,38 @@ async def lihat_hasil_jawaban(
             "kelas": kelas,
             "latihan": latihan,
             "jawaban": jawaban
+        }
+    )
+
+
+# ===== RIWAYAT NILAI (MURID) =====
+@router.get("/riwayat-nilai", response_class=HTMLResponse)
+async def riwayat_nilai(request: Request, db: Session = Depends(get_db)):
+    """Halaman riwayat nilai murid"""
+    user = get_current_user(request, db)
+    
+    if not user or user.role != "murid":
+        return RedirectResponse(url="/login")
+    
+    # Ambil semua jawaban/nilai siswa
+    riwayat_list = get_all_jawaban_by_siswa(db, user.id)
+    
+    total_kuis = len(riwayat_list)
+    total_lulus = len([r for r in riwayat_list if r.nilai >= 70])
+    rata_rata = sum([r.nilai for r in riwayat_list]) / total_kuis if total_kuis > 0 else 0
+    
+    stats = {
+        "total_kuis": total_kuis,
+        "total_lulus": total_lulus,
+        "rata_rata": round(rata_rata, 1)
+    }
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="murid/riwayat-nilai.html",
+        context={
+            "user": user,
+            "riwayat_list": riwayat_list,
+            "stats": stats
         }
     )

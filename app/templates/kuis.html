@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="{{ url_for('static', path='css/kuis.css') }}" />
 </head>
 <body>
+  {% include "components/back_button.html" %}
 
   <!-- ── Navbar ── -->
   <nav class="navbar">
@@ -37,7 +38,17 @@
   </nav>
 
   <!-- ── Page Content ── -->
-  <div class="kuis-page">
+  <div class="top-toolbar">
+    <a href="javascript:history.back()" class="reusable-back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Kembali
+    </a>
+  </div>
+
+  <div class="kuis-page" style="flex-direction: column; gap: 20px; padding-top: 0;">
     <div class="kuis-card">
 
       <!-- Mascot -->
@@ -87,5 +98,6 @@
   </div>
 
   <script src="{{ url_for('static', path='js/kuis.js') }}"></script>
+  <script src="{{ url_for('static', path='js/back-button.js') }}"></script>
 </body>
 </html>

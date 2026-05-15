@@ -88,12 +88,18 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="top-toolbar">
+    <a href="javascript:history.back()" class="reusable-back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Kembali
+    </a>
+</div>
+
+<div class="container" style="padding-top: 0;">
     <div class="header">
-        <a href="/murid/dashboard" style="text-decoration: none; color: #64748b; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Kembali ke Dashboard
-        </a>
         <h1>{{ kelas.nama_kelas }}</h1>
         <p>Selesaikan semua latihan untuk meningkatkan kemampuanmu!</p>
     </div>

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="{{ url_for('static', path='css/pilih-peran.css') }}" />
 </head>
 <body class="role-body">
+  {% include "components/back_button.html" %}
 
   <div class="role-container">
     <div class="role-card">
@@ -47,5 +48,6 @@
     </div>
   </div>
 
+  <script src="{{ url_for('static', path='js/back-button.js') }}"></script>
 </body>
 </html>

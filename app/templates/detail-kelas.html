@@ -49,7 +49,18 @@
 {% endblock %}
 
 {% block content %}
-<main class="detail-kelas-container">
+<div class="top-toolbar">
+  <a href="javascript:history.back()" class="reusable-back-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    Kembali
+  </a>
+</div>
+
+<main class="detail-kelas-container" style="padding-top: 0;">
+
   <!-- Breadcrumb -->
   <div class="breadcrumb">
     <a href="/kelas/daftar">Kelas</a>

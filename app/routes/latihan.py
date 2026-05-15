@@ -8,6 +8,7 @@ import base64
 import cv2
 import numpy as np
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter(tags=["Latihan"])
 templates = Jinja2Templates(directory="app/templates")
@@ -17,16 +18,21 @@ from app.modules.level_huruf.predict import predict_from_canvas
 from app.modules.level_kata.segmenter import segment_letters
 from app.modules.level_kata.predict import predict_word
 from app.modules.level_kata.validator import validate_word
+from app.services.latihan import submit_jawaban_otomatis
 
 # ===== Request Models =====
 class PredictLetterRequest(BaseModel):
     mode: str  # "upper", "lower", "number"
     target: str
     image: str  # base64
+    latihan_id: Optional[int] = None
+    kelas_id: Optional[int] = None
 
 class PredictWordRequest(BaseModel):
     target: str
     image: str  # base64
+    latihan_id: Optional[int] = None
+    kelas_id: Optional[int] = None
 
 # ===== Helper function to decode base64 image =====
 def decode_base64_image(image_data: str):
@@ -116,7 +122,7 @@ async def legacy_canvas_latihan_kata_html_redirect(request: Request, db: Session
 
 # ===== Prediction Endpoints =====
 @router.post("/save")
-async def predict_letter(request_data: PredictLetterRequest, db: Session = Depends(get_db)):
+async def predict_letter(request_data: PredictLetterRequest, request: Request, db: Session = Depends(get_db)):
     """
     Predict single letter/number from canvas drawing
     Expected payload: { mode: "upper"|"lower"|"number", target: string, image: base64 }
@@ -137,6 +143,20 @@ async def predict_letter(request_data: PredictLetterRequest, db: Session = Depen
         # Check if correct
         correct = (prediction.lower() == request_data.target.lower()) and confidence >= 0.80
         
+        # Save if user is logged in and providing IDs
+        user = get_current_user(request, db)
+        if user and user.role == "murid" and request_data.latihan_id and request_data.kelas_id:
+            score = int(confidence * 100)
+            submit_jawaban_otomatis(
+                db, 
+                request_data.latihan_id, 
+                user.id, 
+                request_data.kelas_id, 
+                prediction, 
+                score, 
+                correct
+            )
+        
         return {
             "correct": correct,
             "prediction": prediction,
@@ -150,7 +170,7 @@ async def predict_letter(request_data: PredictLetterRequest, db: Session = Depen
         )
 
 @router.post("/predict-word")
-async def predict_word_endpoint(request_data: PredictWordRequest, db: Session = Depends(get_db)):
+async def predict_word_endpoint(request_data: PredictWordRequest, request: Request, db: Session = Depends(get_db)):
     """
     Predict word from canvas drawing
     Expected payload: { target: string, image: base64 }
@@ -180,6 +200,20 @@ async def predict_word_endpoint(request_data: PredictWordRequest, db: Session = 
         # Validate
         is_correct, similarity_score = validate_word(predicted_word, request_data.target)
         
+        # Save if user is logged in and providing IDs
+        user = get_current_user(request, db)
+        if user and user.role == "murid" and request_data.latihan_id and request_data.kelas_id:
+            score = int(similarity_score)
+            submit_jawaban_otomatis(
+                db, 
+                request_data.latihan_id, 
+                user.id, 
+                request_data.kelas_id, 
+                predicted_word, 
+                score, 
+                is_correct
+            )
+            
         return {
             "correct": is_correct,
             "prediction": predicted_word,

@@ -6,10 +6,40 @@ from app.routes import auth, halaman, latihan, kuis, profil, kelas, guru, murid
 from app.database import engine, Base
 import os
 
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger("gestra")
+
 # Initialize database
-Base.metadata.create_all(bind=engine)
+try:
+    logger.info("Initializing database...")
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database initialized successfully.")
+except Exception as e:
+    logger.error(f"Failed to initialize database: {e}")
 
 app = FastAPI(title="GESTRA Fullstack API")
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("GESTRA System is starting up...")
+    logger.info("Checking static directories...")
+    if os.path.exists("app/static"):
+        logger.info("app/static directory found.")
+    else:
+        logger.warning("app/static directory NOT found!")
+    
+    if os.path.exists("app/templates"):
+        logger.info("app/templates directory found.")
+    else:
+        logger.warning("app/templates directory NOT found!")
+
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -35,7 +65,18 @@ async def predict_model():
 # Error handler for validation
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.error(f"Validation Error: {exc.errors()} | Body: {exc.body}")
     return JSONResponse(
         status_code=422,
         content={"detail": exc.errors(), "body": exc.body},
     )
+
+# Generic Error Handler to avoid unexplained ISE
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled Exception: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "message": str(exc)}
+    )
+

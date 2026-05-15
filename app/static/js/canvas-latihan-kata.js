@@ -35,6 +35,8 @@ const octx = cameraOverlay.getContext('2d');
 // Ambil parameter kata dari URL
 const urlParams = new URLSearchParams(window.location.search);
 const targetWord = urlParams.get('target') || 'mangga';
+const latihanId = urlParams.get('latihan_id');
+const kelasId = urlParams.get('kelas_id');
 
 // Update Tampilan Target di UI
 const targetDisplay = document.querySelector('.target-char');
@@ -149,7 +151,9 @@ async function periksaTulisan() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 target: targetWord,
-                image: dataURL
+                image: dataURL,
+                latihan_id: latihanId ? parseInt(latihanId) : null,
+                kelas_id: kelasId ? parseInt(kelasId) : null
             })
         });
         

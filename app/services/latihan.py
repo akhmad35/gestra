@@ -67,7 +67,7 @@ def delete_latihan(db: Session, latihan_id: int):
 # ===== JAWABAN SERVICES =====
 
 def submit_jawaban(db: Session, jawaban: JawabanCreate, siswa_id: int, kelas_id: int):
-    """Submit jawaban dari siswa"""
+    """Submit jawaban dari siswa (manual/text)"""
     # Check apakah sudah submit sebelumnya
     existing = db.query(Jawaban).filter(
         (Jawaban.latihan_id == jawaban.latihan_id) &
@@ -90,6 +90,35 @@ def submit_jawaban(db: Session, jawaban: JawabanCreate, siswa_id: int, kelas_id:
     
     db.commit()
     return get_jawaban_by_id(db, existing.id if existing else db_jawaban.id)
+
+
+def submit_jawaban_otomatis(db: Session, latihan_id: int, siswa_id: int, kelas_id: int, jawaban: str, nilai: int, benar: bool):
+    """Submit jawaban yang langsung dinilai (dari canvas/kuis)"""
+    existing = db.query(Jawaban).filter(
+        (Jawaban.latihan_id == latihan_id) &
+        (Jawaban.siswa_id == siswa_id)
+    ).first()
+    
+    if existing:
+        existing.jawaban = jawaban
+        existing.nilai = nilai
+        existing.benar = benar
+        existing.dikoreksi_pada = datetime.utcnow()
+        db.add(existing)
+    else:
+        db_jawaban = Jawaban(
+            latihan_id=latihan_id,
+            siswa_id=siswa_id,
+            kelas_id=kelas_id,
+            jawaban=jawaban,
+            nilai=nilai,
+            benar=benar,
+            dikoreksi_pada=datetime.utcnow()
+        )
+        db.add(db_jawaban)
+    
+    db.commit()
+    return True
 
 
 def get_jawaban_by_id(db: Session, jawaban_id: int):
@@ -147,6 +176,11 @@ def get_stat_jawaban_kelas(db: Session, kelas_id: int):
         "benar": benar,
         "rata_nilai": rata_nilai
     }
+
+
+def get_all_jawaban_by_siswa(db: Session, siswa_id: int):
+    """Ambil semua jawaban siswa dari semua kelas"""
+    return db.query(Jawaban).filter(Jawaban.siswa_id == siswa_id).order_by(Jawaban.dikumpulkan_pada.desc()).all()
 
 
 from datetime import datetime

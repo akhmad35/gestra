@@ -78,7 +78,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="top-toolbar">
+    <a href="javascript:history.back()" class="reusable-back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Kembali
+    </a>
+</div>
+
+<div class="container" style="padding-top: 0;">
     <div class="result-card">
         <div class="icon-success">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>

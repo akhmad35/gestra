@@ -128,8 +128,15 @@
     }
 
     @keyframes modalIn {
-        from { opacity: 0; transform: scale(0.9) translateY(16px); }
-        to   { opacity: 1; transform: scale(1) translateY(0); }
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(16px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
     }
 
     .modal-close {
@@ -306,7 +313,22 @@
 {% endblock %}
 
 {% block content %}
+
+
+
+
 <div class="dashboard-container">
+    <div class="riwayat-back-shell">
+        <a href="/beranda" class="riwayat-back-btn" id="riwayat-back" title="Kembali ke halaman sebelumnya">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="M19 12H5"></path>
+                <path d="M12 19l-7-7 7-7"></path>
+            </svg>
+            <span>Kembali</span>
+        </a>
+    </div>
+
     <div class="welcome-section">
         <h1>Semangat Belajar, {{ user.nama }}! 🚀</h1>
         <p>Ayo bergabung ke kelas dan mulai kerjakan latihanmu hari ini.</p>
@@ -322,32 +344,39 @@
         </button>
     </div>
 
+
     <div class="section-header">
         <h2>Kelas Yang Saya Ikuti</h2>
     </div>
 
     <div class="kelas-grid">
         {% if kelas_list %}
-            {% for kelas in kelas_list %}
-            <div class="kelas-card">
-                <div class="kelas-header">
-                    <h3>{{ kelas.nama_kelas }}</h3>
-                    <div class="guru-info">Guru: {{ kelas.guru.nama if kelas.guru else 'Anonim' }}</div>
-                </div>
-                <div class="kelas-body">
-                    <p>{{ kelas.deskripsi or 'Tidak ada deskripsi.' }}</p>
-                </div>
-                <div class="kelas-footer">
-                    <a href="/murid/kelas/{{ kelas.id }}/latihan" class="btn-masuk">Buka Kelas</a>
-                </div>
+        {% for kelas in kelas_list %}
+        <div class="kelas-card">
+            <div class="kelas-header">
+                <h3>{{ kelas.nama_kelas }}</h3>
+                <div class="guru-info">Guru: {{ kelas.guru.nama if kelas.guru else 'Anonim' }}</div>
             </div>
-            {% endfor %}
+            <div class="kelas-body">
+                <p>{{ kelas.deskripsi or 'Tidak ada deskripsi.' }}</p>
+            </div>
+            <div class="kelas-footer">
+                <a href="/murid/kelas/{{ kelas.id }}/latihan" class="btn-masuk">Buka Kelas</a>
+            </div>
+        </div>
+        {% endfor %}
         {% else %}
-            <div class="empty-state">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                <h3>Kamu belum bergabung di kelas manapun</h3>
-                <p>Minta kode kelas ke gurumu dan masukkan di atas untuk mulai belajar.</p>
-            </div>
+        <div class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <h3>Kamu belum bergabung di kelas manapun</h3>
+            <p>Minta kode kelas ke gurumu dan masukkan di atas untuk mulai belajar.</p>
+        </div>
         {% endif %}
     </div>
 </div>
@@ -359,17 +388,8 @@
         <h3 id="modal-kode-title">Masukkan Kode Kelas</h3>
         <p>Minta kode unik dari gurumu untuk bergabung ke kelas baru.</p>
         <form action="/kelas/bergabung-kode" method="POST" id="form-kode-kelas">
-            <input
-                type="text"
-                name="kode_kelas"
-                id="input-kode-kelas"
-                class="modal-input"
-                placeholder="CONTOH: AB1234"
-                maxlength="6"
-                required
-                autocomplete="off"
-                aria-label="Kode kelas dari guru"
-            />
+            <input type="text" name="kode_kelas" id="input-kode-kelas" class="modal-input" placeholder="CONTOH: AB1234"
+                maxlength="6" required autocomplete="off" aria-label="Kode kelas dari guru" />
             <p class="modal-hint">Kode terdiri dari 6 karakter (huruf & angka)</p>
             <button type="submit" class="btn-modal-submit" id="btn-gabung-kelas">
                 Gabung Kelas
