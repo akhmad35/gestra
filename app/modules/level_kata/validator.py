@@ -1,11 +1,4 @@
-try:
-    from Levenshtein import ratio
-except ImportError:
-    from difflib import SequenceMatcher
-
-    def ratio(a: str, b: str) -> float:
-        return SequenceMatcher(None, a, b).ratio()
-
+from Levenshtein import ratio
 
 def validate_word(predicted, target):
     predicted = predicted.lower().strip()
@@ -13,5 +6,5 @@ def validate_word(predicted, target):
 
     score = ratio(predicted, target)
     is_correct = score >= 0.8
-
+    
     return is_correct, score
