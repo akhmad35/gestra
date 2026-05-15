@@ -15,7 +15,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 # Import prediction modules
 from app.modules.level_huruf.predict import predict_from_canvas
-from app.modules.level_kata.segmenter import segment_letters
+# from app.modules.level_kata.segmenter import segment_letters
 from app.modules.level_kata.predict import predict_word
 from app.modules.level_kata.validator import validate_word
 from app.services.latihan import submit_jawaban_otomatis
