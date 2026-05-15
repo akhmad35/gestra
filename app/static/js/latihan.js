@@ -77,7 +77,7 @@ function mulaiLatihan() {
 
   // TUNGGU sebentar agar toast/suara sempat muncul, lalu pindah halaman
   setTimeout(() => {
-    window.location.href = `/canvas-latihan-huruf.html?target=${selectedChar}&mode=${mode}`;
+    window.location.href = `/canvas-latihan-huruf?target=${selectedChar}&mode=${mode}`;
   }, 800); // pindah setelah 0.8 detik
 }
 
