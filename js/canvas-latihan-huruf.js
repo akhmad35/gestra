@@ -45,6 +45,7 @@ cameraOverlay.width = 640; cameraOverlay.height = 480;
 let prevPoint = null;
 let smoothPoint = null;
 const alpha = 0.6;
+let letterScores = [];
 
 function resetCanvas() {
     pctx.fillStyle = "white";
@@ -136,8 +137,14 @@ const camera = new Camera(video, {
 
 camera.start();
 
+let currentScore = 100;
+
 async function periksaTulisan() {
     const dataURL = paintCanvas.toDataURL('image/png');
+    const btn = document.querySelector(".btn-primary");
+
+    btn.disabled = true;
+    btn.innerText = "Mengecek Huruf";
     
     console.log("MENGIRIM KE BACKEND -> Mode:", currentMode, "| Target:", targetChar);
     
@@ -153,41 +160,55 @@ async function periksaTulisan() {
         });
         
         const data = await response.json();
-        showModalResult(data);
+        const errorStates = ["Kamu salah menulis huruf", "Tidak Jelas", "Kosong", "Error"];
+
+        // Penalti Nilai
+        if (!data.correct || errorStates.includes(data.prediction)) {
+            // Kurangi 10 poin
+            currentScore = Math.max(0, currentScore - 10);
+            console.log(`Penalty! Skor huruf: ${currentScore}`);
+            
+            // Tampilkan pesan suara
+            let msg = (data.prediction === "Kosong") ? "Kanvas kosong!" : "Tulisan kurang tepat.";
+            speak(`${msg} Coba lagi ya, nilai kamu sekarang ${currentScore}`);
+            
+            // Tampilkan modal hasil sementara
+            showModalResult(data, false); 
+            
+            resetCanvas();
+            btn.disabled = false;
+            btn.innerText = "Periksa Tulisan";
+        } else {
+            showModalResult(data, true);
+        }
+
     } catch (error) {
         alert("Gagal terhubung ke server FastAPI");
+        btn.disabled = false;
+        btn.innerText = "Periksa Tulisan";
     }
 }
 
-function showModalResult(data) {
-    console.log("Data diterima dari server:", data); // Cek data ini di konsol (F12)
-
+function showModalResult(data, isFinal) {
+    // console.log("Data diterima dari server:", data);
     const modal = document.getElementById("modal-selesai");
     const title = document.getElementById("modal-title");
     const confidenceText = document.getElementById("modal-confidence");
+    const btnCek = modal.querySelector("btn-cek-nilai");
 
-    if (!title || !confidenceText) {
-        console.error("Elemen modal-title atau modal-confidence tidak ditemukan!");
-        return;
-    }
-
-    // 1. Logika penentuan teks judul
-    if (data.correct) {
-        title.innerText = `Bagus! Prediksi: ${data.prediction}`;
+    if (isFinal) {
+        // Tampilan jika BENAR
+        title.innerText = `Luar Biasa!`;
         title.style.color = "#16a34a";
-        speak(`Bagus! Prediksi benar, ini adalah ${data.prediction}`);
+        confidenceText.innerHTML = `Kamu berhasil menulis huruf <b>${targetChar}</b><br>Nilai Akhir: <span style="font-size: 1.5rem; color: #3B82F6;">${currentScore}</span>`;
+        if (btnCek) btnCek.style.display = "inline-block";
+        speak(`Hebat! Kamu berhasil. Nilai kamu ${currentScore}`);
     } else {
-        title.innerText = `Coba Lagi! Prediksi: ${data.prediction}`;
+        // Tampilan jika SALAH (Coba Lagi)
+        title.innerText = `Ayo Coba Lagi!`;
         title.style.color = "#dc2626";
-        speak(`Coba lagi, sistem melihat ini sebagai ${data.prediction}`);
-    }
-
-    // 2. Logika menampilkan akurasi (confidence)
-    if (data.confidence !== undefined) {
-        confidenceText.innerText = `Nilai Kamu ${data.confidence}`;
-        confidenceText.style.display = "block";
-    } else {
-        confidenceText.innerText = "Akurasi tidak tersedia";
+        confidenceText.innerHTML = `Sistem melihat: <b>${data.prediction}</b><br>Skor berkurang jadi: <b>${currentScore}</b>`;
+        if (btnCek) btnCek.style.display = "none"; // Sembunyikan tombol cek nilai jika belum berhasil
     }
 
     modal.style.display = "flex";
