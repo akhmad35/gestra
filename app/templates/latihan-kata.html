@@ -7,7 +7,7 @@
   <title>GESTRA — Latihan Menulis Kata</title>
   <meta name="description" content="Latihan menulis kata di GESTRA." />
   <link rel="stylesheet" href="{{ url_for('static', path='css/global.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', path='css/latihan-kata.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', path='css/latihan-kata.css') }}?v=3" />
 </head>
 
 <body>
@@ -89,23 +89,64 @@
 
       <!-- Categories Grid -->
       <div class="category-grid" id="category-grid">
+        <!-- Buah -->
         <div class="category-card" onclick="selectCategory('Buah', this)">
-          <span>Buah</span>
+          <div class="category-card-thumbnail">
+            <img src="{{ url_for('static', path='assets/images/buah.png') }}?v=3" alt="Buah" class="category-illustration" />
+          </div>
+          <div class="category-card-footer">
+            <span>Buah</span>
+          </div>
         </div>
+        
+        <!-- Hewan -->
         <div class="category-card" onclick="selectCategory('Hewan', this)">
-          <span>Hewan</span>
+          <div class="category-card-thumbnail">
+            <img src="{{ url_for('static', path='assets/images/hewan.png') }}?v=3" alt="Hewan" class="category-illustration" />
+          </div>
+          <div class="category-card-footer">
+            <span>Hewan</span>
+          </div>
         </div>
+        
+        <!-- Benda -->
         <div class="category-card" onclick="selectCategory('Benda', this)">
-          <span>Benda</span>
+          <div class="category-card-thumbnail">
+            <img src="{{ url_for('static', path='assets/images/benda.png') }}?v=3" alt="Benda" class="category-illustration" />
+          </div>
+          <div class="category-card-footer">
+            <span>Benda</span>
+          </div>
         </div>
+        
+        <!-- Hari -->
         <div class="category-card" onclick="selectCategory('Hari', this)">
-          <span>Hari</span>
+          <div class="category-card-thumbnail">
+            <img src="{{ url_for('static', path='assets/images/hari.png') }}?v=3" alt="Hari" class="category-illustration" />
+          </div>
+          <div class="category-card-footer">
+            <span>Hari</span>
+          </div>
         </div>
+        
+        <!-- Warna -->
         <div class="category-card" onclick="selectCategory('Warna', this)">
-          <span>Warna</span>
+          <div class="category-card-thumbnail">
+            <img src="{{ url_for('static', path='assets/images/warna.png') }}?v=3" alt="Warna" class="category-illustration" />
+          </div>
+          <div class="category-card-footer">
+            <span>Warna</span>
+          </div>
         </div>
+        
+        <!-- Negara -->
         <div class="category-card" onclick="selectCategory('Negara', this)">
-          <span>Negara</span>
+          <div class="category-card-thumbnail">
+            <img src="{{ url_for('static', path='assets/images/negara.png') }}?v=3" alt="Negara" class="category-illustration" />
+          </div>
+          <div class="category-card-footer">
+            <span>Negara</span>
+          </div>
         </div>
       </div>
     </div>
