@@ -14,8 +14,21 @@ def create_latihan(db: Session, latihan: LatihanCreate, guru_id: int):
         pertanyaan=latihan.pertanyaan,
         tipe_soal=latihan.tipe_soal,
         tingkat_kesulitan=latihan.tingkat_kesulitan,
+        metode_pembuatan=latihan.metode_pembuatan,
+        dataset_type=latihan.dataset_type,
+        jumlah_soal=latihan.jumlah_soal,
+        durasi_menit=latihan.durasi_menit,
+        waktu_mulai=latihan.waktu_mulai,
+        waktu_selesai=latihan.waktu_selesai,
+        status=latihan.status,
+        soal_tergenerate=latihan.soal_tergenerate,
         pilihan_jawaban=latihan.pilihan_jawaban,
-        jawaban_kunci=latihan.jawaban_kunci
+        jawaban_kunci=latihan.jawaban_kunci,
+        izinkan_retry=latihan.izinkan_retry,
+        max_attempt=latihan.max_attempt,
+        mode_timer=latihan.mode_timer,
+        durasi_per_soal=latihan.durasi_per_soal,
+        izinkan_lihat_hasil=latihan.izinkan_lihat_hasil
     )
     db.add(db_latihan)
     db.commit()
@@ -77,6 +90,8 @@ def submit_jawaban(db: Session, jawaban: JawabanCreate, siswa_id: int, kelas_id:
     if existing:
         # Update jawaban sebelumnya
         existing.jawaban = jawaban.jawaban
+        existing.attempts_count += 1
+        existing.dikumpulkan_pada = datetime.utcnow()
         db.add(existing)
     else:
         # Buat jawaban baru
@@ -84,7 +99,8 @@ def submit_jawaban(db: Session, jawaban: JawabanCreate, siswa_id: int, kelas_id:
             latihan_id=jawaban.latihan_id,
             siswa_id=siswa_id,
             kelas_id=kelas_id,
-            jawaban=jawaban.jawaban
+            jawaban=jawaban.jawaban,
+            attempts_count=1
         )
         db.add(db_jawaban)
     
@@ -103,7 +119,9 @@ def submit_jawaban_otomatis(db: Session, latihan_id: int, siswa_id: int, kelas_i
         existing.jawaban = jawaban
         existing.nilai = nilai
         existing.benar = benar
+        existing.attempts_count += 1
         existing.dikoreksi_pada = datetime.utcnow()
+        existing.dikumpulkan_pada = datetime.utcnow()
         db.add(existing)
     else:
         db_jawaban = Jawaban(
@@ -113,6 +131,7 @@ def submit_jawaban_otomatis(db: Session, latihan_id: int, siswa_id: int, kelas_i
             jawaban=jawaban,
             nilai=nilai,
             benar=benar,
+            attempts_count=1,
             dikoreksi_pada=datetime.utcnow()
         )
         db.add(db_jawaban)

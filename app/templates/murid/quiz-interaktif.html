@@ -1,0 +1,169 @@
+{% extends "layout.html" %}
+
+{% block title %}Quiz Interaktif - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .interactive-card {
+        background: white;
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .interactive-header {
+        margin-bottom: 2rem;
+    }
+
+    .interactive-header h2 {
+        font-size: 2rem;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .interactive-header p {
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    .drag-area {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 2rem 0;
+        min-height: 100px;
+        padding: 1rem;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        background: #f8fafc;
+    }
+
+    .drop-slot {
+        width: 80px;
+        height: 80px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .drag-items {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .drag-item {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        background: var(--primary-gradient);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 800;
+        cursor: grab;
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+    }
+
+    .drag-item:active {
+        cursor: grabbing;
+        transform: scale(0.95);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="top-toolbar">
+    <a href="/murid/dashboard" class="reusable-back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Kembali
+    </a>
+</div>
+
+<div class="quiz-container">
+    <div class="interactive-card">
+        <div class="interactive-header">
+            <h2>Susun Kata</h2>
+            <p>Tarik huruf di bawah ke dalam kotak untuk membentuk kata "BUKU"</p>
+        </div>
+
+        <div class="drag-area" id="drop-zone">
+            <div class="drop-slot" data-expected="B"></div>
+            <div class="drop-slot" data-expected="U"></div>
+            <div class="drop-slot" data-expected="K"></div>
+            <div class="drop-slot" data-expected="U"></div>
+        </div>
+
+        <div class="drag-items">
+            <div class="drag-item" draggable="true" id="item-U1">U</div>
+            <div class="drag-item" draggable="true" id="item-K">K</div>
+            <div class="drag-item" draggable="true" id="item-B">B</div>
+            <div class="drag-item" draggable="true" id="item-U2">U</div>
+        </div>
+        
+        <button onclick="checkResult()" style="margin-top: 2rem; background: #10b981; color: white; border: none; padding: 1rem 2rem; border-radius: 12px; font-weight: 700; cursor: pointer;">Cek Jawaban</button>
+    </div>
+</div>
+
+<script>
+    // Simple drag and drop logic
+    const items = document.querySelectorAll('.drag-item');
+    const slots = document.querySelectorAll('.drop-slot');
+    
+    items.forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', e.target.id);
+        });
+    });
+
+    slots.forEach(slot => {
+        slot.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        slot.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if(!slot.hasChildNodes()) {
+                const id = e.dataTransfer.getData('text/plain');
+                const draggableElement = document.getElementById(id);
+                slot.appendChild(draggableElement);
+            }
+        });
+    });
+
+    function checkResult() {
+        let isCorrect = true;
+        slots.forEach(slot => {
+            const expected = slot.getAttribute('data-expected');
+            const item = slot.firstElementChild;
+            if(!item || item.innerText !== expected) {
+                isCorrect = false;
+            }
+        });
+        
+        if(isCorrect) {
+            alert('Hebat! Jawabanmu Benar 🎉');
+        } else {
+            alert('Masih ada yang salah, coba lagi ya!');
+        }
+    }
+</script>
+{% endblock %}

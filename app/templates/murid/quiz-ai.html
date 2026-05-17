@@ -1,0 +1,172 @@
+{% extends "layout.html" %}
+
+{% block title %}Quiz AI Adaptif - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .quiz-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        background: white;
+        padding: 1rem 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .quiz-score {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #10b981;
+    }
+
+    .quiz-card {
+        background: white;
+        border-radius: 24px;
+        padding: 3rem;
+        text-align: center;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .quiz-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: var(--primary-gradient);
+    }
+
+    .question-text {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 2rem;
+    }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .option-btn {
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        padding: 1.5rem;
+        border-radius: 16px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #334155;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .option-btn:hover {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        transform: translateY(-2px);
+    }
+
+    .option-btn.correct {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+
+    .option-btn.wrong {
+        background: #ef4444;
+        color: white;
+        border-color: #ef4444;
+    }
+
+    .ai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f1f5f9;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 1rem;
+    }
+
+    .ai-badge span {
+        color: #8b5cf6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="top-toolbar">
+    <a href="/murid/dashboard" class="reusable-back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Kembali ke Dashboard
+    </a>
+</div>
+
+<div class="quiz-container">
+    <div class="quiz-header">
+        <div>
+            <h2 style="margin:0; font-size:1.25rem; color:#1e293b;">Soal 1 / 10</h2>
+        </div>
+        <div class="quiz-score">
+            Skor: <span id="score">0</span>
+        </div>
+    </div>
+
+    <div class="quiz-card">
+        <div class="ai-badge">
+            <span>✨</span> Direkomendasikan AI untuk tingkat kemahiranmu
+        </div>
+        
+        <div class="question-text">
+            Huruf apa ini? " A "
+        </div>
+        
+        <div class="options-grid">
+            <button class="option-btn" onclick="checkAnswer(this, true)">A</button>
+            <button class="option-btn" onclick="checkAnswer(this, false)">B</button>
+            <button class="option-btn" onclick="checkAnswer(this, false)">C</button>
+            <button class="option-btn" onclick="checkAnswer(this, false)">D</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    function checkAnswer(btn, isCorrect) {
+        if(isCorrect) {
+            btn.classList.add('correct');
+            score += 100;
+            document.getElementById('score').innerText = score;
+            setTimeout(() => {
+                alert('Jawaban Benar! Melanjutkan ke soal berikutnya...');
+                // logic next question
+            }, 500);
+        } else {
+            btn.classList.add('wrong');
+            setTimeout(() => {
+                alert('Kurang tepat, coba lagi!');
+                btn.classList.remove('wrong');
+            }, 800);
+        }
+    }
+</script>
+{% endblock %}

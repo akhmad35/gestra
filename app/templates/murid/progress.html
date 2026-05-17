@@ -1,0 +1,242 @@
+{% extends "layout.html" %}
+
+{% block title %}Progress Belajar - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .progress-page-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .page-header p {
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card h3 {
+        margin: 0 0 1.5rem 0;
+        font-size: 1.25rem;
+        color: #1e293b;
+    }
+
+    .chart-container {
+        height: 300px;
+        width: 100%;
+        background: #f8fafc;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-weight: 600;
+    }
+
+    .ai-recom-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .ai-recom-card h3 {
+        margin: 0 0 1rem 0;
+        color: #0284c7;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .recom-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .recom-list li {
+        margin-bottom: 0.75rem;
+        color: #334155;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .accuracy-item {
+        margin-bottom: 1rem;
+    }
+
+    .acc-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .acc-bar-bg {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .acc-bar-fill {
+        height: 100%;
+        background: var(--primary-gradient);
+        border-radius: 4px;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="top-toolbar">
+    <a href="/murid/dashboard" class="reusable-back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Kembali ke Dashboard
+    </a>
+</div>
+
+<div class="progress-page-container">
+    <div class="page-header">
+        <h1>Progress Belajar</h1>
+        <p>Pantau perkembanganmu dari waktu ke waktu</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="main-column">
+            <div class="stat-card">
+                <h3>Grafik Perkembangan XP</h3>
+                <div class="chart-container">
+                    <canvas id="xpChart"></canvas>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Akurasi Menulis per Huruf</h3>
+                
+                <div class="accuracy-item">
+                    <div class="acc-header">
+                        <span>Huruf A</span>
+                        <span>90%</span>
+                    </div>
+                    <div class="acc-bar-bg">
+                        <div class="acc-bar-fill" style="width: 90%; background: #10b981;"></div>
+                    </div>
+                </div>
+
+                <div class="accuracy-item">
+                    <div class="acc-header">
+                        <span>Huruf B</span>
+                        <span>75%</span>
+                    </div>
+                    <div class="acc-bar-bg">
+                        <div class="acc-bar-fill" style="width: 75%; background: #3b82f6;"></div>
+                    </div>
+                </div>
+
+                <div class="accuracy-item">
+                    <div class="acc-header">
+                        <span>Huruf C</span>
+                        <span>40%</span>
+                    </div>
+                    <div class="acc-bar-bg">
+                        <div class="acc-bar-fill" style="width: 40%; background: #ef4444;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-column">
+            <div class="ai-recom-card">
+                <h3>🤖 Rekomendasi AI</h3>
+                <ul class="recom-list">
+                    <li>💡 <strong>Perbanyak Latihan Huruf C:</strong> Sistem mendeteksi kamu sering kesulitan pada lengkungan.</li>
+                    <li>💡 <strong>Coba Speed Quiz:</strong> Waktu responmu sedikit lambat, latih kecepatan dengan Speed Quiz.</li>
+                    <li>💡 <strong>Pertahankan!:</strong> Akurasi huruf A-mu sudah sangat bagus.</li>
+                </ul>
+            </div>
+
+            <div class="stat-card">
+                <h3>Ringkasan</h3>
+                <div style="font-size: 2rem; font-weight: 800; color: #10b981;">85%</div>
+                <p style="color: #64748b; font-size: 0.875rem; margin-top: 0;">Rata-rata Akurasi</p>
+                <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 1rem 0;">
+                <div style="font-size: 2rem; font-weight: 800; color: #3b82f6;">12</div>
+                <p style="color: #64748b; font-size: 0.875rem; margin-top: 0;">Latihan Diselesaikan</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('xpChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                datasets: [{
+                    label: 'XP Didapat',
+                    data: [120, 190, 300, 250, 400, 450, 500],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

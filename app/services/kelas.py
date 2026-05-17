@@ -83,3 +83,17 @@ def check_siswa_di_kelas(db: Session, kelas_id: int, siswa_id: int):
 def get_siswa_di_kelas(db: Session, kelas_id: int):
     """Ambil semua siswa di kelas"""
     return db.query(Enrollment).filter(Enrollment.kelas_id == kelas_id).all()
+
+
+def keluar_kelas(db: Session, kelas_id: int, siswa_id: int):
+    """Siswa keluar dari kelas"""
+    enrollment = db.query(Enrollment).filter(
+        Enrollment.kelas_id == kelas_id,
+        Enrollment.siswa_id == siswa_id
+    ).first()
+    if enrollment:
+        db.delete(enrollment)
+        db.commit()
+        return True
+    return False
+

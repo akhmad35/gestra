@@ -1,16 +1,18 @@
 {% extends "layout.html" %}
 
-{% block title %}GESTRA — Edit Profil{% endblock %}
+{% block title %}GESTRA — Edit Profil 🎒{% endblock %}
 
 {% block extra_css %}
 <style>
     .edit-profile-container {
         max-width: 600px;
-        margin: 4rem auto;
+        margin: 3rem auto 5rem;
         padding: 2.5rem;
         background: white;
-        border-radius: 24px;
+        border-radius: 28px;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        border: 2px solid #E2E8F0;
+        animation: fadeUp 0.4s ease both;
     }
 
     .edit-header {
@@ -20,8 +22,15 @@
 
     .edit-header h1 {
         font-size: 1.75rem;
-        font-weight: 800;
-        color: #1e293b;
+        font-weight: 900;
+        color: #1E293B;
+        margin-bottom: 6px;
+    }
+
+    .edit-header p {
+        font-size: 0.95rem;
+        color: #64748B;
+        font-weight: 700;
     }
 
     .form-group {
@@ -30,65 +39,138 @@
 
     .form-group label {
         display: block;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #64748b;
-        margin-bottom: 0.5rem;
+        font-size: 0.88rem;
+        font-weight: 800;
+        color: #475569;
+        margin-bottom: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .form-control {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e2e8f0;
-        border-radius: 12px;
+        padding: 0.85rem 1.1rem;
+        border: 2px solid #E2E8F0;
+        border-radius: 14px;
         font-size: 1rem;
-        transition: border-color 0.2s;
+        font-weight: 700;
+        color: #1E293B;
+        transition: all 0.2s ease;
     }
 
     .form-control:focus {
-        border-color: #6366f1;
+        border-color: #6366F1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
         outline: none;
     }
 
     .btn-save {
         width: 100%;
-        background: #1e293b;
+        background: #4F46E5;
         color: white;
         border: none;
         padding: 1rem;
-        border-radius: 12px;
-        font-size: 1rem;
-        font-weight: 700;
+        border-radius: 16px;
+        font-size: 1.05rem;
+        font-weight: 800;
         cursor: pointer;
         margin-top: 1rem;
-        transition: opacity 0.2s;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
     }
 
     .btn-save:hover {
-        opacity: 0.9;
+        background: #4338CA;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
     }
 
     .alert {
         padding: 1rem;
-        border-radius: 12px;
+        border-radius: 14px;
         margin-bottom: 1.5rem;
-        font-size: 0.875rem;
-        font-weight: 600;
+        font-size: 0.9rem;
+        font-weight: 700;
     }
 
     .alert-error {
-        background: #fee2e2;
-        color: #ef4444;
+        background: #FEE2E2;
+        color: #EF4444;
+        border: 1px solid #FCA5A5;
     }
 
     .btn-cancel {
         display: block;
         text-align: center;
         margin-top: 1.5rem;
-        color: #64748b;
+        color: #64748B;
         text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 600;
+        font-size: 0.95rem;
+        font-weight: 800;
+        transition: color 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+        color: #1E293B;
+    }
+
+    /* ── Playful Upload Avatar Section ── */
+    .avatar-upload-container {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .avatar-image {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #4F46E5;
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.15);
+        transition: transform 0.3s ease;
+    }
+
+    .avatar-wrapper:hover .avatar-image {
+        transform: scale(1.03);
+    }
+
+    .avatar-input-label {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: #4F46E5;
+        color: white;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 3.5px solid white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        transition: all 0.2s ease;
+    }
+
+    .avatar-input-label:hover {
+        background: #4338CA;
+        transform: scale(1.1);
+    }
+
+    .avatar-input-label svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 </style>
 {% endblock %}
@@ -97,8 +179,8 @@
 <main class="page-wrapper">
     <div class="edit-profile-container">
         <div class="edit-header">
-            <h1>Edit Profil</h1>
-            <p>Perbarui informasi akun Anda di sini.</p>
+            <h1>Edit Profilku ✏️</h1>
+            <p>Perbarui foto profil, nama, atau password belajarmu di sini.</p>
         </div>
 
         {% if error %}
@@ -107,10 +189,33 @@
         </div>
         {% endif %}
 
-        <form action="/edit-profile" method="POST">
+        <!-- Enctype added to allow image file uploads -->
+        <form action="/edit-profile" method="POST" enctype="multipart/form-data">
+            
+            <!-- Beautiful Avatar Upload Trigger -->
+            <div class="avatar-upload-container">
+                <div class="avatar-wrapper">
+                    <img src="{{ user.foto_profil or url_for('static', path='assets/images/mascot.png') }}" 
+                         id="avatar-preview" 
+                         alt="Avatar" 
+                         class="avatar-image" />
+                    
+                    <label for="foto_profil_input" class="avatar-input-label" title="Ganti Foto">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                    </label>
+                    <input type="file" id="foto_profil_input" name="foto_profil" accept="image/*" style="display: none;" onchange="previewImage(event)" />
+                </div>
+                <p style="font-size: 0.8rem; color: #64748B; margin-top: 10px; font-weight: 800; letter-spacing: 0.2px;">
+                    Klik ikon kamera biru di atas untuk memilih foto barumu! 📸✨
+                </p>
+            </div>
+
             <div class="form-group">
                 <label for="nama">Nama Lengkap</label>
-                <input type="text" id="nama" name="nama" class="form-control" value="{{ user.nama }}" required>
+                <input type="text" id="nama" name="nama" class="form-control" value="{{ user.nama }}" placeholder="Tulis namamu disini" required>
             </div>
 
             <div class="form-group">
@@ -119,14 +224,29 @@
             </div>
 
             <div class="form-group">
-                <label for="password">Password Baru (Kosongkan jika tidak ingin mengubah)</label>
+                <label for="password">Password Baru (Kosongkan jika tidak ingin diubah)</label>
                 <input type="password" id="password" name="password" class="form-control" placeholder="••••••••">
             </div>
 
-            <button type="submit" class="btn-save">Simpan Perubahan</button>
+            <button type="submit" class="btn-save">Simpan Perubahan ✨</button>
         </form>
 
         <a href="/profile" class="btn-cancel">Batal</a>
     </div>
 </main>
+
+<script>
+    // Live client preview of the chosen image
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const preview = document.getElementById('avatar-preview');
+                preview.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+</script>
 {% endblock %}

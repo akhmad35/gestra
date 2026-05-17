@@ -21,9 +21,12 @@
   animation: fadeUp .4s ease both;
 }
 .materi-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   box-shadow: var(--shadow-md);
   border-color: var(--blue-200);
+}
+.materi-card:hover .materi-thumbnail svg {
+  transform: scale(1.08) rotate(-3deg);
 }
 
 .materi-thumbnail {

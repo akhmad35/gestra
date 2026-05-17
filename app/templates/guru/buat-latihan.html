@@ -77,6 +77,70 @@
     .btn-submit:hover {
         opacity: 0.9;
     }
+
+    /* ── Dataset Section ── */
+    .dataset-section {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .dataset-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .dataset-header h3 {
+        margin: 0;
+        font-size: 1.125rem;
+        color: #1e293b;
+    }
+
+    .dataset-preview {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+
+    .dataset-item {
+        min-width: 100px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.5rem;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .dataset-item img {
+        width: 100%;
+        height: 80px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #f1f5f9;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-generate {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-generate:hover {
+        background: #059669;
+    }
 </style>
 {% endblock %}
 
@@ -87,39 +151,263 @@
         <p>Kelas: <strong>{{ kelas.nama_kelas }}</strong></p>
     </div>
 
-    <form action="/guru/latihan/buat/{{ kelas.id }}" method="POST">
-        <div class="form-group">
-            <label for="judul">Judul Latihan</label>
-            <input type="text" id="judul" name="judul" class="form-control" placeholder="Contoh: Latihan Menulis Kata 'Ibu'" required>
-        </div>
-
-        <div class="grid-2">
-            <div class="form-group">
-                <label for="tipe_soal">Tipe Latihan</label>
-                <select id="tipe_soal" name="tipe_soal" class="form-control">
-                    <option value="essay">Essay / Menulis</option>
-                    <option value="pilihan_ganda">Pilihan Ganda</option>
-                    <option value="isian">Isian Singkat</option>
-                </select>
+    <form action="/guru/latihan/buat/{{ kelas.id }}" method="POST" id="form-buat-latihan">
+        <!-- PENGATURAN DASAR -->
+        <div class="dataset-section">
+            <div class="dataset-header">
+                <h3>Informasi Dasar</h3>
             </div>
             <div class="form-group">
-                <label for="tingkat_kesulitan">Tingkat Kesulitan</label>
-                <select id="tingkat_kesulitan" name="tingkat_kesulitan" class="form-control">
-                    <option value="mudah">Mudah</option>
-                    <option value="sedang">Sedang</option>
-                    <option value="sulit">Sulit</option>
+                <label for="judul">Judul Latihan</label>
+                <input type="text" id="judul" name="judul" class="form-control" placeholder="Contoh: Latihan Menulis Huruf" required>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="tipe_soal">Tipe Latihan</label>
+                    <select id="tipe_soal" name="tipe_soal" class="form-control">
+                        <option value="handwriting_huruf">Handwriting Huruf</option>
+                        <option value="handwriting_kata">Handwriting Kata</option>
+                        <option value="tebak_gambar">Tebak Gambar</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tingkat_kesulitan">Tingkat Kesulitan</label>
+                    <select id="tingkat_kesulitan" name="tingkat_kesulitan" class="form-control">
+                        <option value="mudah">Mudah</option>
+                        <option value="sedang">Sedang</option>
+                        <option value="sulit">Sulit</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pertanyaan">Instruksi Latihan</label>
+                <textarea id="pertanyaan" name="pertanyaan" class="form-control" placeholder="Tuliskan instruksi untuk siswa..." required></textarea>
+            </div>
+        </div>
+
+        <!-- METODE DAN DATASET -->
+        <div class="dataset-section">
+            <div class="dataset-header">
+                <h3>Sumber Soal</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="metode_pembuatan">Metode Pembuatan</label>
+                <select id="metode_pembuatan" name="metode_pembuatan" class="form-control" onchange="toggleMetode()">
+                    <option value="manual">Pilih Manual (Dari Dataset)</option>
+                    <option value="random">Generate Random Otomatis</option>
+                </select>
+            </div>
+
+            <!-- Bagian Random -->
+            <div id="section-random" style="display: none;" class="grid-2">
+                <div class="form-group">
+                    <label for="dataset_type">Jenis Dataset</label>
+                    <select id="dataset_type" name="dataset_type" class="form-control">
+                        <option value="huruf">Huruf (A-Z)</option>
+                        <option value="kata">Kata</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="jumlah_soal">Jumlah Soal</label>
+                    <input type="number" id="jumlah_soal" name="jumlah_soal" class="form-control" value="5" min="1" max="26">
+                </div>
+            </div>
+
+            <!-- Bagian Manual -->
+            <div id="section-manual">
+                <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 1rem;">Pilih soal yang ingin dimasukkan dari dataset di bawah ini:</p>
+                <div style="margin-bottom: 1rem;">
+                    <button type="button" class="btn-generate" onclick="switchTab('huruf')" id="tab-huruf" style="background:#6366f1; padding:0.5rem 1rem;">Dataset Huruf</button>
+                    <button type="button" class="btn-generate" onclick="switchTab('kata')" id="tab-kata" style="background:#e2e8f0; color:#333; padding:0.5rem 1rem;">Dataset Kata</button>
+                </div>
+                
+                <input type="hidden" name="dataset_manual" id="dataset_manual" value="[]">
+                
+                <div id="grid-huruf" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
+                    {% for item in dataset_huruf %}
+                    <div class="dataset-item manual-item" onclick="toggleSelection(this, '{{ item.id }}', '{{ item.label }}', '{{ item.image }}')" style="cursor:pointer; border: 2px solid transparent;">
+                        <img src="{{ item.image }}" alt="{{ item.label }}">
+                        <div style="font-size: 0.75rem; font-weight: 700;">{{ item.label }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div id="grid-kata" style="display: none; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
+                    {% for item in dataset_kata %}
+                    <div class="dataset-item manual-item" onclick="toggleSelection(this, '{{ item.id }}', '{{ item.label }}', '{{ item.image }}')" style="cursor:pointer; border: 2px solid transparent;">
+                        <img src="{{ item.image }}" alt="{{ item.label }}">
+                        <div style="font-size: 0.75rem; font-weight: 700;">{{ item.label }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.875rem; font-weight: 600; color: #6366f1;">
+                    Terpilih: <span id="count-terpilih">0</span> soal
+                </div>
+            </div>
+        </div>
+
+        <!-- PENGATURAN WAKTU & STATUS -->
+        <div class="dataset-section">
+            <div class="dataset-header">
+                <h3>Pengaturan Pelaksanaan</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="mode_timer">Mode Timer</label>
+                <select id="mode_timer" name="mode_timer" class="form-control" onchange="toggleTimerMode()">
+                    <option value="total">Timer Total Latihan</option>
+                    <option value="per_soal">Timer Per Soal</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="durasi-total-group">
+                <label for="durasi_menit">Durasi Pengerjaan Total (Menit)</label>
+                <input type="number" id="durasi_menit" name="durasi_menit" class="form-control" value="0" min="0" placeholder="0 = tanpa batas waktu">
+                <small style="color: #64748b;">Isi 0 jika tidak ada batas waktu saat mengerjakan.</small>
+            </div>
+
+            <div class="form-group" id="durasi-soal-group" style="display: none;">
+                <label for="durasi_per_soal">Durasi Per Soal (Detik)</label>
+                <input type="number" id="durasi_per_soal" name="durasi_per_soal" class="form-control" value="30" min="5">
+                <small style="color: #64748b;">Siswa harus mengerjakan tiap soal dalam waktu ini sebelum otomatis dilewati.</small>
+            </div>
+
+            <!-- Retry Settings -->
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="izinkan_retry">Izinkan Coba Lagi (Retry)</label>
+                    <select id="izinkan_retry" name="izinkan_retry" class="form-control" onchange="toggleRetry()">
+                        <option value="tidak">Tidak</option>
+                        <option value="ya">Ya</option>
+                    </select>
+                </div>
+                <div class="form-group" id="max-attempt-group" style="display: none;">
+                    <label for="max_attempt">Batas Maksimal Percobaan</label>
+                    <select id="max_attempt" name="max_attempt" class="form-control">
+                        <option value="1">1x</option>
+                        <option value="3">3x</option>
+                        <option value="-1">Unlimited (Tanpa Batas)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Result Visibility Setting -->
+            <div class="form-group">
+                <label for="izinkan_lihat_hasil">Izinkan Siswa Melihat Hasil Jawaban</label>
+                <select id="izinkan_lihat_hasil" name="izinkan_lihat_hasil" class="form-control">
+                    <option value="ya">Ya (Siswa bisa melihat detail jawaban benar/salah dan nilai)</option>
+                    <option value="tidak">Tidak (Hanya melihat status selesai)</option>
+                </select>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="waktu_mulai">Waktu Mulai (Opsional)</label>
+                    <input type="datetime-local" id="waktu_mulai" name="waktu_mulai" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="waktu_selesai">Waktu Selesai (Opsional)</label>
+                    <input type="datetime-local" id="waktu_selesai" name="waktu_selesai" class="form-control">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="status_latihan">Status Latihan</label>
+                <select id="status_latihan" name="status_latihan" class="form-control">
+                    <option value="draft">Draft (Disembunyikan dari siswa)</option>
+                    <option value="aktif">Aktif (Bisa dikerjakan siswa)</option>
+                    <option value="selesai">Selesai (Ditutup)</option>
                 </select>
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="pertanyaan">Instruksi / Pertanyaan</label>
-            <textarea id="pertanyaan" name="pertanyaan" class="form-control" placeholder="Tuliskan instruksi atau pertanyaan untuk siswa..." required></textarea>
-        </div>
-
-        <button type="submit" class="btn-submit">Simpan Latihan</button>
+        <button type="submit" class="btn-submit" onclick="return validateForm()">Simpan Latihan</button>
     </form>
 
     <a href="/guru/kelas/{{ kelas.id }}/detail" style="display: block; text-align: center; margin-top: 1.5rem; color: #64748b; text-decoration: none; font-size: 0.875rem; font-weight: 600;">← Batal</a>
 </div>
+
+<script>
+    let selectedItems = [];
+
+    function toggleTimerMode() {
+        const mode = document.getElementById('mode_timer').value;
+        if(mode === 'total') {
+            document.getElementById('durasi-total-group').style.display = 'block';
+            document.getElementById('durasi-soal-group').style.display = 'none';
+        } else {
+            document.getElementById('durasi-total-group').style.display = 'none';
+            document.getElementById('durasi-soal-group').style.display = 'block';
+        }
+    }
+
+    function toggleRetry() {
+        const retry = document.getElementById('izinkan_retry').value;
+        if(retry === 'ya') {
+            document.getElementById('max-attempt-group').style.display = 'block';
+        } else {
+            document.getElementById('max-attempt-group').style.display = 'none';
+        }
+    }
+
+    function toggleMetode() {
+        const metode = document.getElementById('metode_pembuatan').value;
+        if(metode === 'random') {
+            document.getElementById('section-random').style.display = 'grid';
+            document.getElementById('section-manual').style.display = 'none';
+        } else {
+            document.getElementById('section-random').style.display = 'none';
+            document.getElementById('section-manual').style.display = 'block';
+        }
+    }
+
+    function switchTab(tipe) {
+        if(tipe === 'huruf') {
+            document.getElementById('grid-huruf').style.display = 'grid';
+            document.getElementById('grid-kata').style.display = 'none';
+            document.getElementById('tab-huruf').style.background = '#6366f1';
+            document.getElementById('tab-huruf').style.color = 'white';
+            document.getElementById('tab-kata').style.background = '#e2e8f0';
+            document.getElementById('tab-kata').style.color = '#333';
+        } else {
+            document.getElementById('grid-huruf').style.display = 'none';
+            document.getElementById('grid-kata').style.display = 'grid';
+            document.getElementById('tab-kata').style.background = '#6366f1';
+            document.getElementById('tab-kata').style.color = 'white';
+            document.getElementById('tab-huruf').style.background = '#e2e8f0';
+            document.getElementById('tab-huruf').style.color = '#333';
+        }
+    }
+
+    function toggleSelection(element, id, label, image) {
+        const index = selectedItems.findIndex(item => item.id === id);
+        
+        if (index > -1) {
+            // Remove
+            selectedItems.splice(index, 1);
+            element.style.borderColor = 'transparent';
+            element.style.background = 'white';
+        } else {
+            // Add
+            selectedItems.push({ id, label, image });
+            element.style.borderColor = '#6366f1';
+            element.style.background = '#eef2ff';
+        }
+        
+        document.getElementById('count-terpilih').textContent = selectedItems.length;
+        document.getElementById('dataset_manual').value = JSON.stringify(selectedItems);
+    }
+
+    function validateForm() {
+        const metode = document.getElementById('metode_pembuatan').value;
+        if(metode === 'manual' && selectedItems.length === 0) {
+            alert("Harap pilih minimal 1 soal dari dataset jika menggunakan metode manual.");
+            return false;
+        }
+        return true;
+    }
+</script>
 {% endblock %}

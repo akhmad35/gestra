@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}GESTRA - Riwayat Nilai{% endblock %}
+{% block title %}GESTRA - Riwayat Belajarku 📚{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -10,162 +10,441 @@
 
     .riwayat-page {
         min-height: calc(100vh - 65px);
-        padding: 18px 0 56px;
-        background: var(--gray-50);
+        padding: 24px 0 64px;
+        background: #F8FAFC;
     }
 
     .riwayat-container {
         width: min(100%, 1120px);
         margin: 0 auto;
-        padding: 0 32px;
+        padding: 0 24px;
     }
 
-    .riwayat-back-shell {
-        padding: 0 32px;
-        margin-bottom: 22px;
+    /* ── Navigation Toolbar ── */
+    .nav-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
     }
 
     .riwayat-back-btn {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         width: fit-content;
-        min-height: 32px;
-        padding: 6px 10px;
-        border-radius: 8px;
-        color: var(--gray-500);
-        background: transparent;
-        border: 1px solid transparent;
-        font-size: 0.82rem;
+        min-height: 38px;
+        padding: 8px 18px;
+        border-radius: 50px;
+        color: #475569;
+        background: white;
+        border: 1.5px solid #E2E8F0;
+        font-size: 0.88rem;
         font-weight: 800;
-        line-height: 1;
-        transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        cursor: pointer;
+        user-select: none;
     }
 
     .riwayat-back-btn svg {
-        width: 14px;
-        height: 14px;
-        flex: 0 0 auto;
-        stroke-width: 2.7;
+        width: 16px;
+        height: 16px;
+        stroke-width: 3;
     }
 
-    .riwayat-back-btn:hover,
-    .riwayat-back-btn:focus-visible {
-        background: var(--white);
-        border-color: var(--gray-200);
-        color: var(--blue-600);
-        outline: none;
+    .riwayat-back-btn:hover {
+        background: #F1F5F9;
+        color: #3B82F6;
+        border-color: #CBD5E1;
+        transform: translateX(-3px);
     }
 
-    .riwayat-header {
-        margin: 24px 0 28px;
+    /* Breadcrumbs */
+    .breadcrumbs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #64748B;
+        flex-wrap: wrap;
     }
 
-    .riwayat-header h1 {
+    .breadcrumb-item {
+        cursor: pointer;
+        transition: color 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .breadcrumb-item:hover {
+        color: #3B82F6;
+    }
+
+    .breadcrumb-separator {
+        color: #94A3B8;
+        font-weight: 800;
+    }
+
+    .breadcrumb-active {
+        color: #1E293B;
+        cursor: default;
+    }
+
+    /* ── Header Card ── */
+    .header-banner {
+        background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+        border: 2px solid #C7D2FE;
+        border-radius: 28px;
+        padding: 2rem;
+        margin-bottom: 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    .header-banner::before {
+        content: '🌟';
+        position: absolute;
+        font-size: 8rem;
+        right: -20px;
+        bottom: -30px;
+        opacity: 0.15;
+        transform: rotate(-15deg);
+    }
+
+    .header-text h1 {
         margin: 0 0 8px;
-        color: var(--gray-900);
-        font-size: clamp(1.8rem, 3vw, 2.45rem);
+        color: #1E1B4B;
+        font-size: clamp(1.6rem, 3vw, 2.3rem);
         font-weight: 900;
-        line-height: 1.1;
+        letter-spacing: -0.5px;
     }
 
-    .riwayat-header p {
+    .header-text p {
         margin: 0;
-        color: var(--gray-500);
-        font-size: 1rem;
+        color: #4338CA;
+        font-size: 1.05rem;
         font-weight: 700;
-        line-height: 1.5;
     }
 
-    .riwayat-summary {
+    .header-decor {
+        font-size: 4rem;
+        animation: float-decor 3s infinite ease-in-out;
+    }
+
+    @keyframes float-decor {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    /* ── Single-Page Sections (Views) ── */
+    .view-section {
+        display: none;
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .view-section.active {
+        display: block;
+    }
+
+    .view-section.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* ── Overall Learning Dashboard (Top of Level 0) ── */
+    .overall-dashboard {
+        margin-bottom: 32px;
+        background: white;
+        border: 2px solid #E2E8F0;
+        border-radius: 28px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+    }
+
+    .overall-stats-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 16px;
-        margin-bottom: 22px;
+        margin-bottom: 24px;
     }
 
-    .summary-card {
+    .overall-stat-card {
         display: flex;
         align-items: center;
         gap: 14px;
-        min-width: 0;
-        padding: 18px;
-        background: var(--white);
-        border: 1px solid var(--gray-200);
-        border-radius: 16px;
-        box-shadow: var(--shadow-sm);
+        padding: 16px;
+        background: #F8FAFC;
+        border: 1.5px solid #E2E8F0;
+        border-radius: 20px;
+        transition: transform 0.2s ease;
     }
 
-    .summary-icon {
+    .overall-stat-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .overall-stat-icon {
+        font-size: 1.8rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        flex: 0 0 auto;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
     }
 
-    .summary-icon svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    .summary-label {
-        display: block;
-        color: var(--gray-500);
-        font-size: 0.82rem;
-        font-weight: 800;
-        line-height: 1.2;
-    }
-
-    .summary-value {
-        display: block;
-        margin-top: 3px;
-        color: var(--gray-900);
-        font-size: 1.65rem;
-        font-weight: 900;
-        line-height: 1;
-    }
-
-    .riwayat-toolbar {
+    .overall-stat-info {
         display: flex;
-        justify-content: flex-end;
-        margin-bottom: 18px;
+        flex-direction: column;
     }
 
-    .filter-group {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        max-width: 100%;
-        padding: 4px;
-        background: var(--white);
-        border: 1px solid var(--gray-200);
-        border-radius: 12px;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .filter-btn {
-        min-height: 32px;
-        padding: 7px 13px;
-        border-radius: 9px;
-        background: transparent;
-        color: var(--gray-500);
-        font-size: 0.82rem;
+    .overall-stat-label {
+        font-size: 0.78rem;
         font-weight: 800;
-        white-space: nowrap;
-        transition: background 0.18s ease, color 0.18s ease;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
     }
 
-    .filter-btn.active,
-    .filter-btn:hover,
-    .filter-btn:focus-visible {
-        background: var(--blue-600);
-        color: var(--white);
-        outline: none;
+    .overall-stat-value {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #1E293B;
+        line-height: 1.1;
     }
 
+    .dashboard-interactive-row {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 24px;
+    }
+
+    /* Progress Belajarku Column */
+    .learning-progress-column {
+        background: #EEF2FF;
+        border: 2px solid #C7D2FE;
+        border-radius: 22px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .progress-column-header {
+        margin-bottom: 14px;
+    }
+
+    .progress-column-header h3 {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+        font-weight: 900;
+        color: #1E1B4B;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .progress-column-header p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #4338CA;
+        font-weight: 700;
+    }
+
+    .progress-gauge-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .progress-bar-label-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.88rem;
+        font-weight: 800;
+        color: #312E81;
+    }
+
+    .progress-bar-track {
+        height: 16px;
+        background: #E0E7FF;
+        border-radius: 99px;
+        overflow: hidden;
+        border: 1px solid #C7D2FE;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4F46E5, #10B981);
+        border-radius: 99px;
+        width: 0%;
+        transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .encouraging-text {
+        font-size: 0.9rem;
+        color: #312E81;
+        font-weight: 700;
+        line-height: 1.4;
+        margin: 0;
+        background: white;
+        padding: 10px 14px;
+        border-radius: 14px;
+        border: 1px solid #C7D2FE;
+    }
+
+    /* Overall Line Chart Column */
+    .learning-chart-column {
+        background: white;
+        border: 2px solid #E2E8F0;
+        border-radius: 22px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chart-column-header {
+        margin-bottom: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chart-column-header h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 900;
+        color: #1E293B;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .overall-chart-container {
+        width: 100%;
+        height: 130px;
+    }
+
+    /* ── Category Cards Grid (Main Menu) ── */
+    .category-title-section {
+        margin-bottom: 16px;
+        color: #1E293B;
+        font-size: 1.25rem;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 28px;
+    }
+
+    .category-card {
+        background: white;
+        border: 3px solid #E2E8F0;
+        border-radius: 28px;
+        padding: 36px 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .category-card:hover {
+        transform: translateY(-8px);
+        border-color: #93C5FD;
+        box-shadow: 0 15px 30px -5px rgba(59, 130, 246, 0.12);
+    }
+
+    .category-card .card-icon {
+        font-size: 4rem;
+        animation: float-icon 3s infinite ease-in-out;
+    }
+
+    @keyframes float-icon {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-8px) scale(1.05); }
+    }
+
+    .category-card h3 {
+        margin: 0;
+        font-size: 1.45rem;
+        font-weight: 900;
+        color: #1E293B;
+    }
+
+    .category-card p {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #64748B;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    /* ── Sub-Category Cards Grid (Menulis & Quiz) ── */
+    .subcategory-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        max-width: 760px;
+        margin: 0 auto 28px;
+    }
+
+    /* ── Dynamic Progress Chart ── */
+    .chart-section {
+        background: white;
+        border: 2px solid #E2E8F0;
+        border-radius: 24px;
+        padding: 24px;
+        margin-bottom: 28px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .chart-header h3 {
+        margin: 0;
+        color: #1E293B;
+        font-size: 1.25rem;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chart-container {
+        width: 100%;
+        height: 180px;
+        position: relative;
+    }
+
+    /* ── History Cards List ── */
     .history-list {
         display: grid;
         grid-template-columns: 1fr;
@@ -175,267 +454,541 @@
     .history-card {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
-        gap: 18px;
-        padding: 20px;
-        background: var(--white);
-        border: 1px solid var(--gray-200);
-        border-radius: 18px;
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        gap: 20px;
+        padding: 22px;
+        background: white;
+        border: 2px solid #E2E8F0;
+        border-radius: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        position: relative;
+        overflow: hidden;
     }
 
     .history-card:hover {
-        transform: translateY(-2px);
-        border-color: var(--blue-200);
-        box-shadow: var(--shadow-md);
+        transform: translateY(-3px);
+        border-color: #93C5FD;
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.08);
     }
+
+    .history-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+    }
+
+    .history-card.type-latihan::before { background: #3B82F6; }
+    .history-card.type-quiz-random::before { background: #10B981; }
+    .history-card.type-speed-quiz::before { background: #F59E0B; }
 
     .history-main {
         min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
     .history-title-row {
         display: flex;
         align-items: center;
-        gap: 10px;
-        min-width: 0;
-        margin-bottom: 10px;
+        gap: 12px;
+        margin-bottom: 8px;
     }
 
-    .history-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 38px;
-        height: 38px;
-        border-radius: 12px;
-        background: var(--blue-50);
-        color: var(--blue-600);
-        flex: 0 0 auto;
+    .history-badge {
+        font-size: 0.75rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 50px;
+        text-transform: uppercase;
     }
 
-    .history-icon svg {
-        width: 20px;
-        height: 20px;
-    }
+    .badge-latihan { background: #DBEAFE; color: #1E40AF; }
+    .badge-quiz-random { background: #D1FAE5; color: #065F46; }
+    .badge-speed-quiz { background: #FEF3C7; color: #92400E; }
 
     .history-title {
-        min-width: 0;
-        color: var(--gray-900);
-        font-size: 1.08rem;
+        color: #1E293B;
+        font-size: 1.2rem;
         font-weight: 900;
-        line-height: 1.25;
-        overflow-wrap: anywhere;
+        margin: 0;
     }
 
     .history-meta {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px 14px;
-        margin: 0 0 14px 48px;
-        color: var(--gray-500);
-        font-size: 0.84rem;
+        gap: 16px;
+        color: #64748B;
+        font-size: 0.88rem;
         font-weight: 700;
     }
 
     .history-meta span {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
     }
 
     .history-meta svg {
-        width: 14px;
-        height: 14px;
-        flex: 0 0 auto;
-    }
-
-    .progress-track {
-        height: 8px;
-        margin-left: 48px;
-        overflow: hidden;
-        background: var(--gray-100);
-        border-radius: 999px;
-    }
-
-    .progress-fill {
-        display: block;
-        height: 100%;
-        border-radius: inherit;
+        width: 16px;
+        height: 16px;
+        color: #94A3B8;
     }
 
     .score-panel {
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 14px;
-        min-width: 118px;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .score-box {
+        text-align: center;
+        background: #F8FAFC;
+        border: 2px solid #F1F5F9;
+        border-radius: 16px;
+        padding: 10px 16px;
+        min-width: 80px;
     }
 
     .score-value {
-        color: var(--gray-900);
-        font-size: 2.2rem;
+        display: block;
+        color: #1E293B;
+        font-size: 1.8rem;
         font-weight: 900;
         line-height: 1;
-        letter-spacing: 0;
     }
 
     .score-label {
-        display: block;
-        margin-top: 3px;
-        color: var(--gray-400);
-        font-size: 0.72rem;
-        font-weight: 900;
-        letter-spacing: 0;
-        text-align: right;
+        color: #64748B;
+        font-size: 0.7rem;
+        font-weight: 800;
         text-transform: uppercase;
+        margin-top: 4px;
     }
 
-    .status-badge {
+    .btn-detail {
+        background: #F1F5F9;
+        color: #475569;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 14px;
+        font-size: 0.9rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s ease;
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 7px 10px;
-        border-radius: 999px;
-        font-size: 0.78rem;
-        font-weight: 900;
-        white-space: nowrap;
     }
 
-    .status-badge svg {
-        width: 13px;
-        height: 13px;
-        flex: 0 0 auto;
+    .btn-detail:hover {
+        background: #3B82F6;
+        color: white;
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
     }
 
-    .status-badge.pass {
-        background: #dcfce7;
-        color: #15803d;
-    }
-
-    .status-badge.fail {
-        background: #ffedd5;
-        color: #c2410c;
-    }
-
+    /* ── Empty State ── */
     .empty-state {
-        display: grid;
-        place-items: center;
-        min-height: 320px;
-        padding: 40px 24px;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         text-align: center;
-        background: var(--white);
-        border: 1.5px dashed var(--gray-200);
-        border-radius: 18px;
-        box-shadow: var(--shadow-sm);
+        padding: 4.5rem 2rem;
+        background: white;
+        border: 3px dashed #CBD5E1;
+        border-radius: 28px;
+        width: 100%;
     }
 
-    .empty-state img {
-        width: 128px;
-        margin: 0 auto 18px;
-        opacity: 0.55;
-        filter: grayscale(1);
+    .empty-emoji {
+        font-size: 5rem;
+        margin-bottom: 1.5rem;
+        animation: empty-pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes empty-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
     }
 
     .empty-state h2 {
-        margin: 0 0 8px;
-        color: var(--gray-900);
-        font-size: 1.35rem;
+        color: #1E293B;
+        font-size: 1.6rem;
         font-weight: 900;
+        margin: 0 0 10px;
     }
 
     .empty-state p {
-        margin: 0 0 22px;
-        color: var(--gray-500);
-        font-size: 0.95rem;
+        color: #64748B;
+        font-size: 1.05rem;
         font-weight: 700;
+        max-width: 420px;
+        margin: 0 0 24px;
         line-height: 1.5;
     }
 
-    @media (max-width: 820px) {
-        .riwayat-page {
-            padding-top: 14px;
+    .empty-btn {
+        background: #3B82F6;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s ease;
+    }
+
+    .empty-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+
+    /* ── Modal Detail Redesign ── */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        padding: 16px;
+    }
+
+    .modal-box {
+        background: white;
+        border-radius: 28px;
+        max-width: 620px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        transform: scale(0.9);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 2px solid #E2E8F0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header {
+        padding: 24px;
+        border-bottom: 2px solid #F1F5F9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #F8FAFC;
+        border-radius: 26px 26px 0 0;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 900;
+        color: #1E293B;
+    }
+
+    .btn-close-modal {
+        background: #E2E8F0;
+        border: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #475569;
+        font-weight: 800;
+        transition: all 0.2s ease;
+    }
+
+    .btn-close-modal:hover {
+        background: #CBD5E1;
+        color: #1E293B;
+        transform: scale(1.05);
+    }
+
+    .modal-body {
+        padding: 24px;
+        overflow-y: auto;
+    }
+
+    /* Modal Banner Summary */
+    .modal-summary-banner {
+        background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+        border: 2px solid #C7D2FE;
+        border-radius: 22px;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .modal-summary-score-shell {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .modal-summary-score-box {
+        background: white;
+        border: 2.5px solid #C7D2FE;
+        border-radius: 50%;
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #4F46E5;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+
+    .modal-summary-text h4 {
+        margin: 0 0 3px;
+        font-size: 1.18rem;
+        font-weight: 900;
+        color: #1E1B4B;
+    }
+
+    .modal-summary-text p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #4338CA;
+        font-weight: 700;
+    }
+
+    /* Modal Progress Segmented Bar */
+    .modal-progress-section {
+        margin-bottom: 24px;
+    }
+
+    .modal-progress-label-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #64748B;
+        margin-bottom: 6px;
+    }
+
+    .modal-progress-segmented-track {
+        height: 12px;
+        border-radius: 99px;
+        background: #F1F5F9;
+        overflow: hidden;
+        display: flex;
+    }
+
+    .modal-progress-correct-fill {
+        height: 100%;
+        background: #10B981;
+    }
+
+    .modal-progress-incorrect-fill {
+        height: 100%;
+        background: #EF4444;
+    }
+
+    /* Detail Accordion Question Cards */
+    .modal-questions-title {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: #1E293B;
+        margin: 0 0 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .detail-question-card {
+        border-radius: 20px;
+        padding: 16px 20px;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition: transform 0.2s ease;
+    }
+
+    .detail-question-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .detail-question-card.status-correct {
+        background: #F0FDF4;
+        border: 2px solid #BBF7D0;
+    }
+
+    .detail-question-card.status-incorrect {
+        background: #FEF2F2;
+        border: 2px solid #FCA5A5;
+    }
+
+    .detail-question-card.status-locked {
+        background: #F8FAFC;
+        border: 2px solid #E2E8F0;
+    }
+
+    .question-card-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed rgba(0,0,0,0.06);
+    }
+
+    .question-number-badge {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 0.82rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .detail-question-card.status-correct .question-number-badge { color: #15803D; border: 1.5px solid #BBF7D0; }
+    .detail-question-card.status-incorrect .question-number-badge { color: #B91C1C; border: 1.5px solid #FCA5A5; }
+    .detail-question-card.status-locked .question-number-badge { color: #475569; border: 1.5px solid #CBD5E1; }
+
+    .question-status-pill {
+        font-size: 0.75rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 50px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .detail-question-card.status-correct .question-status-pill { background: #D1FAE5; color: #065F46; }
+    .detail-question-card.status-incorrect .question-status-pill { background: #FEE2E2; color: #991B1B; }
+    .detail-question-card.status-locked .question-status-pill { background: #E2E8F0; color: #334155; }
+
+    .question-card-content {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        text-align: center;
+    }
+
+    .question-data-box {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .question-data-label {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .question-data-value {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #1E293B;
+    }
+
+    .detail-question-card.status-correct .question-data-value { color: #1E293B; }
+    .detail-question-card.status-incorrect .question-data-value.val-student { color: #EF4444; }
+    .detail-question-card.status-incorrect .question-data-value.val-key { color: #10B981; }
+
+    .question-locked-message-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
+        text-align: center;
+        gap: 8px;
+    }
+
+    .question-locked-icon {
+        font-size: 2.5rem;
+    }
+
+    .question-locked-title {
+        font-size: 1rem;
+        font-weight: 900;
+        color: #334155;
+        margin: 0;
+    }
+
+    .question-locked-desc {
+        font-size: 0.85rem;
+        color: #64748B;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* ── Responsive Grid ── */
+    @media (max-width: 920px) {
+        .overall-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
 
-        .riwayat-container {
-            padding: 0 18px;
-        }
-
-        .riwayat-back-shell {
-            padding: 0 18px;
-            margin-bottom: 20px;
-        }
-
-        .riwayat-header {
-            margin-top: 0;
-        }
-
-        .riwayat-summary {
+        .dashboard-interactive-row {
             grid-template-columns: 1fr;
-            gap: 12px;
+            gap: 16px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .category-grid,
+        .subcategory-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
 
-        .summary-card {
-            padding: 15px;
-        }
-
-        .riwayat-toolbar {
-            justify-content: flex-start;
-            overflow-x: auto;
-            padding-bottom: 2px;
-        }
-
-        .filter-group {
-            flex-wrap: nowrap;
+        .overall-stats-grid {
+            grid-template-columns: 1fr;
         }
 
         .history-card {
             grid-template-columns: 1fr;
-            gap: 16px;
-            padding: 16px;
-        }
-
-        .history-meta,
-        .progress-track {
-            margin-left: 0;
+            padding: 18px;
         }
 
         .score-panel {
-            flex-direction: row;
-            align-items: center;
-            min-width: 0;
             width: 100%;
+            justify-content: space-between;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1.5px solid #F1F5F9;
         }
 
-        .score-label {
-            text-align: left;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .riwayat-container {
-            padding: 0 14px;
+        .header-banner {
+            flex-direction: column;
+            text-align: center;
+            gap: 16px;
+            padding: 1.5rem;
         }
 
-        .riwayat-back-shell {
-            padding: 0 14px;
-        }
-
-        .riwayat-header h1 {
-            font-size: 1.7rem;
-        }
-
-        .riwayat-header p {
-            font-size: 0.92rem;
-        }
-
-        .history-title-row {
-            align-items: flex-start;
-        }
-
-        .score-value {
-            font-size: 1.9rem;
+        .header-banner::before {
+            display: none;
         }
     }
 </style>
@@ -443,191 +996,988 @@
 
 {% block content %}
 <div class="riwayat-page">
-    <div class="riwayat-back-shell">
-        <a href="/murid/dashboard"
-           class="riwayat-back-btn"
-           id="riwayat-back"
-           title="Kembali ke halaman sebelumnya">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M19 12H5"></path>
-                <path d="M12 19l-7-7 7-7"></path>
-            </svg>
-            <span>Kembali</span>
-        </a>
-    </div>
-
     <div class="riwayat-container">
-        <header class="riwayat-header">
-            <h1>Riwayat Nilai</h1>
-            <p>Daftar quiz dan latihan yang sudah dikerjakan</p>
+        
+        <!-- Navigation Toolbar -->
+        <nav class="nav-toolbar">
+            <div class="riwayat-back-btn" onclick="goBack()" title="Kembali">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span id="back-btn-text">Kembali</span>
+            </div>
+
+            <!-- Breadcrumbs -->
+            <div class="breadcrumbs" id="riwayat-breadcrumbs">
+                <span class="breadcrumb-item" onclick="navigateToView('view-main')">🏠 Riwayat Belajarku</span>
+            </div>
+        </nav>
+
+        <!-- Dynamic Header Banner -->
+        <header class="header-banner">
+            <div class="header-text">
+                <h1 id="banner-title">Riwayat Belajarku 📚✨</h1>
+                <p id="banner-subtitle">Pilih kategori belajar di bawah ini untuk melihat perkembangan belajarmu!</p>
+            </div>
+            <div class="header-decor" id="banner-emoji">🚀</div>
         </header>
 
-        <section class="riwayat-summary" aria-label="Ringkasan nilai">
-            <article class="summary-card">
-                <span class="summary-icon" style="background: #e0f2fe; color: #0369a1;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M12 20h9"></path>
-                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-                    </svg>
-                </span>
-                <span>
-                    <span class="summary-label">Total Quiz</span>
-                    <span class="summary-value">{{ stats.total_kuis }}</span>
-                </span>
-            </article>
+        <!-- ================= SECTION 0: LEVEL MAIN (PILIHAN UTAMA) ================= -->
+        <section class="view-section active show" id="view-main">
+            
+            <!-- Overall Student Scoreboard & Charts Section at the Top of Landing View -->
+            <div class="overall-dashboard">
+                
+                <!-- 4 Ceria Stats Cards -->
+                <div class="overall-stats-grid">
+                    <div class="overall-stat-card">
+                        <span class="overall-stat-icon" style="background: #FFF7ED;">🏆</span>
+                        <div class="overall-stat-info">
+                            <span class="overall-stat-label">Rata-rata Nilai</span>
+                            <span class="overall-stat-value" id="overall-nilai-avg">0</span>
+                        </div>
+                    </div>
 
-            <article class="summary-card">
-                <span class="summary-icon" style="background: #fef9c3; color: #a16207;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M3 3v18h18"></path>
-                        <path d="m7 14 3-3 4 4 5-7"></path>
-                    </svg>
-                </span>
-                <span>
-                    <span class="summary-label">Rata-rata Nilai</span>
-                    <span class="summary-value">{{ stats.rata_rata }}</span>
-                </span>
-            </article>
+                    <div class="overall-stat-card">
+                        <span class="overall-stat-icon" style="background: #EFF6FF;">✍️</span>
+                        <div class="overall-stat-info">
+                            <span class="overall-stat-label">Latihan Selesai</span>
+                            <span class="overall-stat-value" id="overall-latihan-count">0</span>
+                        </div>
+                    </div>
 
-            <article class="summary-card">
-                <span class="summary-icon" style="background: #dcfce7; color: #15803d;">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <path d="m9 11 3 3L22 4"></path>
-                    </svg>
-                </span>
-                <span>
-                    <span class="summary-label">Total Lulus</span>
-                    <span class="summary-value">{{ stats.total_lulus }}</span>
-                </span>
-            </article>
+                    <div class="overall-stat-card">
+                        <span class="overall-stat-icon" style="background: #ECFDF5;">🎲</span>
+                        <div class="overall-stat-info">
+                            <span class="overall-stat-label">Kuis Selesai</span>
+                            <span class="overall-stat-value" id="overall-kuis-count">0</span>
+                        </div>
+                    </div>
+
+                    <div class="overall-stat-card">
+                        <span class="overall-stat-icon" style="background: #FEF2F2;">🔥</span>
+                        <div class="overall-stat-info">
+                            <span class="overall-stat-label">Streak Latihan</span>
+                            <span class="overall-stat-value" id="overall-streak">0 Hari</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Progress Bar & Line Chart Stack Row -->
+                <div class="dashboard-interactive-row">
+                    
+                    <!-- Progress Belajarku Column -->
+                    <div class="learning-progress-column">
+                        <div class="progress-column-header">
+                            <h3>🎯 Hasil Akurasi Belajarku</h3>
+                            <p>Berapa banyak jawaban menulismu yang tepat?</p>
+                        </div>
+                        <div class="progress-gauge-container">
+                            <div class="progress-bar-label-row">
+                                <span id="progress-correct-soal-label">0 / 0 Soal Benar</span>
+                                <span id="progress-percent-label">0%</span>
+                            </div>
+                            <div class="progress-bar-track">
+                                <div class="progress-bar-fill" id="overall-progress-bar-fill"></div>
+                            </div>
+                        </div>
+                        <p class="encouraging-text" id="overall-progress-encouraging">
+                            Yuk asah kemampuan menulismu! Setiap coretan kuas di canvas membantumu menjadi bintang menulis! 🎨🚀
+                        </p>
+                    </div>
+
+                    <!-- Line Chart Column -->
+                    <div class="learning-chart-column">
+                        <div class="chart-column-header">
+                            <h3>📈 Grafik Kemajuan Belajarku</h3>
+                            <span style="color: #64748B; font-size: 0.85rem; font-weight: 700;">Tren Skor Keseluruhan</span>
+                        </div>
+                        <div class="overall-chart-container">
+                            <svg id="overall-progress-chart" width="100%" height="100%" style="overflow: visible;"></svg>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="category-title-section">
+                <span>📁 Pilihan Kategori Belajar:</span>
+            </div>
+
+            <div class="category-grid">
+                
+                <!-- LATIHAN MENULIS CARD -->
+                <div class="category-card" onclick="navigateToView('view-menulis-sub')">
+                    <div class="card-icon">✍️</div>
+                    <h3>Latihan Menulis</h3>
+                    <p>Lihat hasil latihan menulis huruf dan kata mandirimu.</p>
+                </div>
+
+                <!-- QUIZ CARD -->
+                <div class="category-card" onclick="navigateToView('view-quiz-sub')">
+                    <div class="card-icon">🎲</div>
+                    <h3>Quiz GESTRA</h3>
+                    <p>Lihat riwayat quiz acak dan speed quiz dengan timer.</p>
+                </div>
+
+                <!-- LATIHAN KELAS CARD -->
+                <div class="category-card" onclick="openList('kelas')">
+                    <div class="card-icon">🏫</div>
+                    <h3>Latihan Kelas</h3>
+                    <p>Lihat daftar dan nilai latihan dari gurumu di kelas.</p>
+                </div>
+
+            </div>
         </section>
 
-        <div class="riwayat-toolbar">
-            <div class="filter-group" role="group" aria-label="Saring hasil">
-                <button type="button" class="filter-btn active" onclick="filterResults('all', this)">Semua</button>
-                <button type="button" class="filter-btn" onclick="filterResults('pass', this)">Lulus</button>
-                <button type="button" class="filter-btn" onclick="filterResults('fail', this)">Belum Lulus</button>
-            </div>
-        </div>
+        <!-- ================= SECTION 1: LATIHAN MENULIS SUB-MENU ================= -->
+        <section class="view-section" id="view-menulis-sub">
+            <div class="subcategory-grid">
+                
+                <!-- HURUF CARD -->
+                <div class="category-card" onclick="openList('handwriting_huruf')">
+                    <div class="card-icon">🔤</div>
+                    <h3>Menulis Huruf</h3>
+                    <p>Riwayat pengerjaan latihan menulis satu huruf.</p>
+                </div>
 
-        <main>
-            {% if riwayat_list %}
-                <div class="history-list" id="history-list">
+                <!-- KATA CARD -->
+                <div class="category-card" onclick="openList('handwriting_kata')">
+                    <div class="card-icon">📖</div>
+                    <h3>Menulis Kata</h3>
+                    <p>Riwayat pengerjaan latihan menulis kata lengkap.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= SECTION 2: QUIZ SUB-MENU ================= -->
+        <section class="view-section" id="view-quiz-sub">
+            <div class="subcategory-grid">
+                
+                <!-- QUIZ RANDOM CARD -->
+                <div class="category-card" onclick="openList('quiz_random')">
+                    <div class="card-icon">✨</div>
+                    <h3>Quiz Random</h3>
+                    <p>Riwayat pengerjaan kuis acak 10 soal GESTRA.</p>
+                </div>
+
+                <!-- SPEED QUIZ CARD -->
+                <div class="category-card" onclick="openList('speed_quiz')">
+                    <div class="card-icon">⏱️</div>
+                    <h3>Speed Quiz</h3>
+                    <p>Riwayat kuis cepat menggunakan batasan timer.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================= SECTION 3: LIST DATA NILAI ================= -->
+        <section class="view-section" id="view-list">
+            
+            <!-- Dynamic Progress Chart -->
+            <div class="chart-section" id="chart-wrapper">
+                <div class="chart-header">
+                    <h3 id="chart-title">📈 Grafik Perkembangan Nilaimu</h3>
+                    <span style="color: #64748B; font-size: 0.85rem; font-weight: 700;">Tren 7 Latihan Terakhir</span>
+                </div>
+                <div class="chart-container">
+                    <svg id="perkembangan-chart" width="100%" height="100%" style="overflow: visible;"></svg>
+                </div>
+            </div>
+
+            <!-- List container -->
+            <div class="history-list" id="history-container">
+                
+                <!-- Jinja2 Latihan Kelas / Homework -->
+                {% if riwayat_list %}
                     {% for item in riwayat_list %}
-                        <article class="history-card" data-status="{{ 'pass' if item.nilai >= 70 else 'fail' }}">
+                        <article class="history-card type-latihan" 
+                                 data-timestamp="{{ item.dikumpulkan_pada.strftime('%Y-%m-%dT%H:%M:%S') }}"
+                                 data-category="{{ item.latihan.tipe_soal if item.latihan else 'handwriting_huruf' }}"
+                                 data-is-kelas="{{ 'true' if item.kelas_id else 'false' }}"
+                                 data-details-json='{
+                                     "judul": {{ (item.latihan.judul if item.latihan else "Latihan Menulis")|tojson }},
+                                     "tipe": "Latihan Menulis",
+                                     "target": {{ (item.latihan.pertanyaan if item.latihan else "")|tojson }},
+                                     "jawaban": {{ item.jawaban|tojson if item.jawaban else "" }},
+                                     "jawaban_kunci": {{ (item.latihan.jawaban_kunci if (item.latihan and item.latihan.jawaban_kunci) else (item.latihan.pertanyaan if item.latihan else ""))|tojson }},
+                                     "nilai": {{ item.nilai }},
+                                     "benar": {{ 'true' if item.benar else 'false' }},
+                                     "attempts": {{ item.attempts_count }},
+                                     "kelas": {{ (item.kelas.nama_kelas if item.kelas else "Latihan Umum")|tojson }},
+                                     "tanggal": "{{ item.dikumpulkan_pada.strftime('%d %b %Y, %H:%M') }}",
+                                     "izinkan_lihat_hasil": {{ 'true' if (item.latihan and item.latihan.izinkan_lihat_hasil) else 'true' }}
+                                 }'>
                             <div class="history-main">
                                 <div class="history-title-row">
-                                    <span class="history-icon">
-                                        {% if 'Huruf' in item.latihan.judul %}
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                <path d="M4 7V4h16v3"></path>
-                                                <path d="M9 20h6"></path>
-                                                <path d="M12 4v16"></path>
-                                            </svg>
-                                        {% elif 'Kata' in item.latihan.judul %}
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
-                                            </svg>
-                                        {% else %}
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01Z"></path>
-                                            </svg>
-                                        {% endif %}
-                                    </span>
-                                    <h2 class="history-title">{{ item.latihan.judul }}</h2>
+                                    <span class="history-badge badge-latihan">✍️ {{ 'Huruf' if (item.latihan and item.latihan.tipe_soal == 'handwriting_huruf') else 'Kata' }}</span>
+                                    <h2 class="history-title">{{ item.latihan.judul if item.latihan else 'Latihan Menulis' }}</h2>
                                 </div>
-
                                 <div class="history-meta">
-                                    <span>
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                                            <path d="M16 2v4"></path>
-                                            <path d="M8 2v4"></path>
-                                            <path d="M3 10h18"></path>
-                                        </svg>
-                                        {{ item.dikumpulkan_pada.strftime('%d %b %Y, %H:%M') }}
-                                    </span>
-                                    <span>{{ item.kelas.nama_kelas if item.kelas else 'Latihan Umum' }}</span>
-                                </div>
-
-                                <div class="progress-track" aria-label="Progress nilai {{ item.nilai }} persen">
-                                    <span class="progress-fill"
-                                          style="width: {{ item.nilai }}%; background: {{ '#10b981' if item.nilai >= 70 else '#f59e0b' if item.nilai >= 40 else '#ef4444' }};">
-                                    </span>
+                                    <span>📅 {{ item.dikumpulkan_pada.strftime('%d %b %Y, %H:%M') }}</span>
+                                    <span>🏫 {{ item.kelas.nama_kelas if item.kelas else 'Latihan Umum' }}</span>
+                                    <span>🔄 Percobaan ke-{{ item.attempts_count }}</span>
                                 </div>
                             </div>
-
                             <div class="score-panel">
-                                <div>
+                                <div class="score-box">
                                     <span class="score-value">{{ item.nilai }}</span>
                                     <span class="score-label">Nilai</span>
                                 </div>
-
-                                {% if item.nilai >= 70 %}
-                                    <span class="status-badge pass">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <path d="m20 6-11 11-5-5"></path>
-                                        </svg>
-                                        Lulus
-                                    </span>
-                                {% else %}
-                                    <span class="status-badge fail">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <path d="M18 6 6 18"></path>
-                                            <path d="m6 6 12 12"></path>
-                                        </svg>
-                                        Belum Lulus
-                                    </span>
-                                {% endif %}
+                                <button type="button" class="btn-detail" onclick="openDetailModal(this)">
+                                    Lihat Detail
+                                </button>
                             </div>
                         </article>
                     {% endfor %}
-                </div>
-            {% else %}
-                <section class="empty-state">
-                    <div>
-                        <img src="{{ url_for('static', path='assets/images/mascot.png') }}" alt="">
-                        <h2>Belum ada latihan yang dikerjakan</h2>
-                        <p>Mulai latihan dan lihat riwayat nilaimu di sini.</p>
-                        <a href="/murid/dashboard" class="btn-primary">Mulai belajar</a>
-                    </div>
-                </section>
-            {% endif %}
-        </main>
+                {% endif %}
+
+                <!-- Jinja2 Quiz Sessions -->
+                {% if quiz_sessions %}
+                    {% for session in quiz_sessions %}
+                        <article class="history-card type-{{ 'speed-quiz' if session.mode == 'timer' else 'quiz-random' }}" 
+                                 data-timestamp="{{ session.waktu_mulai.strftime('%Y-%m-%dT%H:%M:%S') }}"
+                                 data-category="{{ 'speed_quiz' if session.mode == 'timer' else 'quiz_random' }}"
+                                 data-is-kelas="false"
+                                 data-details-json='{
+                                     "judul": "{{ "Speed Quiz ⏱️" if session.mode == "timer" else "Quiz Random 🎲" }}",
+                                     "tipe": "{{ "Speed Quiz" if session.mode == "timer" else "Quiz Acak" }}",
+                                     "skor": {{ session.skor_akhir }},
+                                     "benar": {{ session.benar_count }},
+                                     "salah": {{ session.salah_count }},
+                                     "total": {{ session.total_soal }},
+                                     "durasi": {{ session.durasi_detik }},
+                                     "tanggal": "{{ session.waktu_mulai.strftime('%d %b %Y, %H:%M') }}",
+                                     "izinkan_lihat_hasil": true,
+                                     "questions": [
+                                         {% for d in session.details %}
+                                         {
+                                             "nomor": {{ d.nomor_soal }},
+                                             "target": {{ d.target_char|tojson }},
+                                             "prediction": {{ (d.prediction if d.prediction else "")|tojson }},
+                                             "confidence": {{ d.confidence }},
+                                             "correct": {{ 'true' if d.is_correct else 'false' }}
+                                         }{{ "," if not loop.last else "" }}
+                                         {% endfor %}
+                                     ]
+                                 }'>
+                            <div class="history-main">
+                                <div class="history-title-row">
+                                    <span class="history-badge badge-{{ 'speed-quiz' if session.mode == 'timer' else 'quiz-random' }}">
+                                        {{ '⏱️ Speed' if session.mode == 'timer' else '🎲 Acak' }}
+                                    </span>
+                                    <h2 class="history-title">Kuis GESTRA #{{ session.id }}</h2>
+                                </div>
+                                <div class="history-meta">
+                                    <span>📅 {{ session.waktu_mulai.strftime('%d %b %Y, %H:%M') }}</span>
+                                    <span>🎯 {{ session.benar_count }}/{{ session.total_soal }} Benar</span>
+                                    <span>⏱️ {{ session.durasi_detik }} Detik</span>
+                                </div>
+                            </div>
+                            <div class="score-panel">
+                                <div class="score-box">
+                                    <span class="score-value">{{ session.skor_akhir }}</span>
+                                    <span class="score-label">Skor</span>
+                                </div>
+                                <button type="button" class="btn-detail" onclick="openDetailModal(this)">
+                                    Lihat Detail
+                                </button>
+                            </div>
+                        </article>
+                    {% endfor %}
+                {% endif %}
+
+            </div>
+
+            <!-- Inside view-list: Cute Empty State -->
+            <div class="empty-state" id="empty-state">
+                <div class="empty-emoji">🚀✨</div>
+                <h2>Wah, belum ada riwayat pengerjaan!</h2>
+                <p id="empty-description">Yuk asah terus kemampuan menulis dan kuis belajarmu sekarang!</p>
+                <a href="/murid/dashboard" class="empty-btn">Mulai Belajar Sekarang! 🌟</a>
+            </div>
+
+        </section>
+
+    </div>
+</div>
+
+<!-- Section 5: Dynamic Detail Modal Dialog -->
+<div id="detail-modal" class="modal-overlay" onclick="closeDetailModalOnOuterClick(event)">
+    <div class="modal-box">
+        <header class="modal-header">
+            <h3 id="modal-title">Detail Hasil Latihan</h3>
+            <button class="btn-close-modal" onclick="closeDetailModal()">✕</button>
+        </header>
+        <div class="modal-body" id="modal-body-content">
+            <!-- Dynamic context -->
+        </div>
     </div>
 </div>
 
 <script>
-    (function () {
-        var back = document.getElementById('riwayat-back');
-        if (!back) return;
+    // Navigation State Tree
+    let activeView = 'view-main';
+    let activeLeafNode = ''; // 'handwriting_huruf', 'handwriting_kata', 'quiz_random', 'speed_quiz', 'kelas'
 
-        back.addEventListener('click', function (event) {
-            var referrer = document.referrer;
+    const viewMeta = {
+        'view-main': {
+            title: 'Riwayat Belajarku 📚✨',
+            subtitle: 'Pilih kategori belajar di bawah ini untuk melihat perkembangan belajarmu!',
+            emoji: '🚀'
+        },
+        'view-menulis-sub': {
+            title: 'Latihan Menulis ✍️🎨',
+            subtitle: 'Pilih tingkat latihan untuk melihat riwayat menulis mandirimu.',
+            emoji: '✏️'
+        },
+        'view-quiz-sub': {
+            title: 'Kuis GESTRA 🎲⭐',
+            subtitle: 'Lihat seluruh hasil kuis random dan speed kuis dengan timer.',
+            emoji: '🏆'
+        },
+        'view-list-handwriting_huruf': {
+            title: 'Menulis Huruf 🔤',
+            subtitle: 'Daftar riwayat menulis huruf mandiri yang telah kamu kerjakan.',
+            emoji: '🎨'
+        },
+        'view-list-handwriting_kata': {
+            title: 'Menulis Kata 📖',
+            subtitle: 'Daftar riwayat menulis kata mandiri yang telah kamu kerjakan.',
+            emoji: '📚'
+        },
+        'view-list-quiz_random': {
+            title: 'Quiz Random 🎲',
+            subtitle: 'Daftar riwayat kuis acak 10 soal untuk melatih daya ingat.',
+            emoji: '✨'
+        },
+        'view-list-speed_quiz': {
+            title: 'Speed Quiz ⏱️',
+            subtitle: 'Daftar riwayat kuis cepat dengan batasan waktu timer.',
+            emoji: '⚡'
+        },
+        'view-list-kelas': {
+            title: 'Latihan Kelas 🏫',
+            subtitle: 'Daftar riwayat tugas latihan yang diberikan oleh bapak/ibu gurumu.',
+            emoji: '🎒'
+        }
+    };
 
-            try {
-                if (referrer && new URL(referrer).origin === window.location.origin && window.history.length > 1) {
-                    event.preventDefault();
-                    window.history.back();
+    document.addEventListener('DOMContentLoaded', () => {
+        // Sort cards chronologically on load
+        sortCardsChronologically();
+
+        // Compute and plot overall student stats & weekly line charts
+        calculateOverallStats();
+    });
+
+    function sortCardsChronologically() {
+        const container = document.getElementById('history-container');
+        const cards = Array.from(container.children);
+        
+        cards.sort((a, b) => {
+            const timeA = new Date(a.getAttribute('data-timestamp'));
+            const timeB = new Date(b.getAttribute('data-timestamp'));
+            return timeB - timeA; // Descending (Newest first)
+        });
+
+        container.innerHTML = '';
+        cards.forEach(card => container.appendChild(card));
+    }
+
+    // --- Compute Overall Student Scoreboard ---
+    function calculateOverallStats() {
+        const container = document.getElementById('history-container');
+        const cards = Array.from(container.children);
+        
+        let totalLatihan = 0;
+        let totalKuis = 0;
+        let scoreSum = 0;
+        let scoreCount = 0;
+        let totalCorrectAnswers = 0;
+        let totalQuestionsAnswered = 0;
+        let uniqueDays = new Set();
+
+        cards.forEach(card => {
+            const dataStr = card.getAttribute('data-details-json');
+            if (!dataStr) return;
+            const data = JSON.parse(dataStr);
+
+            const timestamp = card.getAttribute('data-timestamp');
+            if (timestamp) {
+                uniqueDays.add(timestamp.split('T')[0]);
+            }
+
+            if (data.tipe.toLowerCase().includes('kuis') || data.tipe.toLowerCase().includes('acak')) {
+                totalKuis++;
+                scoreSum += data.skor || 0;
+                scoreCount++;
+
+                totalCorrectAnswers += data.benar || 0;
+                totalQuestionsAnswered += data.total || 0;
+            } else {
+                totalLatihan++;
+                scoreSum += data.nilai || 0;
+                scoreCount++;
+
+                totalQuestionsAnswered++;
+                if (data.benar) {
+                    totalCorrectAnswers++;
                 }
-            } catch (error) {
-                return;
             }
         });
-    })();
 
-    function filterResults(status, button) {
-        document.querySelectorAll('.filter-btn').forEach(function (item) {
-            item.classList.remove('active');
-        });
-        button.classList.add('active');
+        // Write Stat values
+        document.getElementById('overall-latihan-count').innerText = totalLatihan;
+        document.getElementById('overall-kuis-count').innerText = totalKuis;
+        
+        const avg = scoreCount > 0 ? Math.round(scoreSum / scoreCount) : 0;
+        document.getElementById('overall-nilai-avg').innerText = avg;
 
-        document.querySelectorAll('.history-card').forEach(function (card) {
-            var shouldShow = status === 'all' || card.dataset.status === status;
-            card.hidden = !shouldShow;
+        const streak = uniqueDays.size;
+        document.getElementById('overall-streak').innerText = streak + " Hari";
+
+        // Render Learning Accuracy Gauge
+        const progressPercent = totalQuestionsAnswered > 0 ? Math.round((totalCorrectAnswers / totalQuestionsAnswered) * 100) : 0;
+        document.getElementById('progress-correct-soal-label').innerText = `${totalCorrectAnswers} / ${totalQuestionsAnswered} Soal Benar`;
+        document.getElementById('progress-percent-label').innerText = `${progressPercent}%`;
+        
+        setTimeout(() => {
+            document.getElementById('overall-progress-bar-fill').style.width = `${progressPercent}%`;
+        }, 300);
+
+        // Child-friendly feedback based on progress percentage
+        const encouragingEl = document.getElementById('overall-progress-encouraging');
+        if (progressPercent >= 85) {
+            encouragingEl.innerHTML = `Luar biasa! Skor akurasimu mencapai <b>${progressPercent}%</b> 🌟 Kamu adalah juara menulis GESTRA! Tetap hebat ya! 🚀🏆`;
+        } else if (progressPercent >= 70) {
+            encouragingEl.innerHTML = `Hebat sekali! Skor akurasimu sudah <b>${progressPercent}%</b> ⭐ Teruskan coretan indahmu di canvas untuk mendapat nilai 100! 🎨✨`;
+        } else if (progressPercent > 0) {
+            encouragingEl.innerHTML = `Ayo semangat! Kamu sudah menyelesaikan banyak latihan. Yuk terus menggambar huruf dan kata agar kuasmu semakin jago! 💪❤️`;
+        } else {
+            encouragingEl.innerHTML = `Yuk mulai latihan pertamamu! Setiap coretan kuas di canvas membantumu mengumpulkan bintang menulis pertamamu! 🎨🌟`;
+        }
+
+        // Plot overall SVG progress line chart
+        plotOverallSVGChart(cards);
+    }
+
+    function plotOverallSVGChart(cards) {
+        // Last 7 scores chronologically (oldest first)
+        const sortedOldest = [...cards]
+            .map(card => {
+                const data = JSON.parse(card.getAttribute('data-details-json'));
+                const score = (data.nilai !== undefined) ? data.nilai : (data.skor || 0);
+                const date = new Date(card.getAttribute('data-timestamp'));
+                return { score, date };
+            })
+            .sort((a, b) => a.date - b.date)
+            .slice(-7);
+
+        const scores = sortedOldest.map(item => item.score);
+        const svg = document.getElementById('overall-progress-chart');
+
+        if (scores.length === 0) {
+            svg.innerHTML = `<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#94A3B8" font-size="12" font-weight="800">Yuk mulai latihan pertamamu untuk melihat grafik nilaimu! 📈🚀</text>`;
+            return;
+        }
+
+        const width = svg.clientWidth || 450;
+        const height = 120;
+        const padding = 22;
+        const maxVal = 100;
+
+        const points = scores.map((score, index) => {
+            const x = padding + (index * (width - 2 * padding) / Math.max(1, scores.length - 1));
+            const y = height - padding - (score * (height - 2 * padding) / maxVal);
+            return { x, y, score };
         });
+
+        let pathD = `M ${points[0].x} ${points[0].y}`;
+        for (let i = 1; i < points.length; i++) {
+            const cpX1 = points[i-1].x + (points[i].x - points[i-1].x) / 2;
+            const cpY1 = points[i-1].y;
+            const cpX2 = points[i-1].x + (points[i].x - points[i-1].x) / 2;
+            const cpY2 = points[i].y;
+            pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${points[i].x} ${points[i].y}`;
+        }
+
+        let svgContent = `
+            <defs>
+                <linearGradient id="overall-chart-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.25"/>
+                    <stop offset="100%" stop-color="#4F46E5" stop-opacity="0.0"/>
+                </linearGradient>
+                <linearGradient id="overall-line-grad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#4F46E5"/>
+                    <stop offset="100%" stop-color="#10B981"/>
+                </linearGradient>
+            </defs>
+            
+            <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#E2E8F0" stroke-width="1.5"/>
+            <line x1="${padding}" y1="${height - padding - (50 * (height - 2 * padding) / maxVal)}" x2="${width - padding}" y2="${height - padding - (50 * (height - 2 * padding) / maxVal)}" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="4"/>
+            <line x1="${padding}" y1="${height - padding - (100 * (height - 2 * padding) / maxVal)}" x2="${width - padding}" y2="${height - padding - (100 * (height - 2 * padding) / maxVal)}" stroke="#E2E8F0" stroke-width="1"/>
+            
+            <path d="${pathD} L ${points[points.length-1].x} ${height - padding} L ${points[0].x} ${height - padding} Z" fill="url(#overall-chart-grad)"/>
+            <path d="${pathD}" fill="none" stroke="url(#overall-line-grad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        `;
+
+        points.forEach((pt, idx) => {
+            svgContent += `
+                <g>
+                    <circle cx="${pt.x}" cy="${pt.y}" r="4" fill="#FFFFFF" stroke="#4F46E5" stroke-width="2.5"/>
+                    <text x="${pt.x}" y="${pt.y - 10}" font-size="9" font-weight="900" fill="#4F46E5" text-anchor="middle">${pt.score}</text>
+                </g>
+            `;
+        });
+
+        svg.innerHTML = svgContent;
+    }
+
+    // --- UX Alur Navigasi ---
+    function navigateToView(viewId) {
+        const currentSection = document.getElementById(activeView);
+        const nextSection = document.getElementById(viewId === 'view-list' ? 'view-list' : viewId);
+        
+        if (!nextSection) return;
+
+        // Transition: Fade Out current active view
+        if (currentSection) {
+            currentSection.style.opacity = '0';
+            currentSection.style.transform = 'translateY(12px)';
+            setTimeout(() => {
+                currentSection.classList.remove('show');
+                currentSection.classList.remove('active');
+                
+                // Show next section
+                activeView = viewId;
+                showSection(nextSection, viewId);
+            }, 180);
+        } else {
+            activeView = viewId;
+            showSection(nextSection, viewId);
+        }
+    }
+
+    function showSection(section, viewId) {
+        section.classList.add('active');
+        // Force Reflow
+        section.offsetHeight;
+
+        setTimeout(() => {
+            section.classList.add('show');
+            section.style.opacity = '1';
+            section.style.transform = 'translateY(0)';
+        }, 10);
+
+        // Update headers & breadcrumbs based on navigation hierarchy
+        updateUIState(viewId);
+    }
+
+    function updateUIState(viewId) {
+        const titleEl = document.getElementById('banner-title');
+        const subtitleEl = document.getElementById('banner-subtitle');
+        const emojiEl = document.getElementById('banner-emoji');
+        const backBtnText = document.getElementById('back-btn-text');
+
+        // Choose correct meta config key
+        const key = (viewId === 'view-list') ? `view-list-${activeLeafNode}` : viewId;
+        const config = viewMeta[key] || viewMeta['view-main'];
+
+        titleEl.innerText = config.title;
+        subtitleEl.innerText = config.subtitle;
+        emojiEl.innerText = config.emoji;
+
+        // Update Back Button Label
+        if (viewId === 'view-main') {
+            backBtnText.innerText = 'Kembali ke Beranda';
+        } else {
+            backBtnText.innerText = 'Kembali';
+        }
+
+        // Render Breadcrumbs
+        renderBreadcrumbs(viewId);
+    }
+
+    function renderBreadcrumbs(viewId) {
+        const breadcrumbs = document.getElementById('riwayat-breadcrumbs');
+        let html = `<span class="breadcrumb-item" onclick="navigateToView('view-main')">🏠 Riwayat Belajarku</span>`;
+
+        if (viewId === 'view-menulis-sub') {
+            html += `
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-item breadcrumb-active">✍️ Latihan Menulis</span>
+            `;
+        } else if (viewId === 'view-quiz-sub') {
+            html += `
+                <span class="breadcrumb-separator">›</span>
+                <span class="breadcrumb-item breadcrumb-active">🎲 Kuis GESTRA</span>
+            `;
+        } else if (viewId === 'view-list') {
+            if (activeLeafNode === 'handwriting_huruf') {
+                html += `
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item" onclick="navigateToView('view-menulis-sub')">✍️ Latihan Menulis</span>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item breadcrumb-active">🔤 Huruf</span>
+                `;
+            } else if (activeLeafNode === 'handwriting_kata') {
+                html += `
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item" onclick="navigateToView('view-menulis-sub')">✍️ Latihan Menulis</span>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item breadcrumb-active">📖 Kata</span>
+                `;
+            } else if (activeLeafNode === 'quiz_random') {
+                html += `
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item" onclick="navigateToView('view-quiz-sub')">🎲 Kuis GESTRA</span>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item breadcrumb-active">✨ Acak</span>
+                `;
+            } else if (activeLeafNode === 'speed_quiz') {
+                html += `
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item" onclick="navigateToView('view-quiz-sub')">🎲 Kuis GESTRA</span>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item breadcrumb-active">⏱️ Speed</span>
+                `;
+            } else if (activeLeafNode === 'kelas') {
+                html += `
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item breadcrumb-active">🏫 Latihan Kelas</span>
+                `;
+            }
+        }
+
+        breadcrumbs.innerHTML = html;
+    }
+
+    function goBack() {
+        if (activeView === 'view-main') {
+            window.location.href = '/murid/dashboard';
+        } else if (activeView === 'view-menulis-sub' || activeView === 'view-quiz-sub') {
+            navigateToView('view-main');
+        } else if (activeView === 'view-list') {
+            if (activeLeafNode === 'handwriting_huruf' || activeLeafNode === 'handwriting_kata') {
+                navigateToView('view-menulis-sub');
+            } else if (activeLeafNode === 'quiz_random' || activeLeafNode === 'speed_quiz') {
+                navigateToView('view-quiz-sub');
+            } else if (activeLeafNode === 'kelas') {
+                navigateToView('view-main');
+            }
+        }
+    }
+
+    // --- Bukaan List Data & Filter Cerdas ---
+    function openList(category) {
+        activeLeafNode = category;
+        navigateToView('view-list');
+        
+        const container = document.getElementById('history-container');
+        const cards = Array.from(container.children);
+        let visibleCount = 0;
+        let visibleCards = [];
+
+        cards.forEach(card => {
+            const cat = card.getAttribute('data-category');
+            const isKelas = card.getAttribute('data-is-kelas') === 'true';
+
+            let showCard = false;
+            if (category === 'kelas') {
+                showCard = isKelas;
+            } else {
+                showCard = (cat === category && !isKelas);
+            }
+
+            if (showCard) {
+                card.style.display = 'grid';
+                visibleCount++;
+                visibleCards.push(card);
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Toggle Empty State
+        const emptyState = document.getElementById('empty-state');
+        const descEl = document.getElementById('empty-description');
+        if (visibleCount === 0) {
+            emptyState.style.display = 'flex';
+            if (category === 'kelas') {
+                descEl.innerText = 'Gurumu belum memberikan latihan kelas. Tetap semangat, ya! 🏫';
+            } else {
+                descEl.innerText = 'Yuk mulai pengerjaan pertamamu untuk melatih keahlian menulismu! 🌟';
+            }
+        } else {
+            emptyState.style.display = 'none';
+        }
+
+        // Render line chart dynamically for this exact category!
+        updateCategoryChart(visibleCards);
+    }
+
+    function updateCategoryChart(visibleCards) {
+        const sortedOldestFirst = [...visibleCards]
+            .map(card => {
+                const data = JSON.parse(card.getAttribute('data-details-json'));
+                const score = (data.nilai !== undefined) ? data.nilai : (data.skor || 0);
+                const date = new Date(card.getAttribute('data-timestamp'));
+                return { score, date };
+            })
+            .sort((a, b) => a.date - b.date) // Oldest first
+            .slice(-7); // Last 7
+
+        const scores = sortedOldestFirst.map(item => item.score);
+        const chartWrapper = document.getElementById('chart-wrapper');
+        const chartSvg = document.getElementById('perkembangan-chart');
+        const chartTitle = document.getElementById('chart-title');
+        
+        if (scores.length < 2) {
+            chartWrapper.style.display = 'none';
+            return;
+        }
+        
+        chartWrapper.style.display = 'block';
+        
+        // Dynamic title hook
+        let categoryName = 'Nilaimu';
+        if (activeLeafNode === 'handwriting_huruf') categoryName = 'Menulis Huruf 🔤';
+        else if (activeLeafNode === 'handwriting_kata') categoryName = 'Menulis Kata 📖';
+        else if (activeLeafNode === 'quiz_random') categoryName = 'Quiz Random 🎲';
+        else if (activeLeafNode === 'speed_quiz') categoryName = 'Speed Quiz ⏱️';
+        else if (activeLeafNode === 'kelas') categoryName = 'Latihan Kelas 🏫';
+
+        chartTitle.innerHTML = `📈 Grafik Perkembangan ${categoryName}`;
+
+        const width = chartSvg.clientWidth || 800;
+        const height = 180;
+        const padding = 35;
+        const maxVal = 100;
+
+        const points = scores.map((score, index) => {
+            const x = padding + (index * (width - 2 * padding) / Math.max(1, scores.length - 1));
+            const y = height - padding - (score * (height - 2 * padding) / maxVal);
+            return { x, y, score };
+        });
+
+        let pathD = `M ${points[0].x} ${points[0].y}`;
+        for (let i = 1; i < points.length; i++) {
+            const cpX1 = points[i-1].x + (points[i].x - points[i-1].x) / 2;
+            const cpY1 = points[i-1].y;
+            const cpX2 = points[i-1].x + (points[i].x - points[i-1].x) / 2;
+            const cpY2 = points[i].y;
+            pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${points[i].x} ${points[i].y}`;
+        }
+
+        let svgContent = `
+            <defs>
+                <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#818CF8" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="#818CF8" stop-opacity="0.0"/>
+                </linearGradient>
+                <linearGradient id="line-grad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#4F46E5"/>
+                    <stop offset="100%" stop-color="#10B981"/>
+                </linearGradient>
+            </defs>
+            
+            <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#E2E8F0" stroke-width="2"/>
+            <line x1="${padding}" y1="${height - padding - (50 * (height - 2 * padding) / maxVal)}" x2="${width - padding}" y2="${height - padding - (50 * (height - 2 * padding) / maxVal)}" stroke="#F1F5F9" stroke-width="1.5" stroke-dasharray="6"/>
+            <line x1="${padding}" y1="${height - padding - (100 * (height - 2 * padding) / maxVal)}" x2="${width - padding}" y2="${height - padding - (100 * (height - 2 * padding) / maxVal)}" stroke="#E2E8F0" stroke-width="1.5"/>
+
+            <text x="${padding - 10}" y="${height - padding + 4}" font-size="10" font-weight="800" fill="#94A3B8" text-anchor="end">0</text>
+            <text x="${padding - 10}" y="${height - padding - (50 * (height - 2 * padding) / maxVal) + 4}" font-size="10" font-weight="800" fill="#94A3B8" text-anchor="end">50</text>
+            <text x="${padding - 10}" y="${height - padding - (100 * (height - 2 * padding) / maxVal) + 4}" font-size="10" font-weight="800" fill="#94A3B8" text-anchor="end">100</text>
+            
+            <path d="${pathD} L ${points[points.length-1].x} ${height - padding} L ${points[0].x} ${height - padding} Z" fill="url(#chart-grad)"/>
+            
+            <path d="${pathD}" fill="none" stroke="url(#line-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        `;
+
+        points.forEach((pt, idx) => {
+            svgContent += `
+                <g style="cursor: pointer;">
+                    <circle cx="${pt.x}" cy="${pt.y}" r="6" fill="#FFFFFF" stroke="#4F46E5" stroke-width="3.5"/>
+                    <circle cx="${pt.x}" cy="${pt.y}" r="12" fill="#4F46E5" opacity="0" onmouseover="this.setAttribute('opacity', '0.2')" onmouseout="this.setAttribute('opacity', '0')"/>
+                    <text x="${pt.x}" y="${pt.y - 14}" font-size="11" font-weight="900" fill="#4F46E5" text-anchor="middle">${pt.score}</text>
+                    <text x="${pt.x}" y="${height - 12}" font-size="10" font-weight="800" fill="#64748B" text-anchor="middle">Latihan ${idx + 1}</text>
+                </g>
+            `;
+        });
+
+        chartSvg.innerHTML = svgContent;
+    }
+
+    // --- Bukaan Detail Modal Redesign ---
+    function openDetailModal(btn) {
+        const card = btn.closest('.history-card');
+        const dataStr = card.getAttribute('data-details-json');
+        if (!dataStr) return;
+        const data = JSON.parse(dataStr);
+
+        const modal = document.getElementById('detail-modal');
+        const titleEl = document.getElementById('modal-title');
+        const bodyContent = document.getElementById('modal-body-content');
+
+        titleEl.innerText = data.judul;
+
+        // Visual calculations
+        let score = (data.nilai !== undefined) ? data.nilai : (data.skor || 0);
+        let correctCount = (data.benar && data.benar !== 'false') ? 1 : 0;
+        let incorrectCount = correctCount === 1 ? 0 : 1;
+        let totalCount = 1;
+        let durasiText = data.durasi !== undefined ? `${data.durasi} Detik` : 'Tanpa Batas Waktu';
+
+        if (data.tipe.toLowerCase().includes('quiz') || data.tipe.toLowerCase().includes('acak')) {
+            correctCount = data.benar || 0;
+            incorrectCount = data.salah || 0;
+            totalCount = data.total || 10;
+        }
+
+        const correctPercent = Math.round((correctCount / totalCount) * 100);
+        const incorrectPercent = 100 - correctPercent;
+
+        // Banner context details
+        const statusLabel = score >= 70 ? 'Lulus Hebat 🎉' : 'Ayo Berlatih Lagi! 💪';
+        const statusColor = score >= 70 ? '#10B981' : '#F59E0B';
+
+        let html = `
+            <!-- Modal Summary Score Card Banner -->
+            <div class="modal-summary-banner">
+                <div class="modal-summary-score-shell">
+                    <div class="modal-summary-score-box" style="color: ${statusColor}; border-color: ${statusColor}77;">
+                        ${score}
+                    </div>
+                    <div class="modal-summary-text">
+                        <h4 style="color: ${statusColor};">${statusLabel}</h4>
+                        <p>Dikerjakan pada ${data.tanggal}</p>
+                    </div>
+                </div>
+                <div style="font-size: 0.9rem; font-weight: 800; color: #475569; background: white; padding: 6px 12px; border-radius: 50px; border: 1.5px solid #E2E8F0;">
+                    ⏱️ ${durasiText}
+                </div>
+            </div>
+
+            <!-- Segmented Progress Bar of correct vs incorrect -->
+            <div class="modal-progress-section">
+                <div class="modal-progress-label-row">
+                    <span>Akurasi Soal Benar: ${correctCount} dari ${totalCount}</span>
+                    <span>${correctPercent}% Sukses</span>
+                </div>
+                <div class="modal-progress-segmented-track">
+                    <div class="modal-progress-correct-fill" style="width: ${correctPercent}%;"></div>
+                    <div class="modal-progress-incorrect-fill" style="width: ${incorrectPercent}%;"></div>
+                </div>
+            </div>
+
+            <h4 class="modal-questions-title">🎯 Rincian Pengerjaan Soal:</h4>
+        `;
+
+        // Check teacher result visiblity permission configuration
+        const canShowResult = data.izinkan_lihat_hasil !== false;
+
+        if (!canShowResult) {
+            // Locked by teacher
+            html += `
+                <div class="detail-question-card status-locked">
+                    <div class="question-locked-message-container">
+                        <span class="question-locked-icon">🔒</span>
+                        <h5 class="question-locked-title">Detail Hasil Latihan Dikunci</h5>
+                        <p class="question-locked-desc">
+                            Bapak/Ibu Guru mengunci rincian kunci jawaban untuk tugas <b>"${data.judul}"</b>. 
+                            Kamu hanya diperbolehkan melihat skor akhir nilaimu saja. Tetap semangat ya!
+                        </p>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Unlocked: Render full, beautifully spaced cards
+            if (data.questions && data.questions.length > 0) {
+                // Render Quiz Timeline Cards
+                data.questions.forEach((q, idx) => {
+                    const statusClass = q.correct ? 'status-correct' : 'status-incorrect';
+                    const icon = q.correct ? '✅ Benar' : '❌ Salah';
+
+                    html += `
+                        <div class="detail-question-card ${statusClass}">
+                            <div class="question-card-top-row">
+                                <span class="question-number-badge">${q.nomor}</span>
+                                <span class="question-status-pill">${icon}</span>
+                            </div>
+                            <div class="question-card-content">
+                                <div class="question-data-box">
+                                    <span class="question-data-label">Target Huruf</span>
+                                    <span class="question-data-value">${q.target}</span>
+                                </div>
+                                <div class="question-data-box">
+                                    <span class="question-data-label">Coretan Kamu</span>
+                                    <span class="question-data-value val-student">${q.prediction || '-'}</span>
+                                </div>
+                                <div class="question-data-box">
+                                    <span class="question-data-label">Kunci Jawaban</span>
+                                    <span class="question-data-value val-key" style="color: #10B981;">${q.target}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                // Render Single Homework Latihan Card
+                const statusClass = (data.benar && data.benar !== 'false') ? 'status-correct' : 'status-incorrect';
+                const icon = (data.benar && data.benar !== 'false') ? '✅ Benar' : '❌ Salah';
+                
+                html += `
+                    <div class="detail-question-card ${statusClass}">
+                        <div class="question-card-top-row">
+                            <span class="question-number-badge">1</span>
+                            <span class="question-status-pill">${icon}</span>
+                        </div>
+                        <div class="question-card-content">
+                            <div class="question-data-box">
+                                <span class="question-data-label">Target Soal</span>
+                                <span class="question-data-value">${data.target}</span>
+                            </div>
+                            <div class="question-data-box">
+                                <span class="question-data-label">Tulisan Kamu</span>
+                                <span class="question-data-value val-student">${data.jawaban || '-'}</span>
+                            </div>
+                            <div class="question-data-box">
+                                <span class="question-data-label">Kunci Jawaban</span>
+                                <span class="question-data-value val-key" style="color: #10B981;">${data.jawaban_kunci || data.target}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        bodyContent.innerHTML = html;
+
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            modal.querySelector('.modal-box').style.transform = 'scale(1)';
+        }, 10);
+    }
+
+    function closeDetailModal() {
+        const modal = document.getElementById('detail-modal');
+        const box = modal.querySelector('.modal-box');
+        modal.style.opacity = '0';
+        box.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+
+    function closeDetailModalOnOuterClick(e) {
+        if (e.target.id === 'detail-modal') {
+            closeDetailModal();
+        }
     }
 </script>
 {% endblock %}

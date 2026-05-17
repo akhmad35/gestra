@@ -84,6 +84,135 @@
 
     .btn-kerjakan { background: #10b981; color: white; }
     .btn-lihat { background: #f1f5f9; color: #1e293b; }
+
+    /* ── Tabs ── */
+    .tabs-nav {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 1px;
+    }
+
+    .tab-btn {
+        background: none;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s;
+    }
+
+    .tab-btn:hover {
+        color: #10b981;
+    }
+
+    .tab-btn.active {
+        color: #10b981;
+    }
+
+    .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #10b981;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Leaderboard & Stats ── */
+    .leaderboard-list {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    
+    .lb-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        gap: 1rem;
+    }
+
+    .lb-item:last-child {
+        border-bottom: none;
+    }
+
+    .lb-rank {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #94a3b8;
+        width: 30px;
+        text-align: center;
+    }
+
+    .lb-item:nth-child(1) .lb-rank { color: #fbbf24; }
+    .lb-item:nth-child(2) .lb-rank { color: #9ca3af; }
+    .lb-item:nth-child(3) .lb-rank { color: #b45309; }
+
+    .lb-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .lb-info {
+        flex: 1;
+    }
+
+    .lb-name {
+        margin: 0;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .lb-score {
+        font-weight: 700;
+        color: #10b981;
+    }
+
+    .announcement-card {
+        background: #f8fafc;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem 1.5rem;
+        border-radius: 0 12px 12px 0;
+        margin-bottom: 1rem;
+    }
+
+    .btn-keluar-kelas:hover {
+        background: #ef4444 !important;
+        color: white !important;
+        border-color: #ef4444 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    }
 </style>
 {% endblock %}
 
@@ -99,37 +228,244 @@
 </div>
 
 <div class="container" style="padding-top: 0;">
-    <div class="header">
-        <h1>{{ kelas.nama_kelas }}</h1>
-        <p>Selesaikan semua latihan untuk meningkatkan kemampuanmu!</p>
+    <div class="header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div class="header-info">
+            <h1>{{ kelas.nama_kelas }}</h1>
+            <p>Selesaikan semua latihan untuk meningkatkan kemampuanmu!</p>
+        </div>
+        <!-- Keluar Kelas Button -->
+        <button class="btn-keluar-kelas" onclick="tunjukkanModalKeluar()" style="
+            background: #FEE2E2;
+            color: #EF4444;
+            border: 2px solid #FCA5A5;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        ">
+            <svg style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Keluar Kelas
+        </button>
     </div>
 
-    <div class="latihan-grid">
-        {% if latihan_list %}
-            {% for latihan in latihan_list %}
-            <div class="latihan-card">
-                {% if latihan.id in jawaban_dict %}
-                    <span class="status-badge status-sudah">Sudah Dikerjakan</span>
-                {% else %}
-                    <span class="status-badge status-belum">Belum Dikerjakan</span>
-                {% endif %}
-                
-                <h3>{{ latihan.judul }}</h3>
-                <p>{{ latihan.pertanyaan|truncate(100) }}</p>
-                
-                {% if latihan.id in jawaban_dict %}
-                    <a href="/murid/latihan/{{ latihan.id }}/hasil" class="btn-action btn-lihat">Lihat Hasil</a>
-                {% else %}
-                    <a href="/murid/latihan/{{ latihan.id }}/kerjakan" class="btn-action btn-kerjakan">Kerjakan</a>
-                {% endif %}
-            </div>
-            {% endfor %}
-        {% else %}
-            <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; background: white; border-radius: 24px;">
-                <h3>Belum ada latihan</h3>
-                <p>Gurumu belum mengunggah latihan untuk kelas ini. Cek lagi nanti ya!</p>
-            </div>
-        {% endif %}
+    <div class="tabs-nav">
+        <button class="tab-btn active" onclick="openTab('latihan')">Latihan & Kuis</button>
+        <button class="tab-btn" onclick="openTab('leaderboard')">Leaderboard</button>
+        <button class="tab-btn" onclick="openTab('pengumuman')">Pengumuman</button>
     </div>
+
+    <!-- TAB: Latihan -->
+    <div id="tab-latihan" class="tab-content active">
+        <div class="latihan-grid">
+            {% if latihan_list %}
+                {% for latihan in latihan_list %}
+                <div class="latihan-card">
+                    {% if latihan.id in jawaban_dict %}
+                        <span class="status-badge status-sudah">Sudah Dikerjakan</span>
+                    {% else %}
+                        <span class="status-badge status-belum">Belum Dikerjakan</span>
+                    {% endif %}
+                    
+                    <h3>{{ latihan.judul }}</h3>
+                    <p>{{ latihan.pertanyaan|truncate(100) }}</p>
+                    
+                    {% if latihan.id in jawaban_dict %}
+                        <a href="/murid/latihan/{{ latihan.id }}/hasil" class="btn-action btn-lihat">Lihat Hasil</a>
+                    {% else %}
+                        <a href="/murid/latihan/{{ latihan.id }}/kerjakan" class="btn-action btn-kerjakan">Kerjakan</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; background: white; border-radius: 24px;">
+                    <h3>Belum ada latihan</h3>
+                    <p>Gurumu belum mengunggah latihan untuk kelas ini. Cek lagi nanti ya!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- TAB: Leaderboard -->
+    <div id="tab-leaderboard" class="tab-content">
+        <div class="leaderboard-list">
+            <h3>Leaderboard Kelas</h3>
+            <p style="color: #64748b; margin-bottom: 1.5rem; font-size: 0.9rem;">Berdasarkan total skor latihan.</p>
+            
+            <div class="lb-item">
+                <div class="lb-rank">1</div>
+                <div class="lb-avatar">A</div>
+                <div class="lb-info">
+                    <p class="lb-name">Ahmad Budi</p>
+                </div>
+                <div class="lb-score">950 XP</div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-rank">2</div>
+                <div class="lb-avatar">S</div>
+                <div class="lb-info">
+                    <p class="lb-name">Siti Aminah</p>
+                </div>
+                <div class="lb-score">820 XP</div>
+            </div>
+            <div class="lb-item">
+                <div class="lb-rank">3</div>
+                <div class="lb-avatar">{{ user.nama[0]|upper }}</div>
+                <div class="lb-info">
+                    <p class="lb-name">{{ user.nama }} (Kamu)</p>
+                </div>
+                <div class="lb-score">780 XP</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: Pengumuman -->
+    <div id="tab-pengumuman" class="tab-content">
+        <div class="announcement-card">
+            <h4 style="margin:0 0 0.5rem 0; color: #1e293b;">Selamat Datang di Kelas!</h4>
+            <p style="margin:0; font-size: 0.9rem; color: #64748b;">Silakan kerjakan latihan yang sudah tersedia. Jangan lupa untuk mengecek batas waktu.</p>
+            <span style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 0.5rem;">Hari ini</span>
+        </div>
+    </div>
+
 </div>
+
+<script>
+function openTab(tabName) {
+    // Hide all contents
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    // Remove active class from buttons
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    // Show selected tab
+    document.getElementById('tab-' + tabName).classList.add('active');
+    // Set button active
+    event.currentTarget.classList.add('active');
+}
+
+function tunjukkanModalKeluar() {
+    const modal = document.getElementById('modal-keluar-kelas');
+    const box = modal.querySelector('.modal-box');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.style.opacity = '1';
+        box.style.transform = 'scale(1)';
+    }, 10);
+}
+
+function tutupModalKeluar() {
+    const modal = document.getElementById('modal-keluar-kelas');
+    const box = modal.querySelector('.modal-box');
+    modal.style.opacity = '0';
+    box.style.transform = 'scale(0.9)';
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+</script>
+
+<!-- Modal Konfirmasi Keluar Kelas -->
+<div id="modal-keluar-kelas" class="modal-overlay" style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+">
+  <div class="modal-box" style="
+      background: white;
+      padding: 2.5rem 2rem;
+      border-radius: 24px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: scale(0.9);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  ">
+    <!-- Playful Warning Emoji -->
+    <div style="
+        font-size: 4.5rem; 
+        margin-bottom: 1.5rem;
+        animation: pulse-warning 2s infinite ease-in-out;
+    ">🏫💔</div>
+    
+    <h3 style="
+        font-size: 1.5rem; 
+        font-weight: 900; 
+        color: #1E293B; 
+        margin-bottom: 0.75rem;
+        letter-spacing: -0.5px;
+    ">Keluar dari Kelas?</h3>
+    
+    <p style="
+        font-size: 1rem; 
+        font-weight: 600; 
+        color: #64748B; 
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    ">Apakah kamu yakin ingin keluar dari kelas <strong>{{ kelas.nama_kelas }}</strong>? Semua data latihan di kelas ini akan dilepas dari keanggotaanmu.</p>
+    
+    <div style="display: flex; gap: 12px; width: 100%;">
+      <!-- Cancel Button -->
+      <button onclick="tutupModalKeluar()" style="
+          flex: 1;
+          background: #F1F5F9;
+          color: #475569;
+          border: none;
+          padding: 12px 20px;
+          font-size: 1rem;
+          font-weight: 700;
+          border-radius: 50px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+      ">
+        Batal
+      </button>
+      
+      <!-- Confirm Form -->
+      <form action="/murid/kelas/{{ kelas.id }}/keluar" method="POST" style="flex: 1; margin: 0;">
+        <button type="submit" style="
+            width: 100%;
+            background: #EF4444;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
+        ">
+          Keluar Kelas
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes pulse-warning {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+</style>
 {% endblock %}

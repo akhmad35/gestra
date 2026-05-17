@@ -2,6 +2,9 @@ from fastapi import APIRouter, Request, Depends, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from typing import Optional
+from datetime import datetime
+import json
 
 from app.database import get_db
 from app.routes.halaman import get_current_user
@@ -17,6 +20,7 @@ from app.services.latihan import (
     get_stat_jawaban_kelas
 )
 from app.schemas.latihan import LatihanCreate, LatihanUpdate
+from app.services.dataset import get_dataset_by_type, generate_random_questions
 
 router = APIRouter(prefix="/guru", tags=["Guru"])
 templates = Jinja2Templates(directory="app/templates")
@@ -77,7 +81,7 @@ async def buat_kelas_page(request: Request, db: Session = Depends(get_db)):
 async def create_kelas_guru(
     request: Request,
     nama_kelas: str = Form(...),
-    deskripsi: str = Form(...),
+    deskripsi: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     """Buat kelas baru (guru)"""
@@ -237,10 +241,18 @@ async def buat_latihan_page(
     if not kelas or kelas.guru_id != user.id:
         return RedirectResponse(url="/guru/dashboard")
     
+    dataset_huruf = get_dataset_by_type("huruf")
+    dataset_kata = get_dataset_by_type("kata")
+    
     return templates.TemplateResponse(
         request=request,
         name="guru/buat-latihan.html",
-        context={"user": user, "kelas": kelas}
+        context={
+            "user": user, 
+            "kelas": kelas,
+            "dataset_huruf": dataset_huruf,
+            "dataset_kata": dataset_kata
+        }
     )
 
 
@@ -252,6 +264,19 @@ async def create_latihan_guru(
     pertanyaan: str = Form(...),
     tipe_soal: str = Form(...),
     tingkat_kesulitan: str = Form(...),
+    metode_pembuatan: str = Form("manual"),
+    dataset_type: Optional[str] = Form(None),
+    jumlah_soal: int = Form(5),
+    durasi_menit: int = Form(0),
+    waktu_mulai: Optional[str] = Form(None),
+    waktu_selesai: Optional[str] = Form(None),
+    status_latihan: str = Form("draft"),
+    dataset_manual: Optional[str] = Form(None),
+    izinkan_retry: Optional[str] = Form(None),
+    max_attempt: int = Form(1),
+    mode_timer: str = Form("total"),
+    durasi_per_soal: int = Form(30),
+    izinkan_lihat_hasil: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     """Buat latihan baru"""
@@ -265,12 +290,46 @@ async def create_latihan_guru(
     if not kelas or kelas.guru_id != user.id:
         return RedirectResponse(url="/guru/dashboard")
     
+    # Process waktu
+    w_mulai = datetime.fromisoformat(waktu_mulai) if waktu_mulai else None
+    w_selesai = datetime.fromisoformat(waktu_selesai) if waktu_selesai else None
+    
+    # Generate questions if random, or parse manual
+    soal_tergenerate = None
+    if metode_pembuatan == "random" and dataset_type:
+        questions = generate_random_questions(dataset_type, jumlah_soal)
+        soal_tergenerate = json.dumps(questions)
+    elif metode_pembuatan == "manual" and dataset_manual:
+        try:
+            # Assuming dataset_manual comes as JSON array of selected items
+            questions = json.loads(dataset_manual)
+            soal_tergenerate = json.dumps(questions)
+            jumlah_soal = len(questions)
+        except:
+            soal_tergenerate = "[]"
+            
+    is_retry = True if izinkan_retry in ["true", "on", "ya", "Ya"] else False
+    is_lihat_hasil = True if izinkan_lihat_hasil in ["true", "on", "ya", "Ya", None] else False
+    
     latihan_data = LatihanCreate(
         kelas_id=kelas_id,
         judul=judul,
         pertanyaan=pertanyaan,
         tipe_soal=tipe_soal,
-        tingkat_kesulitan=tingkat_kesulitan
+        tingkat_kesulitan=tingkat_kesulitan,
+        metode_pembuatan=metode_pembuatan,
+        dataset_type=dataset_type,
+        jumlah_soal=jumlah_soal,
+        durasi_menit=durasi_menit,
+        waktu_mulai=w_mulai,
+        waktu_selesai=w_selesai,
+        status=status_latihan,
+        soal_tergenerate=soal_tergenerate,
+        izinkan_retry=is_retry,
+        max_attempt=max_attempt,
+        mode_timer=mode_timer,
+        durasi_per_soal=durasi_per_soal,
+        izinkan_lihat_hasil=is_lihat_hasil
     )
     
     latihan = create_latihan(db, latihan_data, user.id)
@@ -298,10 +357,18 @@ async def edit_latihan_page(
     if not latihan or latihan.guru_id != user.id:
         return RedirectResponse(url="/guru/dashboard")
     
+    dataset_huruf = get_dataset_by_type("huruf")
+    dataset_kata = get_dataset_by_type("kata")
+    
     return templates.TemplateResponse(
         request=request,
         name="guru/edit-latihan.html",
-        context={"user": user, "latihan": latihan}
+        context={
+            "user": user, 
+            "latihan": latihan,
+            "dataset_huruf": dataset_huruf,
+            "dataset_kata": dataset_kata
+        }
     )
 
 
@@ -313,6 +380,19 @@ async def update_latihan_guru(
     pertanyaan: str = Form(...),
     tipe_soal: str = Form(...),
     tingkat_kesulitan: str = Form(...),
+    metode_pembuatan: str = Form("manual"),
+    dataset_type: Optional[str] = Form(None),
+    jumlah_soal: int = Form(5),
+    durasi_menit: int = Form(0),
+    waktu_mulai: Optional[str] = Form(None),
+    waktu_selesai: Optional[str] = Form(None),
+    status_latihan: str = Form("draft"),
+    dataset_manual: Optional[str] = Form(None),
+    izinkan_retry: Optional[str] = Form(None),
+    max_attempt: int = Form(1),
+    mode_timer: str = Form("total"),
+    durasi_per_soal: int = Form(30),
+    izinkan_lihat_hasil: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
     """Update latihan"""
@@ -326,11 +406,47 @@ async def update_latihan_guru(
     if not latihan or latihan.guru_id != user.id:
         return RedirectResponse(url="/guru/dashboard")
     
+    w_mulai = datetime.fromisoformat(waktu_mulai) if waktu_mulai else None
+    w_selesai = datetime.fromisoformat(waktu_selesai) if waktu_selesai else None
+    
+    # Determine questions
+    soal_tergenerate = latihan.soal_tergenerate
+    
+    # If settings changed, we might need to regenerate or re-parse
+    if metode_pembuatan == "random" and dataset_type:
+        # only regenerate if user changed the dataset or jumlah_soal
+        if (latihan.dataset_type != dataset_type) or (latihan.jumlah_soal != jumlah_soal):
+            questions = generate_random_questions(dataset_type, jumlah_soal)
+            soal_tergenerate = json.dumps(questions)
+    elif metode_pembuatan == "manual" and dataset_manual:
+        try:
+            questions = json.loads(dataset_manual)
+            soal_tergenerate = json.dumps(questions)
+            jumlah_soal = len(questions)
+        except:
+            pass
+            
+    is_retry = True if izinkan_retry in ["true", "on", "ya", "Ya"] else False
+    is_lihat_hasil = True if izinkan_lihat_hasil in ["true", "on", "ya", "Ya", None] else False
+    
     latihan_update = LatihanUpdate(
         judul=judul,
         pertanyaan=pertanyaan,
         tipe_soal=tipe_soal,
-        tingkat_kesulitan=tingkat_kesulitan
+        tingkat_kesulitan=tingkat_kesulitan,
+        metode_pembuatan=metode_pembuatan,
+        dataset_type=dataset_type,
+        jumlah_soal=jumlah_soal,
+        durasi_menit=durasi_menit,
+        waktu_mulai=w_mulai,
+        waktu_selesai=w_selesai,
+        status=status_latihan,
+        soal_tergenerate=soal_tergenerate,
+        izinkan_retry=is_retry,
+        max_attempt=max_attempt,
+        mode_timer=mode_timer,
+        durasi_per_soal=durasi_per_soal,
+        izinkan_lihat_hasil=is_lihat_hasil
     )
     
     update_latihan(db, latihan_id, latihan_update)
@@ -394,5 +510,41 @@ async def lihat_jawaban_latihan(
             "user": user,
             "latihan": latihan,
             "jawaban_list": jawaban_list
+        }
+    )
+
+@router.get("/kelas/{kelas_id}/nilai", response_class=HTMLResponse)
+async def lihat_nilai_siswa(
+    request: Request,
+    kelas_id: int,
+    db: Session = Depends(get_db)
+):
+    """Halaman nilai per siswa untuk kelas tertentu"""
+    user = get_current_user(request, db)
+    if not user or user.role != "guru":
+        return RedirectResponse(url="/login")
+    
+    kelas = get_kelas_by_id(db, kelas_id)
+    if not kelas or kelas.guru_id != user.id:
+        return RedirectResponse(url="/guru/dashboard")
+    
+    from app.models.latihan import Jawaban, Latihan
+    jawaban_list = db.query(Jawaban).join(Latihan).filter(Latihan.kelas_id == kelas_id).all()
+    
+    total_siswa = len(kelas.enrollments)
+    total_latihan = len(get_latihan_by_kelas(db, kelas_id))
+    avg_score = sum([j.nilai for j in jawaban_list]) / len(jawaban_list) if jawaban_list else 0
+    avg_score = round(avg_score, 1)
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="guru/nilai-siswa.html",
+        context={
+            "user": user,
+            "kelas": kelas,
+            "jawaban_list": jawaban_list,
+            "total_siswa": total_siswa,
+            "total_latihan": total_latihan,
+            "avg_score": avg_score
         }
     )

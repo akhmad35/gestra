@@ -5,7 +5,7 @@ from datetime import datetime
 
 class KelasBase(BaseModel):
     nama_kelas: str
-    deskripsi: str
+    deskripsi: Optional[str] = None
     kode_kelas: str
 
 

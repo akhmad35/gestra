@@ -203,7 +203,18 @@
                         <div class="latihan-item">
                             <div class="latihan-info">
                                 <h4>{{ latihan.judul }}</h4>
-                                <p>{{ latihan.tipe_soal|capitalize }} • {{ latihan.tingkat_kesulitan|capitalize }}</p>
+                                <p style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.5rem;">
+                                    <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">{{ latihan.tipe_soal|replace('_', ' ')|title }}</span>
+                                    <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">{{ latihan.jumlah_soal }} Soal</span>
+                                    <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 4px;">{{ latihan.durasi_menit if latihan.durasi_menit > 0 else 'Tanpa Waktu' }}</span>
+                                    {% if latihan.status == 'draft' %}
+                                        <span style="background: #fef08a; color: #854d0e; padding: 2px 8px; border-radius: 4px; font-weight: bold;">Draft</span>
+                                    {% elif latihan.status == 'aktif' %}
+                                        <span style="background: #bbf7d0; color: #166534; padding: 2px 8px; border-radius: 4px; font-weight: bold;">Aktif</span>
+                                    {% else %}
+                                        <span style="background: #fecaca; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-weight: bold;">Selesai</span>
+                                    {% endif %}
+                                </p>
                             </div>
                             <div style="display: flex; gap: 0.5rem;">
                                 <a href="/guru/latihan/{{ latihan.id }}/jawaban" class="btn-action btn-view">Hasil</a>

@@ -1,0 +1,196 @@
+{% extends "layout.html" %}
+
+{% block title %}Achievement - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .achieve-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .profile-card {
+        background: var(--primary-gradient);
+        border-radius: 24px;
+        padding: 3rem;
+        color: white;
+        text-align: center;
+        box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .avatar {
+        width: 100px;
+        height: 100px;
+        background: white;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 800;
+        color: #10b981;
+    }
+
+    .level-badge {
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #f59e0b;
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 9999px;
+        font-weight: 800;
+        border: 4px solid white;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-item h3 {
+        font-size: 2rem;
+        margin: 0;
+        font-weight: 800;
+    }
+
+    .stat-item p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .badges-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .badge-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        transition: transform 0.2s;
+    }
+
+    .badge-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        filter: grayscale(0%);
+    }
+
+    .badge-icon.locked {
+        filter: grayscale(100%);
+        opacity: 0.5;
+    }
+
+    .badge-title {
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+    }
+
+    .badge-desc {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="top-toolbar">
+    <a href="/murid/dashboard" class="reusable-back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Kembali ke Dashboard
+    </a>
+</div>
+
+<div class="achieve-container">
+    <div class="profile-card">
+        <div class="avatar">{{ user.nama[0]|upper }}</div>
+        <h2 style="margin: 0 0 0.5rem 0; font-size: 2rem;">{{ user.nama }}</h2>
+        <p style="margin: 0; opacity: 0.9;">Pejuang Pengetahuan</p>
+        
+        <div class="level-badge">LEVEL 5</div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h3>1,250</h3>
+                <p>Total XP</p>
+            </div>
+            <div class="stat-item">
+                <h3>12</h3>
+                <p>Latihan Selesai</p>
+            </div>
+            <div class="stat-item">
+                <h3>🔥 7</h3>
+                <p>Hari Streak</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="section-title">🏅 Koleksi Badge</h3>
+    <div class="badges-grid">
+        <div class="badge-card">
+            <div class="badge-icon">🌟</div>
+            <h4 class="badge-title">Awal Mula</h4>
+            <p class="badge-desc">Menyelesaikan 1 latihan pertama</p>
+        </div>
+        <div class="badge-card">
+            <div class="badge-icon">🔥</div>
+            <h4 class="badge-title">On Fire</h4>
+            <p class="badge-desc">Mencapai 7 hari streak belajar</p>
+        </div>
+        <div class="badge-card">
+            <div class="badge-icon">🎯</div>
+            <h4 class="badge-title">Si Akurat</h4>
+            <p class="badge-desc">Mendapat nilai 100 berturut-turut</p>
+        </div>
+        <div class="badge-card">
+            <div class="badge-icon locked">🏆</div>
+            <h4 class="badge-title">Sang Juara</h4>
+            <p class="badge-desc">Peringkat 1 di Leaderboard Kelas</p>
+        </div>
+        <div class="badge-card">
+            <div class="badge-icon locked">📚</div>
+            <h4 class="badge-title">Kutu Buku</h4>
+            <p class="badge-desc">Menyelesaikan 50 latihan</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

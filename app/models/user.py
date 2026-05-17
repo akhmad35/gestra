@@ -9,3 +9,4 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     password = Column(String)
     role = Column(String, default="murid") # "murid" or "guru"
+    foto_profil = Column(String, default="/static/assets/images/mascot.png")

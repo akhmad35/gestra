@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 
+{% block navbar %}{% endblock %} {# ← tambahkan ini #}
+
 {% block title %}Dashboard Murid - GESTRA{% endblock %}
 
 {% block extra_css %}
@@ -243,7 +245,7 @@
     }
 
     .kelas-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-5px) scale(1.02);
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         border-color: #10b981;
     }
@@ -306,6 +308,117 @@
         border-radius: 24px;
         grid-column: 1 / -1;
     }
+
+    /* ── Progress Bar & Badges ── */
+    .progress-container {
+        width: 100%;
+        background-color: #e2e8f0;
+        border-radius: 9999px;
+        height: 0.5rem;
+        margin-top: 1rem;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        background: var(--primary-gradient);
+        height: 100%;
+        border-radius: 9999px;
+        transition: width 0.5s ease-in-out;
+    }
+
+    .progress-text {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+        text-align: right;
+        display: block;
+    }
+
+    .badge-baru {
+        background-color: #ef4444;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        margin-left: 0.5rem;
+        vertical-align: middle;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .tugas-info {
+        display: flex;
+        align-items: center;
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+        color: #3b82f6;
+        font-weight: 600;
+    }
+
+    /* ── Quick Actions ── */
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .quick-action-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+        color: var(--text-primary);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        transition: all 0.2s ease;
+    }
+
+    .quick-action-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+    }
+
+    .qa-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        background: #f1f5f9;
+    }
+
+    .qa-content h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .qa-content p {
+        margin: 0;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
 </style>
 
 
@@ -345,23 +458,109 @@
     </div>
 
 
+    <!-- Latihan Kelas Section -->
+    <div class="section-header">
+        <h2>Latihan Kelas Terkini</h2>
+    </div>
+
+    <div class="kelas-grid" style="margin-bottom: 3rem;">
+        {% if latihan_data %}
+        {% for item in latihan_data %}
+        <div class="kelas-card">
+            <div class="kelas-header" style="background: white; border-bottom: none; padding-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <h3 style="font-size: 1.125rem; font-weight: 700; color: #1e293b; margin: 0;">{{ item.latihan.judul
+                        }}</h3>
+                    {% if item.status_waktu == 'belum_dimulai' %}
+                    <span
+                        style="background: #f1f5f9; color: #64748b; padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">Belum
+                        Dimulai</span>
+                    {% elif item.status_waktu == 'selesai' or item.status_waktu == 'berakhir' or item.sudah_dikerjakan
+                    %}
+                    <span
+                        style="background: #fef08a; color: #854d0e; padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">Selesai</span>
+                    {% else %}
+                    <span
+                        style="background: #bbf7d0; color: #166534; padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;">Berlangsung</span>
+                    {% endif %}
+                </div>
+                <div style="font-size: 0.875rem; color: #64748b; margin-top: 0.25rem;">Kelas: {{ item.nama_kelas }}
+                </div>
+            </div>
+            <div class="kelas-body" style="padding-top: 1rem; padding-bottom: 0;">
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <span
+                        style="background: #eef2ff; color: #4338ca; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">{{
+                        item.latihan.jumlah_soal }} Soal</span>
+                    <span
+                        style="background: #eef2ff; color: #4338ca; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">{{
+                        item.latihan.durasi_menit if item.latihan.durasi_menit > 0 else 'Tanpa Batas' }} Menit</span>
+                </div>
+            </div>
+            <div class="kelas-footer">
+                {% if item.status_waktu == 'aktif' and not item.sudah_dikerjakan %}
+                <a href="/murid/latihan/{{ item.latihan.id }}/kerjakan" class="btn-masuk"
+                    style="background: #6366f1; color: white;">Kerjakan Latihan</a>
+                {% elif item.sudah_dikerjakan %}
+                <a href="/murid/latihan/{{ item.latihan.id }}/hasil" class="btn-masuk"
+                    style="background: #f1f5f9; color: #64748b;">Lihat Hasil</a>
+                {% else %}
+                <button disabled class="btn-masuk"
+                    style="background: #f1f5f9; color: #94a3b8; width: 100%; border: none; cursor: not-allowed;">Belum
+                    Tersedia</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <p>Belum ada latihan yang aktif untuk saat ini.</p>
+        </div>
+        {% endif %}
+    </div>
+
     <div class="section-header">
         <h2>Kelas Yang Saya Ikuti</h2>
     </div>
 
     <div class="kelas-grid">
         {% if kelas_list %}
-        {% for kelas in kelas_list %}
+        {% for kelas_data in kelas_list_data %}
         <div class="kelas-card">
             <div class="kelas-header">
-                <h3>{{ kelas.nama_kelas }}</h3>
-                <div class="guru-info">Guru: {{ kelas.guru.nama if kelas.guru else 'Anonim' }}</div>
+                <h3>
+                    {{ kelas_data.kelas.nama_kelas }}
+                    {% if kelas_data.tugas_baru > 0 %}
+                    <span class="badge-baru">{{ kelas_data.tugas_baru }} Baru</span>
+                    {% endif %}
+                </h3>
+                <div class="guru-info">Guru: {{ kelas_data.kelas.guru.nama if kelas_data.kelas.guru else 'Anonim' }}
+                </div>
             </div>
             <div class="kelas-body">
-                <p>{{ kelas.deskripsi or 'Tidak ada deskripsi.' }}</p>
+                <p>{{ kelas_data.kelas.deskripsi or 'Tidak ada deskripsi.' }}</p>
+
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: {{ kelas_data.progress }}%;"></div>
+                </div>
+                <span class="progress-text">{{ kelas_data.progress }}% Selesai</span>
+
+                {% if kelas_data.tugas_baru > 0 %}
+                <div class="tugas-info">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    Ada {{ kelas_data.tugas_baru }} tugas menunggu!
+                </div>
+                {% endif %}
             </div>
             <div class="kelas-footer">
-                <a href="/murid/kelas/{{ kelas.id }}/latihan" class="btn-masuk">Buka Kelas</a>
+                <a href="/murid/kelas/{{ kelas_data.kelas.id }}/latihan" class="btn-masuk">Buka Kelas</a>
             </div>
         </div>
         {% endfor %}
@@ -424,6 +623,14 @@
     // Auto-uppercase input kode
     document.getElementById('input-kode-kelas').addEventListener('input', function () {
         this.value = this.value.toUpperCase();
+    });
+
+    // Auto-open modal if query param join=true is present
+    window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('join') === 'true') {
+            bukaModalKode();
+        }
     });
 </script>
 {% endblock %}

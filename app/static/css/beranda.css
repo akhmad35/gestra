@@ -15,6 +15,8 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2.5px solid var(--blue-300);
+  background-color: var(--blue-50);
+  mix-blend-mode: multiply;
 }
 .greeting-section h2 {
   font-size: 1.5rem;
@@ -45,6 +47,7 @@
 .welcome-banner-right img {
   width: 90px;
   object-fit: contain;
+  mix-blend-mode: multiply;
 }
 .welcome-banner-right p {
   font-size: .78rem;
@@ -83,9 +86,12 @@
   display: block;
 }
 .level-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   box-shadow: var(--shadow-md);
   border-color: var(--blue-200);
+}
+.level-card:hover .level-card-thumbnail svg {
+  transform: scale(1.08) rotate(-3deg);
 }
 
 .level-card-thumbnail {
@@ -165,6 +171,7 @@
   width: 100px;
   flex-shrink: 0;
   object-fit: contain;
+  mix-blend-mode: multiply;
 }
 .quiz-cta-content h3 {
   font-size: 1.2rem;

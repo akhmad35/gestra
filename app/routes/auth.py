@@ -14,7 +14,9 @@ async def login_page(request: Request, db: Session = Depends(get_db)):
     # Kalau sudah login, langsung ke beranda
     user_email = request.cookies.get("user_email")
     if user_email:
-        return RedirectResponse(url="/beranda")
+        user = get_user_by_email(db, user_email)
+        if user:
+            return RedirectResponse(url="/beranda")
     return templates.TemplateResponse(request, "login.html")
 
 @router.post("/login")
@@ -28,11 +30,13 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
     return response
 
 @router.get("/register", response_class=HTMLResponse)
-async def register_page(request: Request):
+async def register_page(request: Request, db: Session = Depends(get_db)):
     # Kalau sudah login, langsung ke beranda
     user_email = request.cookies.get("user_email")
     if user_email:
-        return RedirectResponse(url="/beranda")
+        user = get_user_by_email(db, user_email)
+        if user:
+            return RedirectResponse(url="/beranda")
     return templates.TemplateResponse(request, "daftar.html")
 
 @router.post("/register")
@@ -55,9 +59,12 @@ async def register(
     return response
 
 @router.get("/pilih-peran", response_class=HTMLResponse)
-async def pilih_peran_page(request: Request):
+async def pilih_peran_page(request: Request, db: Session = Depends(get_db)):
     user_email = request.cookies.get("user_email")
     if not user_email:
+        return RedirectResponse(url="/login")
+    user = get_user_by_email(db, user_email)
+    if not user:
         return RedirectResponse(url="/login")
     return templates.TemplateResponse(request, "pilih-peran.html")
 

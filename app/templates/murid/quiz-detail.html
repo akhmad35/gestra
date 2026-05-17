@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+
+{% block title %}Detail Kuis - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    .header-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .grid-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    .question-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .q-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        color: #64748b;
+    }
+    .q-body {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        justify-content: center;
+        padding: 1rem 0;
+    }
+    .char-box {
+        text-align: center;
+    }
+    .char-val {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+    .char-label {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .status-correct { background: #d1fae5; color: #10b981; }
+    .status-wrong { background: #fee2e2; color: #ef4444; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="top-toolbar">
+    <a href="/murid/riwayat-nilai" class="reusable-back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Kembali ke Riwayat
+    </a>
+</div>
+
+<div class="detail-container">
+    <div class="header-card">
+        <div>
+            <h1 style="margin:0; font-size:1.5rem;">Kuis Random #{{ session.id }}</h1>
+            <p style="margin:0; color:#64748b;">Dikerjakan pada {{ session.waktu_selesai.strftime('%d %b %Y %H:%M') if session.waktu_selesai else 'Belum Selesai' }}</p>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;">{{ session.skor_akhir }}</div>
+            <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">SKOR TOTAL</div>
+        </div>
+    </div>
+
+    <div class="grid-details">
+        {% for detail in session.details %}
+        <div class="question-card">
+            <div class="q-header">
+                <span>Soal {{ detail.nomor_soal }}</span>
+                <span class="status-badge {{ 'status-correct' if detail.is_correct else 'status-wrong' }}">
+                    {{ 'Benar' if detail.is_correct else 'Salah' }}
+                </span>
+            </div>
+            <div class="q-body">
+                <div class="char-box">
+                    <div class="char-val">{{ detail.target_char }}</div>
+                    <div class="char-label">Target</div>
+                </div>
+                <div style="font-size: 1.5rem; color: #cbd5e1;">➔</div>
+                <div class="char-box">
+                    <div class="char-val" style="color: {{ '#10b981' if detail.is_correct else '#ef4444' }};">{{ detail.prediction }}</div>
+                    <div class="char-label">Jawabanmu</div>
+                </div>
+            </div>
+            <div style="margin-top: 1rem; font-size: 0.875rem; color: #64748b; text-align: center;">
+                Akurasi AI: <strong>{{ detail.confidence|round(1) }}%</strong>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

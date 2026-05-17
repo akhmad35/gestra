@@ -1,0 +1,174 @@
+{% extends "layout.html" %}
+
+{% block title %}Nilai Siswa Kelas {{ kelas.nama_kelas }} - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .nilai-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .header-nilai {
+        margin-bottom: 2rem;
+    }
+
+    .header-nilai h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .header-nilai p {
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        text-align: center;
+    }
+
+    .stat-card h3 {
+        margin: 0 0 0.5rem 0;
+        color: #64748b;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .stat-card .val {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #10b981;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f1f5f9;
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 1.25rem 1.5rem;
+        text-align: left;
+    }
+
+    th {
+        background: #f8fafc;
+        font-weight: 700;
+        color: #475569;
+        font-size: 0.875rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    td {
+        border-bottom: 1px solid #f1f5f9;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    .status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .status-selesai { background: #d1fae5; color: #10b981; }
+    .status-belum { background: #fee2e2; color: #ef4444; }
+
+    .score-badge {
+        font-weight: 800;
+        color: #3b82f6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="top-toolbar">
+    <a href="/guru/kelas/{{ kelas.id }}/detail" class="reusable-back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Kembali ke Kelas
+    </a>
+</div>
+
+<div class="nilai-container">
+    <div class="header-nilai">
+        <h1>Nilai Siswa</h1>
+        <p>Kelas: <strong>{{ kelas.nama_kelas }}</strong></p>
+    </div>
+
+    <div class="stats-cards">
+        <div class="stat-card">
+            <h3>Total Siswa</h3>
+            <div class="val">{{ total_siswa }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Rata-rata Skor</h3>
+            <div class="val" style="color: #3b82f6;">{{ avg_score }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Latihan Diberikan</h3>
+            <div class="val" style="color: #f59e0b;">{{ total_latihan }}</div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama Siswa</th>
+                    <th>Judul Latihan</th>
+                    <th>Status</th>
+                    <th>Skor Handwriting</th>
+                    <th>Waktu (WIB)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if jawaban_list %}
+                    {% for j in jawaban_list %}
+                    <tr>
+                        <td>{{ j.siswa.nama }}</td>
+                        <td>{{ j.latihan.judul }}</td>
+                        <td><span class="status status-selesai">Selesai</span></td>
+                        <td><span class="score-badge">{{ j.nilai }}</span></td>
+                        <td style="color: #64748b; font-size: 0.875rem;">{{ j.dikumpulkan_pada.strftime('%Y-%m-%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #64748b; padding: 3rem;">Belum ada data nilai kuis handwriting yang masuk.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

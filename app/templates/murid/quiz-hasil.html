@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+
+{% block title %}Hasil Kuis - GESTRA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 0 1rem;
+        text-align: center;
+    }
+    .result-card {
+        background: white;
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    .result-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 8px;
+        background: var(--primary-gradient);
+    }
+    .score-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        margin: 0 auto 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 10px solid #10b981;
+    }
+    .score-val {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1;
+    }
+    .score-label {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+    .stat-box {
+        padding: 1.5rem;
+        background: #f8fafc;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+    }
+    .stat-val {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+    }
+    .action-btns {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+    .btn-action {
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+    }
+    .btn-secondary {
+        background: #f1f5f9;
+        color: #475569;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="result-container">
+    <div class="result-card">
+        <h1 style="margin-bottom: 0.5rem;">Selamat, {{ user.nama }}! 🎉</h1>
+        <p style="color: #64748b; margin-bottom: 2rem;">Kamu telah menyelesaikan kuis hari ini.</p>
+
+        <div class="score-circle">
+            <div class="score-val">{{ session.skor_akhir }}</div>
+            <div class="score-label">Skor Total</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-val" style="color: #10b981;">{{ session.benar_count }}</div>
+                <div class="stat-label">Benar</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val" style="color: #ef4444;">{{ session.salah_count }}</div>
+                <div class="stat-label">Salah</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val" style="color: #3b82f6;">{{ avg_accuracy }}%</div>
+                <div class="stat-label">Akurasi Rata-rata</div>
+            </div>
+        </div>
+
+        <div class="action-btns">
+            <a href="/murid/quiz-random/start" class="btn-action btn-primary">Coba Lagi</a>
+            <a href="/murid/riwayat-nilai" class="btn-action btn-secondary">Lihat Riwayat</a>
+            <a href="/murid/dashboard" class="btn-action btn-secondary">Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
