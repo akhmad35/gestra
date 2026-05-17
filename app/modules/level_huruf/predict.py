@@ -17,11 +17,11 @@ MODEL_PATHS = {
         "labels": list(string.digits)
     },
     "upper": {
-        "path": "models/CNN_Dataset_Huruf_Besar_New.keras",
+        "path": "models/MN2_Dataset_Huruf_Besar.keras",
         "labels": list(string.ascii_uppercase)
     },
     "lower": {
-        "path": "models/CNN_Dataset_Huruf_Kecil_New.keras",
+        "path": "models/MN2_Dataset_Huruf_Kecil.keras",
         "labels": list(string.ascii_lowercase)
     }
 }
@@ -65,14 +65,13 @@ def preprocess_canvas(canvas):
     return img_input
 
 # Fungsi untuk prediksi tulisan dari canvas
-def predict_from_canvas(canvas, mode):
+def predict_from_canvas(canvas, mode, target=None): # Tambahkan parameter target
     try:
         model = get_model(mode)
         labels = MODEL_PATHS[mode]["labels"]
         
         img_prepared = preprocess_canvas(canvas)
         
-        # Jika canvas kosong, maka tidak terjadi prediksi dan akan mengembalikan nilai "Kosong"
         if img_prepared is None:
             return "Kosong", 0.0
         
@@ -81,12 +80,22 @@ def predict_from_canvas(canvas, mode):
         idx = int(np.argmax(preds))
         confidence = float(preds[idx])
         
-        # Jika confidencenya kurang dari 80%, maka tulisan dianggap tidak jelas
-        if confidence < 0.80: 
-            return "Tidak Jelas", confidence
+        if target:
+            target_clean = str(target).strip().lower()
+            predicted_clean = str(labels[idx]).strip().lower()
+            
+            # A. Jika tebakan AI benar (Target == Guess)
+            # Kembalikan nilainya meskipun confidence di bawah 80% (Toleransi)
+            if predicted_clean == target_clean:
+                return labels[idx], confidence
+            
+            # B. Jika AI menebak huruf LAIN dan confidence rendah (< 80%)
+            # Langsung anggap Tidak Jelas dan skor 0 (Hukuman)
+            return "Tidak Jelas", 0.0
 
         result = labels[idx]
         return result, confidence
+        
     except Exception as e:
         print(f"Error: {e}")
         return "Error", 0.0
