@@ -83,11 +83,11 @@ async def save_canvas(request: Request):
             prediction, confidence = predict_from_canvas(canvas_1200, mode)
 
     # Ambil prediksi asli dari model
-    prediction, confidence = predict_from_canvas(canvas_1200, mode)
+    prediction, confidence = predict_from_canvas(canvas_1200, mode, target=target)
     
     # Debug huruf level kata
     print(f"Target: {target}")
-    print(f"AI Guess: {prediction}")
+    print(f"Tebakan: {prediction}")
     print(f"Confidence: {confidence * 100:.2f}%")
 
     target_clean = str(target).strip().lower()

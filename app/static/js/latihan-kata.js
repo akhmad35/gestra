@@ -45,7 +45,7 @@ function mulaiLatihanKata() {
 
     // Pindah ke halaman kanvas dengan membawa parameter kata target
     setTimeout(() => {
-        window.location.href = `/canvas-latihan-kata?target=${kataAcak}`;
+        window.location.href = `canvas-latihan-kata.html?target=${kataAcak}`;
     }, 800);
 }
 

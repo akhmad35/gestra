@@ -8,10 +8,25 @@ function closeKuisSelesaiModal() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Ambil parameter dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetChar = urlParams.get('target') || ''; // Ini akan mengambil "Mangga"
+    const currentMode = urlParams.get('mode') || '';
+
+    const targetDisplay = document.getElementById('display-target');
+    
+    if (targetDisplay) {
+        targetDisplay.innerText = targetChar;
+        console.log("Target berhasil dimuat:", targetChar);
+    } else {
+        console.error("Elemen display-target tidak ditemukan!");
+    }
+
+    // Tambahkan juga listener suara pada heading jika diklik
     const heading = document.querySelector('.info-header-text h2');
     if (heading) {
         heading.style.cursor = 'pointer';
-        heading.addEventListener('click', () => speak('Tulis kata dibawah ini'));
+        heading.addEventListener('click', () => speak(`Tulis kata ${targetChar}`));
     }
 });
 
@@ -34,10 +49,10 @@ const octx = cameraOverlay.getContext('2d');
 
 // Ambil parameter kata dari URL
 const urlParams = new URLSearchParams(window.location.search);
-const targetWord = urlParams.get('target') || 'mangga';
+const targetWord = urlParams.get('target') || '';
 
 // Update Tampilan Target di UI
-const targetDisplay = document.querySelector('.target-char');
+const targetDisplay = document.querySelector('.display-target');
 
 // Set ukuran canvas (SAMA PERSIS DENGAN VERSI HURUF)
 paintCanvas.width = 640; paintCanvas.height = 480;
@@ -214,7 +229,7 @@ async function periksaTulisan() {
         const data = await response.json();
 
         // Debug huruf level kata
-        console.group(`%c GESTRA DEBUG: Huruf ${targetWord[currentLetterIndex].toUpperCase()} `, 'background: #222; color: #bada55');
+        console.group(`%c GESTRA DEBUG: Huruf ${targetWord[currentLetterIndex]} `, 'background: #222; color: #bada55');
         console.log(`Target Terdaftar: ${data.target}`);
         console.log(`Tebakan Asli AI: ${data.original_guess}`);
         console.log(`Confidence: ${data.confidence}%`);
@@ -224,27 +239,27 @@ async function periksaTulisan() {
         const errorStates = ["Kamu salah menulis huruf", "Tidak Jelas", "Kosong", "Error"];
         
         // Penalti nilai
-        if (errorStates.includes(data.prediction)) {
-            // Kurangi 10 poin
+        if (!data.correct) {
             letterScores[currentLetterIndex] = Math.max(0, letterScores[currentLetterIndex] - 10);
-            console.log(`Penalty! Skor huruf ${targetWord[currentLetterIndex]} jadi: ${letterScores[currentLetterIndex]}`);
-
-            let errorTitle = (data.prediction === "Kamu salah menulis huruf") ? "Ups! Salah Huruf" : "Kurang Jelas";
+            
+            let errorTitle = (data.prediction === "Kosong") ? "Kanvas Kosong" : "Kurang Tepat";
             speak(`Ayo coba lagi, tulis huruf ${targetWord[currentLetterIndex]}`);
             
             showRetryModal(errorTitle, targetWord[currentLetterIndex]);
             resetCanvas();
             btn.disabled = false;
             btn.innerText = "Kirim Huruf";
+            
             return;
         }
 
-        collectedPredictions += data.prediction;
-        updateRibbon(); 
+        collectedPredictions += targetWord[currentLetterIndex]; 
+        updateRibbon();
 
         currentLetterIndex++;
 
         if (currentLetterIndex < targetWord.length) {
+            // Lanjut ke huruf berikutnya
             setTimeout(() => {
                 speak(`Bagus! Sekarang tulis huruf ${targetWord[currentLetterIndex]}`);
                 resetCanvas();
@@ -253,11 +268,13 @@ async function periksaTulisan() {
                 btn.innerText = "Kirim Huruf";
             }, 500);
         } else {
+            // Kata selesai
             setTimeout(() => {
                 finalValidation();
             }, 800);
         }
     } catch (error) {
+        console.error(error);
         alert("Gagal terhubung ke server");
         btn.disabled = false;
         btn.innerText = "Kirim Huruf";
@@ -299,7 +316,8 @@ async function finalValidation() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 target: targetWord,
-                image: dataURL
+                prediction: collectedPredictions,
+                individual_scores: letterScores
             })
         });
         const data = await response.json();
