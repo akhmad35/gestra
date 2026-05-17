@@ -195,7 +195,7 @@
             <!-- Beautiful Avatar Upload Trigger -->
             <div class="avatar-upload-container">
                 <div class="avatar-wrapper">
-                    <img src="{{ user.foto_profil or url_for('static', path='assets/images/mascot.png') }}" 
+                    <img src="{% if user.foto_profil %}{{ user.foto_profil }}{% else %}{{ url_for('static', path='assets/images/mascot.png') }}?v=2{% endif %}" 
                          id="avatar-preview" 
                          alt="Avatar" 
                          class="avatar-image" />

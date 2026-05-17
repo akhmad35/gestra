@@ -16,7 +16,6 @@
   object-fit: cover;
   border: 2.5px solid var(--blue-300);
   background-color: var(--blue-50);
-  mix-blend-mode: multiply;
 }
 .greeting-section h2 {
   font-size: 1.5rem;
@@ -47,7 +46,13 @@
 .welcome-banner-right img {
   width: 90px;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  animation: floatMascotWelcome 4s ease-in-out infinite;
+  filter: drop-shadow(0 6px 12px rgba(59, 130, 246, 0.18));
+}
+
+@keyframes floatMascotWelcome {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(1deg); }
 }
 .welcome-banner-right p {
   font-size: .78rem;
@@ -76,74 +81,133 @@
 
 .level-card {
   background: var(--white);
-  border-radius: var(--radius-lg);
-  border: 1.5px solid var(--gray-200);
+  border-radius: 24px;
+  border: 1.5px solid #F1F5F9;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 10px 30px rgba(148, 163, 184, 0.05);
   cursor: pointer;
-  transition: var(--transition);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease, box-shadow 0.3s ease;
   text-decoration: none;
   display: block;
 }
 .level-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--blue-200);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(148, 163, 184, 0.12);
 }
-.level-card:hover .level-card-thumbnail svg {
-  transform: scale(1.08) rotate(-3deg);
+#level-1:hover {
+  border-color: #FED7AA;
+}
+#level-2:hover {
+  border-color: #BAE6FD;
+}
+#level-kelas:hover {
+  border-color: #C7D2FE;
 }
 
 .level-card-thumbnail {
   width: 100%;
-  aspect-ratio: 16/9;
-  background-image:
-    linear-gradient(45deg, var(--gray-200) 25%, transparent 25%),
-    linear-gradient(-45deg, var(--gray-200) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, var(--gray-200) 75%),
-    linear-gradient(-45deg, transparent 75%, var(--gray-200) 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  aspect-ratio: 16/10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
   background-color: var(--white);
+  border-bottom: 1.5px solid #F8FAFC;
+}
+
+#level-1 .level-card-thumbnail::before {
+  content: '';
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFFBEB 0%, rgba(255, 255, 255, 0) 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+#level-2 .level-card-thumbnail::before {
+  content: '';
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #F0F9FF 0%, rgba(255, 255, 255, 0) 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.level-illustration {
+  width: 62%;
+  height: 82%;
+  object-fit: contain;
+  z-index: 2;
+  filter: drop-shadow(0 6px 14px rgba(148, 163, 184, 0.08));
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: floatIllustration 5s ease-in-out infinite;
+}
+
+#level-2 .level-illustration {
+  animation-delay: 1.5s;
+}
+
+@keyframes floatIllustration {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.level-card:hover .level-illustration {
+  transform: scale(1.1) rotate(-3deg) translateY(-2px);
 }
 
 .level-card-footer {
-  padding: 14px 18px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  background-color: var(--white);
 }
 .level-card-title {
-  font-size: .95rem;
+  font-size: .98rem;
   font-weight: 800;
   color: var(--gray-900);
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 /* ── Circular Progress ── */
 .progress-circle {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .progress-circle svg {
   transform: rotate(-90deg);
+  width: 56px;
+  height: 56px;
 }
 .progress-circle .progress-bg {
   fill: none;
-  stroke: var(--gray-200);
-  stroke-width: 5;
+  stroke: #F1F5F9;
+  stroke-width: 5.5;
 }
 .progress-circle .progress-bar {
   fill: none;
-  stroke: #22C55E;
-  stroke-width: 5;
+  stroke: #10B981;
+  stroke-width: 5.5;
   stroke-linecap: round;
   stroke-dasharray: 126;
-  stroke-dashoffset: 31.5; /* 75% = 126 * 0.25 */
-  transition: stroke-dashoffset .6s ease;
+  stroke-dashoffset: 31.5;
+  transition: stroke-dashoffset .8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .progress-circle .progress-text {
   position: absolute;
@@ -151,9 +215,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: .78rem;
+  font-size: .82rem;
   font-weight: 800;
-  color: #22C55E;
+  color: #10B981;
 }
 
 /* ── Quiz CTA ── */
@@ -169,9 +233,15 @@
 }
 .quiz-cta-mascot {
   width: 100px;
+  height: 100px;
   flex-shrink: 0;
   object-fit: contain;
-  mix-blend-mode: multiply;
+  background: radial-gradient(circle, #DBEAFE 0%, #EFF6FF 80%);
+  border-radius: 50%;
+  padding: 8px;
+  animation: floatMascotWelcome 4.2s ease-in-out infinite 0.5s;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.12);
+  border: 3px solid var(--white);
 }
 .quiz-cta-content h3 {
   font-size: 1.2rem;

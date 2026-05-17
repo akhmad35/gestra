@@ -332,7 +332,7 @@
   <!-- Profile Header -->
   <div class="profile-header">
     <div class="profile-avatar-wrapper" onclick="window.location.href='/edit-profile'" style="cursor: pointer;">
-      <img src="{{ user.foto_profil or url_for('static', path='assets/images/mascot.png') }}" alt="Foto Profil" class="profile-avatar" />
+      <img src="{% if user.foto_profil %}{{ user.foto_profil }}{% else %}{{ url_for('static', path='assets/images/mascot.png') }}?v=2{% endif %}" alt="Foto Profil" class="profile-avatar" />
       <!-- <span class="link-ganti-foto">Ganti foto profil</span> -->
     </div>
     <div class="profile-info">
