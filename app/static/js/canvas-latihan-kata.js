@@ -216,34 +216,44 @@ async function periksaTulisan() {
     btn.innerText = "Mengecek";
 
     try {
-        const response = await fetch("/save", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                mode: modeKirim,
-                target: currentTarget,
-                image: dataURL
-            })
-        });
-        
-        const data = await response.json();
+        let response, data;
+        try {
+            response = await fetch("/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    mode: modeKirim,
+                    target: currentTarget,
+                    image: dataURL
+                })
+            });
+            data = await response.json();
+        } catch (fetchErr) {
+            console.error("Gagal terhubung ke server GESTRA:", fetchErr);
+            data = {
+                correct: false,
+                prediction: "Error",
+                confidence: 0,
+                status: "Terjadi mismatch antara frontend - backend - model",
+                message: "Coba ulangi ya 😊 sistem sedang menyesuaikan input"
+            };
+        }
 
         // Debug huruf level kata
         console.group(`%c GESTRA DEBUG: Huruf ${targetWord[currentLetterIndex]} `, 'background: #222; color: #bada55');
         console.log(`Target Terdaftar: ${data.target}`);
-        console.log(`Tebakan Asli AI: ${data.original_guess}`);
+        console.log(`Tebakan Asli AI: ${data.prediction}`);
         console.log(`Confidence: ${data.confidence}%`);
-        console.log(`Status Akhir: ${data.prediction}`);
+        console.log(`Status Akhir: ${data.status}`);
         console.groupEnd();
 
-        const errorStates = ["Kamu salah menulis huruf", "Tidak Jelas", "Kosong", "Error"];
-        
         // Penalti nilai
         if (!data.correct) {
             letterScores[currentLetterIndex] = Math.max(0, letterScores[currentLetterIndex] - 10);
             
-            let errorTitle = (data.prediction === "Kosong") ? "Kanvas Kosong" : "Kurang Tepat";
-            speak(`Ayo coba lagi, tulis huruf ${targetWord[currentLetterIndex]}`);
+            let errorTitle = data.status || "Kurang Tepat";
+            let speakMsg = data.message || (data.status === "Hampir Benar" ? "Hampir benar 👍" : `Coba lagi ya 😊`);
+            speak(speakMsg);
             
             showRetryModal(errorTitle, targetWord[currentLetterIndex]);
             resetCanvas();
@@ -274,8 +284,10 @@ async function periksaTulisan() {
             }, 800);
         }
     } catch (error) {
-        console.error(error);
-        alert("Gagal terhubung ke server");
+        console.error("Kesalahan kritis pada periksaTulisan:", error);
+        speak("Coba ulangi ya 😊");
+        showRetryModal("Sistem sedang sibuk", targetWord[currentLetterIndex]);
+        resetCanvas();
         btn.disabled = false;
         btn.innerText = "Kirim Huruf";
     }

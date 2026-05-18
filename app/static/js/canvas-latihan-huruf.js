@@ -266,17 +266,36 @@ async function periksaTulisan() {
             };
         }
 
-        const response = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
+        let response, data;
+        try {
+            response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            data = await response.json();
+        } catch (fetchErr) {
+            console.error("Gagal terhubung ke server GESTRA:", fetchErr);
+            // Fail-safe response fallback
+            data = {
+                correct: false,
+                prediction: "unknown",
+                confidence: 0,
+                status: "system_error",
+                message: "Coba ulangi ya 😊 sistem sedang menyesuaikan input"
+            };
+        }
         
-        const data = await response.json();
         showModalResult(data);
     } catch (error) {
-        console.error(error);
-        alert("Gagal terhubung ke server FastAPI");
+        console.error("Kesalahan kritis pada periksaTulisan:", error);
+        showModalResult({
+            correct: false,
+            prediction: "unknown",
+            confidence: 0,
+            status: "system_error",
+            message: "Coba ulangi ya 😊 sistem sedang menyesuaikan input"
+        });
     } finally {
         if (btn) {
             btn.disabled = false;
@@ -304,19 +323,29 @@ function showModalResult(data) {
     }
     if (retryBtn) retryBtn.style.display = "none";
 
-    // Setup Feedback
+    // Setup Dyslexia-friendly Feedback
+    const customStatus = data.status || (data.correct ? "Benar" : "Tidak Yakin");
+    const feedbackMsg = data.message || (data.correct ? "Bagus, sedikit lagi ✍️" : "Coba lagi ya 😊");
+
     if (data.correct) {
-        title.innerText = `Jawaban Benar!`;
+        title.innerText = customStatus;
         title.style.color = "#16a34a";
         if (iconContainer) iconContainer.innerHTML = '🌟'; 
-        speak(`Hebat! Jawabanmu benar.`);
-        // Jika benar, Coba Lagi tidak perlu
+        speak(feedbackMsg);
         if (retryBtn) retryBtn.style.display = "none";
     } else {
-        title.innerText = `Jawaban Salah!`;
-        title.style.color = "#dc2626";
-        if (iconContainer) iconContainer.innerHTML = '❌';
-        speak(`Ayo coba lagi, kamu pasti bisa.`);
+        title.innerText = customStatus;
+        
+        // Use soft orange for "Hampir Benar" instead of harsh red!
+        if (customStatus === "Hampir Benar") {
+            title.style.color = "#F59E0B";
+            if (iconContainer) iconContainer.innerHTML = '✍️';
+        } else {
+            title.style.color = "#dc2626";
+            if (iconContainer) iconContainer.innerHTML = '❌';
+        }
+        
+        speak(feedbackMsg);
 
         // Logika Coba Lagi berdasarkan waktu
         const isTimerMode = window.QUIZ_CONFIG && window.QUIZ_CONFIG.mode === "timer";

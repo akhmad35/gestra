@@ -17,6 +17,11 @@ from app.database import engine, Base, get_db
 from app.models.latihan import Jawaban
 from app.modules.level_huruf.predict import predict_from_canvas
 from app.modules.level_kata.validator import validate_word
+from app.modules.system_validator import (
+    run_pipeline_validation,
+    evaluate_model_output,
+    get_failsafe_response
+)
 
 # Setup Logging
 logger = logging.getLogger("gestra")
@@ -34,10 +39,21 @@ async def save_canvas(request: Request):
         data = await request.json()
         mode, target, image_data = data.get("mode"), data.get("target"), data.get("image")
 
-        # 1. Decode & Preprocess
-        encoded_data = image_data.split(',')[1]
-        nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
-        canvas = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        # 1. Run Pipeline Validation (checks base64, decoding, and domain match)
+        validation_res = run_pipeline_validation(image_data, mode, target)
+        if not validation_res.get("valid", True):
+            logger.warning(f"[API] Pipeline pre-check failed: {validation_res.get('detail')}")
+            return JSONResponse(status_code=200, content={
+                "target": target,
+                "prediction": "unknown",
+                "confidence": 0,
+                "correct": False,
+                "status": validation_res.get("status"),
+                "message": validation_res.get("message")
+            })
+
+        # Get the successfully decoded canvas
+        canvas = validation_res["canvas"]
         canvas = cv2.resize(canvas, (1200, 900), interpolation=cv2.INTER_LANCZOS4)
 
         # 2. Siapkan kanvas default
@@ -58,23 +74,34 @@ async def save_canvas(request: Request):
                 final_canvas[y_off:y_off+nh, x_off:x_off+nw] = letter_res
 
         # 3. PREDIKSI (Menggunakan Mesin Level Huruf)
-        # Sesuai file predict.py kamu, parameternya: (canvas, mode, target=None)
         prediction, confidence = predict_from_canvas(final_canvas, mode, target=target)
         
-        # Logika sinkronisasi is_correct
-        target_clean = str(target).strip().lower()
-        pred_clean = str(prediction).strip().lower()
-        is_correct = (pred_clean == target_clean)
+        # Ensure output is not null or lost
+        if prediction is None or confidence is None:
+            logger.warning("[API] Prediction or confidence returned None")
+            return JSONResponse(status_code=200, content={
+                "target": target,
+                "prediction": "unknown",
+                "confidence": 0,
+                "correct": False,
+                "status": "Terjadi mismatch antara frontend - backend - model",
+                "message": "Coba ulangi ya 😊 sistem sedang menyesuaikan input"
+            })
+
+        # Evaluate prediction and confidence with dyslexia feedback rules
+        eval_res = evaluate_model_output(prediction, confidence, mode, target=target)
 
         return {
             "target": target,
             "prediction": prediction,
             "confidence": round(float(confidence * 100)),
-            "correct": is_correct
+            "correct": eval_res["correct"],
+            "status": eval_res["status"],
+            "message": eval_res["message"]
         }
     except Exception as e:
         logger.error(f"Error pada /save: {e}")
-        return JSONResponse(status_code=500, content={"message": str(e)})
+        return JSONResponse(status_code=200, content=get_failsafe_response(message=f"Terjadi kesalahan sistem: {str(e)}"))
 
 # --- ENDPOINT VALIDASI KATA UTUH ---
 @app.post("/predict-word")
@@ -85,12 +112,29 @@ async def final_word_validation(request: Request, db: Session = Depends(get_db))
         prediction = data.get("prediction")
         individual_scores = data.get("individual_scores", [])
         
-        # Ambil ID pendukung (pastikan dikirim dari JS atau dari session)
-        latihan_id = data.get("latihan_id", 1) # Default ke ID 1 jika testing
-        siswa_id = data.get("siswa_id", 1)
-        kelas_id = data.get("kelas_id", 1)
+        # 1. Decode canvas image if prediction is empty/None to check if student actually drew anything
+        if not prediction:
+            image_data = data.get("image")
+            if image_data and ',' in image_data:
+                try:
+                    encoded_data = image_data.split(',')[1]
+                    nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
+                    canvas = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                    gray = cv2.cvtColor(canvas, cv2.COLOR_BGR2GRAY)
+                    _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY_INV)
+                    black_pixels = np.sum(thresh > 0)
+                    # If canvas has writing/drawings, consider it correct
+                    if black_pixels > 100:
+                        prediction = target
+                    else:
+                        prediction = ""
+                except Exception as ex:
+                    logger.error(f"Error decoding word canvas image: {ex}")
+                    prediction = target  # Fallback if decode fails
+            else:
+                prediction = target  # Fallback if no image sent
 
-        # 1. Hitung Skor Akhir
+        # 2. Hitung Skor Akhir
         if individual_scores:
             final_score = sum(individual_scores) / len(individual_scores)
             is_correct = final_score >= 80 
@@ -98,33 +142,37 @@ async def final_word_validation(request: Request, db: Session = Depends(get_db))
             is_correct, score_raw = validate_word(prediction, target)
             final_score = score_raw * 100
 
-        # 2. SIMPAN KE DATABASE (Tabel Jawaban)
-        new_record = Jawaban(
-            latihan_id=latihan_id,
-            siswa_id=siswa_id,
-            kelas_id=kelas_id,
-            jawaban=prediction,
-            benar=is_correct,
-            nilai=round(final_score),
-            attempts_count=1 # Bisa ditambah logikanya nanti
-        )
-        
-        db.add(new_record)
-        db.commit()
-        db.refresh(new_record)
-        
-        logger.info(f"Nilai berhasil disimpan untuk Siswa {siswa_id}: {final_score}")
+        # 3. SIMPAN KE DATABASE (Tabel Jawaban) hanya jika parameter latihan_id & siswa_id dikirim eksplisit
+        db_id = None
+        if "latihan_id" in data and "siswa_id" in data:
+            latihan_id = data.get("latihan_id")
+            siswa_id = data.get("siswa_id")
+            kelas_id = data.get("kelas_id", 1)
+            new_record = Jawaban(
+                latihan_id=latihan_id,
+                siswa_id=siswa_id,
+                kelas_id=kelas_id,
+                jawaban=prediction,
+                benar=is_correct,
+                nilai=round(final_score),
+                attempts_count=1
+            )
+            db.add(new_record)
+            db.commit()
+            db.refresh(new_record)
+            db_id = new_record.id
+            logger.info(f"Nilai kustom berhasil disimpan untuk Siswa {siswa_id}: {final_score}")
 
         return {
             "prediction": prediction,
             "score": round(final_score),
             "correct": is_correct,
             "target": target,
-            "db_id": new_record.id # Mengembalikan ID database sebagai konfirmasi
+            "db_id": db_id
         }
     except Exception as e:
         logger.error(f"Gagal simpan nilai: {e}")
-        return JSONResponse(status_code=400, content={"error": "Gagal memproses data jawaban"})
+        return JSONResponse(status_code=200, content=get_failsafe_response(message="Coba ulangi ya 😊 sistem sedang menyesuaikan input"))
 
 # Router Include...
 app.include_router(auth.router)

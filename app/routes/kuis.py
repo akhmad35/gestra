@@ -11,6 +11,11 @@ from app.routes.halaman import get_current_user
 from app.models.quiz import QuizSession, QuizDetail
 from app.models.user import User
 from app.routes.latihan import decode_base64_image
+from app.modules.system_validator import (
+    run_pipeline_validation,
+    evaluate_model_output,
+    get_failsafe_response
+)
 from app.modules.level_huruf.predict import predict_from_canvas
 
 router = APIRouter(prefix="/murid", tags=["Kuis"])
@@ -122,16 +127,40 @@ async def submit_quiz_answer(
         prediction = "None"
         confidence = 0.0
         is_correct = False
+        status_msg = "unknown"
+        message_msg = ""
         
         if not is_timeout and image_data:
-            # Decode & Predict
-            canvas = decode_base64_image(image_data)
-            prediction, confidence = predict_from_canvas(canvas, mode)
-            is_correct = (prediction.lower() == target.lower()) and confidence >= 0.80
+            # 1. Run Pipeline Validation (checks base64, decoding, and domain match)
+            validation_res = run_pipeline_validation(image_data, mode, target)
+            if not validation_res.get("valid", True):
+                prediction = "unknown"
+                confidence = 0.0
+                is_correct = False
+                status_msg = validation_res.get("status")
+                message_msg = validation_res.get("message")
+            else:
+                canvas = validation_res["canvas"]
+                prediction, confidence = predict_from_canvas(canvas, mode)
+                
+                # Check output completeness
+                if prediction is None or confidence is None:
+                    prediction = "unknown"
+                    confidence = 0.0
+                    is_correct = False
+                    status_msg = "Terjadi mismatch antara frontend - backend - model"
+                    message_msg = "Coba ulangi ya 😊 sistem sedang menyesuaikan input"
+                else:
+                    eval_res = evaluate_model_output(prediction, confidence, mode, target=target)
+                    is_correct = eval_res["correct"]
+                    status_msg = eval_res["status"]
+                    message_msg = eval_res["message"]
         else:
             prediction = "Timeout"
             confidence = 0.0
             is_correct = False
+            status_msg = "Tidak Yakin, coba ulang"
+            message_msg = "Coba lagi ya 😊"
         
         if existing_detail:
             # Update detail yang sudah ada (jika murid coba lagi di soal yang sama)
@@ -184,12 +213,14 @@ async def submit_quiz_answer(
             "confidence": round(float(confidence) * 100, 2),
             "finished": finished,
             "total_dikerjakan": total_dikerjakan,
-            "next_url": f"/murid/quiz/kerjakan/{session.id}" if not finished else f"/murid/quiz/hasil/{session.id}"
+            "next_url": f"/murid/quiz/kerjakan/{session.id}" if not finished else f"/murid/quiz/hasil/{session.id}",
+            "status": status_msg,
+            "message": message_msg
         }
         
     except Exception as e:
         print(f"Error in submit_quiz_answer: {e}")
-        return JSONResponse(status_code=500, content={"detail": str(e)})
+        return JSONResponse(status_code=200, content=get_failsafe_response(message=f"Terjadi kesalahan sistem: {str(e)}"))
 
 @router.get("/quiz/hasil/{session_id}", response_class=HTMLResponse)
 async def quiz_hasil(request: Request, session_id: int, db: Session = Depends(get_db)):
