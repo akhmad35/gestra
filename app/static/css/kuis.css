@@ -26,11 +26,14 @@
 
 .kuis-mascot {
   width: 180px;
+  height: 180px;
   flex-shrink: 0;
   object-fit: contain;
-  filter: drop-shadow(0 6px 18px rgba(37,99,235,.18));
+  background: radial-gradient(circle, rgba(191, 219, 254, 0.5) 0%, rgba(239, 246, 255, 0) 70%);
+  border-radius: 50%;
+  padding: 12px;
+  filter: drop-shadow(0 6px 18px rgba(37,99,235,.15));
   animation: floatMascot 3.5s ease-in-out infinite;
-  mix-blend-mode: multiply;
 }
 
 .kuis-content {

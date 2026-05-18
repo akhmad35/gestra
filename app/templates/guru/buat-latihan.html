@@ -219,29 +219,41 @@
             <!-- Bagian Manual -->
             <div id="section-manual">
                 <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 1rem;">Pilih soal yang ingin dimasukkan dari dataset di bawah ini:</p>
-                <div style="margin-bottom: 1rem;">
+                <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
                     <button type="button" class="btn-generate" onclick="switchTab('huruf')" id="tab-huruf" style="background:#6366f1; padding:0.5rem 1rem;">Dataset Huruf</button>
                     <button type="button" class="btn-generate" onclick="switchTab('kata')" id="tab-kata" style="background:#e2e8f0; color:#333; padding:0.5rem 1rem;">Dataset Kata</button>
                 </div>
                 
                 <input type="hidden" name="dataset_manual" id="dataset_manual" value="[]">
                 
+                <!-- Input Kata Manual (Hanya Tampil Saat Tab Kata Aktif) -->
+                <div id="container-tambah-kata" style="display: none; margin-bottom: 1.5rem; background: #ffffff; border: 1px dashed #6366f1; border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.05);">
+                    <label style="display: block; font-size: 0.875rem; font-weight: 700; color: #4f46e5; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Tambah Kata Baru
+                    </label>
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <input type="text" id="input-kata-baru" class="form-control" placeholder="Ketik kata baru sendiri (misal: Buku, Rumah)..." style="flex: 1; border-radius: 12px;" onkeydown="handleKataKeydown(event)">
+                        <button type="button" class="btn-generate" onclick="tambahKataCustom()" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); padding: 0.75rem 1.25rem; font-size: 0.875rem; border-radius: 12px; white-space: nowrap; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); border: none; cursor: pointer; color: white; font-weight: 700; display: flex; align-items: center; gap: 0.25rem;">
+                            Tambah
+                        </button>
+                    </div>
+                    <div id="error-kata-baru" style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 0.4rem; font-weight: 600;"></div>
+                </div>
+
                 <div id="grid-huruf" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
                     {% for item in dataset_huruf %}
-                    <div class="dataset-item manual-item" onclick="toggleSelection(this, '{{ item.id }}', '{{ item.label }}', '{{ item.image }}')" style="cursor:pointer; border: 2px solid transparent;">
+                    <div class="dataset-item manual-item" onclick="toggleSelection(this, '{{ item.id }}', '{{ item.label }}', '{{ item.image }}')" 
+                         style="cursor:pointer; border: 2px solid transparent; background: white; border-radius: 12px; padding: 0.5rem; text-align: center;"
+                         data-id="{{ item.id }}">
                         <img src="{{ item.image }}" alt="{{ item.label }}">
                         <div style="font-size: 0.75rem; font-weight: 700;">{{ item.label }}</div>
                     </div>
                     {% endfor %}
                 </div>
 
-                <div id="grid-kata" style="display: none; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem;">
-                    {% for item in dataset_kata %}
-                    <div class="dataset-item manual-item" onclick="toggleSelection(this, '{{ item.id }}', '{{ item.label }}', '{{ item.image }}')" style="cursor:pointer; border: 2px solid transparent;">
-                        <img src="{{ item.image }}" alt="{{ item.label }}">
-                        <div style="font-size: 0.75rem; font-weight: 700;">{{ item.label }}</div>
-                    </div>
-                    {% endfor %}
+                <div id="grid-kata" style="display: none;">
+                    <!-- Categories and checkable chips are rendered dynamically using javascript from KATEGORI_KATA in latihan-kata.js -->
                 </div>
                 <div style="margin-top: 1rem; font-size: 0.875rem; font-weight: 600; color: #6366f1;">
                     Terpilih: <span id="count-terpilih">0</span> soal
@@ -330,8 +342,21 @@
     <a href="/guru/kelas/{{ kelas.id }}/detail" style="display: block; text-align: center; margin-top: 1.5rem; color: #64748b; text-decoration: none; font-size: 0.875rem; font-weight: 600;">← Batal</a>
 </div>
 
+<!-- Source of Truth: Load KATEGORI_KATA dynamically from student's static javascript file -->
+<script src="/static/js/latihan-kata.js"></script>
+
 <script>
     let selectedItems = [];
+    let customWords = [];
+
+    function handleTipeSoalChange() {
+        const tipe = document.getElementById('tipe_soal').value;
+        if (tipe === 'handwriting_huruf') {
+            switchTab('huruf');
+        } else if (tipe === 'handwriting_kata' || tipe === 'tebak_gambar') {
+            switchTab('kata');
+        }
+    }
 
     function toggleTimerMode() {
         const mode = document.getElementById('mode_timer').value;
@@ -368,13 +393,19 @@
         if(tipe === 'huruf') {
             document.getElementById('grid-huruf').style.display = 'grid';
             document.getElementById('grid-kata').style.display = 'none';
+            document.getElementById('container-tambah-kata').style.display = 'none';
+            
             document.getElementById('tab-huruf').style.background = '#6366f1';
             document.getElementById('tab-huruf').style.color = 'white';
             document.getElementById('tab-kata').style.background = '#e2e8f0';
             document.getElementById('tab-kata').style.color = '#333';
         } else {
             document.getElementById('grid-huruf').style.display = 'none';
-            document.getElementById('grid-kata').style.display = 'grid';
+            document.getElementById('grid-kata').style.display = 'block';
+            document.getElementById('container-tambah-kata').style.display = 'block';
+            
+            renderKataKategori(); // Dynamically render category listings
+            
             document.getElementById('tab-kata').style.background = '#6366f1';
             document.getElementById('tab-kata').style.color = 'white';
             document.getElementById('tab-huruf').style.background = '#e2e8f0';
@@ -382,20 +413,224 @@
         }
     }
 
+    // --- ACCORDION COLLAPSE TRIGGER ---
+    function toggleCategoryCollapse(catId) {
+        const grid = document.getElementById(`grid-category-${catId}`);
+        const chevron = document.getElementById(`chevron-${catId}`);
+        if (grid.style.display === 'none') {
+            grid.style.display = 'grid';
+            chevron.style.transform = 'rotate(180deg)';
+        } else {
+            grid.style.display = 'none';
+            chevron.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    // --- DYNAMIC DYNAMIC ACCORDION RENDERER FOR CATEGORIES ---
+    function renderKataKategori() {
+        const container = document.getElementById('grid-kata');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        container.style.display = 'block';
+        
+        const customList = selectedItems.filter(item => item.id && item.id.startsWith('custom_'));
+        const categories = { ...KATEGORI_KATA };
+        
+        if (customWords.length > 0 || customList.length > 0) {
+            const allCustoms = [];
+            const seen = new Set();
+            [...customWords, ...customList].forEach(item => {
+                if (!seen.has(item.id)) {
+                    seen.add(item.id);
+                    allCustoms.push(item);
+                }
+            });
+            categories['Kata Kustom Anda'] = allCustoms.map(w => w.label);
+        }
+        
+        let html = '';
+        Object.keys(categories).forEach(catName => {
+            const words = categories[catName];
+            if (words.length === 0) return;
+            
+            const catId = catName.replace(/[^a-zA-Z0-9]/g, '_');
+            let selectedInCatCount = 0;
+            
+            const wordsHTML = words.map(word => {
+                let id, label, image;
+                if (catName === 'Kata Kustom Anda') {
+                    const customObj = [...customWords, ...customList].find(w => w.label === word);
+                    id = customObj ? customObj.id : ('custom_' + word.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now());
+                    label = word;
+                    image = `https://placehold.co/80x80?text=${encodeURIComponent(label)}`;
+                } else {
+                    id = 'kata_' + word.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                    label = word;
+                    image = `https://placehold.co/80x80?text=${encodeURIComponent(label)}`;
+                }
+                
+                const isSelected = selectedItems.some(sel => sel.id === id);
+                if (isSelected) selectedInCatCount++;
+                
+                const borderStyle = isSelected ? 'border: 2px solid #6366f1; background: #eef2ff;' : 'border: 1px solid #e2e8f0; background: white;';
+                const checkIcon = isSelected ? 
+                    `<span style="position: absolute; top: 6px; left: 6px; width: 16px; height: 16px; background: #6366f1; color: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; z-index: 5;">✓</span>` : '';
+                
+                const deleteBtn = (catName === 'Kata Kustom Anda') ? 
+                    `<button type="button" class="btn-delete-custom" onclick="hapusKataCustom(event, '${id}')" 
+                            style="position: absolute; top: 4px; right: 4px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.15); z-index: 10;">
+                        ×
+                    </button>` : '';
+
+                return `
+                    <div class="dataset-item manual-item" onclick="toggleSelection(this, '${id}', '${label}', '${image}')" 
+                         style="cursor:pointer; position: relative; border-radius: 12px; padding: 0.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02); ${borderStyle}"
+                         data-id="${id}">
+                        ${checkIcon}
+                        ${deleteBtn}
+                        <img src="${image}" alt="${label}" style="width: 100%; height: 60px; object-fit: contain; border-radius: 8px; background: #f1f5f9; margin-bottom: 0.4rem;">
+                        <div style="font-size: 0.7rem; font-weight: 700; word-break: break-all; color: #334155; line-height: 1.2;">${label}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            const isExpanded = selectedInCatCount > 0 || catName === 'Kata Kustom Anda';
+            const displayGridStyle = isExpanded ? 'display: grid;' : 'display: none;';
+            const rotationAngle = isExpanded ? '180deg' : '0deg';
+            
+            html += `
+                <div class="category-section" style="margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 14px; background: white; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: border-color 0.2s;">
+                    <div onclick="toggleCategoryCollapse('${catId}')" 
+                         style="padding: 0.85rem 1.15rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                        <span style="font-weight: 700; color: #1e293b; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: ${catName === 'Kata Kustom Anda' ? '#10b981' : '#6366f1'};"></span>
+                            ${catName}
+                        </span>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <span id="badge-count-${catId}" style="background: ${selectedInCatCount > 0 ? '#eef2ff' : '#f1f5f9'}; color: ${selectedInCatCount > 0 ? '#4f46e5' : '#64748b'}; font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px; border: 1px solid ${selectedInCatCount > 0 ? '#e0e7ff' : '#e2e8f0'};">
+                                ${selectedInCatCount} / ${words.length} dipilih
+                            </span>
+                            <svg id="chevron-${catId}" style="width: 16px; height: 16px; transition: transform 0.2s; transform: rotate(${rotationAngle}); color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="grid-category-${catId}" style="${displayGridStyle} grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 0.6rem; padding: 0.85rem; background: #ffffff;">
+                        ${wordsHTML}
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+
     function toggleSelection(element, id, label, image) {
         const index = selectedItems.findIndex(item => item.id === id);
         
         if (index > -1) {
-            // Remove
             selectedItems.splice(index, 1);
-            element.style.borderColor = 'transparent';
-            element.style.background = 'white';
         } else {
-            // Add
             selectedItems.push({ id, label, image });
-            element.style.borderColor = '#6366f1';
-            element.style.background = '#eef2ff';
         }
+        
+        renderKataKategori(); // Instantly update state in accordion
+        
+        document.getElementById('count-terpilih').textContent = selectedItems.length;
+        document.getElementById('dataset_manual').value = JSON.stringify(selectedItems);
+    }
+
+    // --- FITUR KATA KUSTOM ---
+    function handleKataKeydown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            tambahKataCustom();
+        }
+    }
+
+    function validateCustomInput(text) {
+        const errorDiv = document.getElementById('error-kata-baru');
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+
+        const cleanText = text.trim();
+        if (!cleanText) {
+            showError("Kata tidak boleh kosong.");
+            return null;
+        }
+
+        if (cleanText.length > 20) {
+            showError("Kata terlalu panjang (maksimal 20 karakter).");
+            return null;
+        }
+
+        const validRegex = /^[a-zA-Z0-9\s\-]+$/;
+        if (!validRegex.test(cleanText)) {
+            showError("Kata hanya boleh berisi huruf, angka, spasi, atau tanda hubung (-).");
+            return null;
+        }
+
+        const lowerText = cleanText.toLowerCase();
+        const isDuplicateCustom = customWords.some(w => w.label.toLowerCase() === lowerText);
+        
+        // Dynamic duplication check directly against source KATEGORI_KATA object
+        let isDuplicateStandard = false;
+        Object.keys(KATEGORI_KATA).forEach(cat => {
+            if (KATEGORI_KATA[cat].some(w => w.toLowerCase() === lowerText)) {
+                isDuplicateStandard = true;
+            }
+        });
+
+        if (isDuplicateCustom || isDuplicateStandard) {
+            showError("Kata ini sudah ada di dalam daftar.");
+            return null;
+        }
+
+        return cleanText;
+    }
+
+    function showError(msg) {
+        const errorDiv = document.getElementById('error-kata-baru');
+        errorDiv.textContent = msg;
+        errorDiv.style.display = 'block';
+    }
+
+    function tambahKataCustom() {
+        const input = document.getElementById('input-kata-baru');
+        const text = input.value;
+        const validatedText = validateCustomInput(text);
+        
+        if (!validatedText) {
+            return;
+        }
+        
+        const formattedText = validatedText.charAt(0).toUpperCase() + validatedText.slice(1);
+        const id = 'custom_' + formattedText.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
+        const image = `https://placehold.co/80x80?text=${encodeURIComponent(formattedText)}`;
+        
+        const newItem = { id, label: formattedText, image };
+        customWords.push(newItem);
+        selectedItems.push(newItem);
+        
+        input.value = '';
+        renderKataKategori(); // Refresh accordion categories to include new custom word
+        
+        document.getElementById('count-terpilih').textContent = selectedItems.length;
+        document.getElementById('dataset_manual').value = JSON.stringify(selectedItems);
+    }
+
+    function hapusKataCustom(event, id) {
+        event.stopPropagation();
+        
+        customWords = customWords.filter(item => item.id !== id);
+        
+        const selectIdx = selectedItems.findIndex(item => item.id === id);
+        if (selectIdx > -1) {
+            selectedItems.splice(selectIdx, 1);
+        }
+        
+        renderKataKategori(); // Refresh accordion
         
         document.getElementById('count-terpilih').textContent = selectedItems.length;
         document.getElementById('dataset_manual').value = JSON.stringify(selectedItems);
@@ -409,5 +644,13 @@
         }
         return true;
     }
+
+    // Attach handleTipeSoalChange on select change
+    document.addEventListener("DOMContentLoaded", () => {
+        const tipeSoalSelect = document.getElementById('tipe_soal');
+        if (tipeSoalSelect) {
+            tipeSoalSelect.addEventListener('change', handleTipeSoalChange);
+        }
+    });
 </script>
 {% endblock %}

@@ -6,10 +6,10 @@
 const KATEGORI_KATA = {
     'Buah': ['Apel', 'Mangga', 'Pisang', 'Jeruk', 'Nanas', 'Melon'],
     'Hewan': ['Kucing', 'Anjing', 'Gajah', 'Singa', 'Kuda', 'Zebra'],
-    'Benda': ['Meja', 'Kursi', 'Buku', 'Lampu', 'Tas', 'Botol'],
+    'Benda': ['Buku', 'Meja', 'Kursi', 'Kaca', 'Pintu', 'Jendela', 'Sepatu', 'Baju', 'Topi', 'Tas'],
     'Hari': ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
     'Warna': ['Hijau', 'Merah', 'Kuning', 'Biru', 'Oren', 'Ungu'],
-    'Negara': ['Brazil', 'Indonesia', 'Jepang', 'Kanada', 'Spanyol']
+    'Negara': ['CV']
 };
 
 let selectedCategory = null;
@@ -60,7 +60,7 @@ function speak(text) {
 
 async function periksaTulisan() {
     const dataURL = paintCanvas.toDataURL('image/png');
-    
+
     try {
         const response = await fetch("/predict-word", { // <--- Pastikan ini predict-word
             method: "POST",
@@ -70,7 +70,7 @@ async function periksaTulisan() {
                 image: dataURL
             })
         });
-        
+
         const data = await response.json();
         showModalResult(data);
     } catch (error) {

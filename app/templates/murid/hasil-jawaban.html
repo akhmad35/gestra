@@ -5,84 +5,91 @@
 {% block extra_css %}
 <style>
     :root {
-        --primary: #6366f1;
-        --success: #10b981;
-        --danger: #ef4444;
-        --warning: #f59e0b;
-        --background: #f8fafc;
-        --card-bg: white;
+        --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        --primary-light: #eff6ff;
+        --success-light: #ecfdf5;
+        --danger-light: #fff5f5;
+
+        --radius-lg: 24px;
+        --radius-xl: 32px;
+        --shadow-md: 0 10px 25px -5px rgba(59, 130, 246, 0.05), 0 8px 10px -6px rgba(59, 130, 246, 0.05);
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
 
     body {
-        background-color: var(--background);
+        background-color: #f8fafc;
         font-family: 'Outfit', 'Inter', sans-serif;
     }
 
     .container {
-        max-width: 850px;
+        max-width: 900px;
         margin: 2rem auto;
         padding: 0 1.5rem;
     }
 
     .result-header-card {
-        background: var(--card-bg);
-        border-radius: 28px;
+        background: white;
+        border-radius: var(--radius-xl);
         padding: 3rem 2rem;
         text-align: center;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
-        border: 1px solid #f1f5f9;
-        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+        border: 2px solid #e2e8f0;
+        margin-bottom: 2.5rem;
         position: relative;
         overflow: hidden;
     }
 
     .status-avatar {
-        width: 100px;
-        height: 100px;
+        width: 110px;
+        height: 110px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 3rem;
+        font-size: 3.5rem;
         margin: 0 auto 1.5rem auto;
-        animation: scaleUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        animation: scaleUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .status-avatar.perfect {
-        background: #ecfdf5;
-        color: var(--success);
+        background: var(--success-light);
         border: 4px solid #a7f3d0;
     }
 
     .status-avatar.neutral {
-        background: #eff6ff;
-        color: var(--primary);
+        background: var(--primary-light);
         border: 4px solid #bfdbfe;
     }
 
     .result-header-card h1 {
-        font-size: 2.25rem;
+        font-size: 2.5rem;
         font-weight: 900;
-        color: #1e293b;
+        background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
     }
 
     .result-header-card p.subtitle {
-        font-size: 1.15rem;
+        font-size: 1.25rem;
         color: #64748b;
         margin-bottom: 2rem;
-        font-weight: 500;
+        font-weight: 600;
     }
 
-    /* Score and Stats Cards */
+    /* Stats Grid */
     .stats-grid {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
-        gap: 1.25rem;
+        gap: 1.5rem;
         margin-bottom: 2rem;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 650px) {
         .stats-grid {
             grid-template-columns: 1fr;
         }
@@ -90,221 +97,147 @@
 
     .stat-card {
         background: #f8fafc;
-        border-radius: 20px;
+        border-radius: var(--radius-lg);
         padding: 1.5rem;
         text-align: center;
-        border: 1px solid #e2e8f0;
-        transition: transform 0.2s;
+        border: 2px solid #e2e8f0;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
     }
 
     .stat-card:hover {
-        transform: translateY(-2px);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.05);
     }
 
     .stat-card .val {
-        font-size: 2.5rem;
+        font-size: 3rem;
         font-weight: 900;
         color: #1e293b;
-        line-height: 1.2;
+        line-height: 1.1;
     }
 
     .stat-card .label {
-        font-size: 0.9rem;
-        font-weight: 700;
+        font-size: 0.85rem;
+        font-weight: 800;
         color: #64748b;
         text-transform: uppercase;
-        margin-top: 0.25rem;
+        margin-top: 0.5rem;
+        letter-spacing: 0.5px;
     }
 
     .stat-card.score {
         background: #f5f3ff;
-        border-color: #c7d2fe;
+        border-color: #ddd6fe;
     }
 
     .stat-card.score .val {
-        color: #6366f1;
+        color: #7c3aed;
     }
 
     .stat-card.correct {
-        background: #ecfdf5;
+        background: var(--success-light);
         border-color: #a7f3d0;
     }
 
     .stat-card.correct .val {
-        color: var(--success);
+        color: #059669;
     }
 
     .stat-card.incorrect {
-        background: #fff5f5;
+        background: var(--danger-light);
         border-color: #fecaca;
     }
 
     .stat-card.incorrect .val {
-        color: var(--danger);
+        color: #dc2626;
     }
 
-    /* Detailed Cards Breakdown */
+    /* Breakdown Grid */
     .breakdown-title {
-        font-size: 1.5rem;
-        font-weight: 800;
+        font-size: 1.6rem;
+        font-weight: 900;
         color: #1e293b;
-        margin: 2.5rem 0 1rem 0;
+        margin: 3rem 0 1.5rem 0;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
 
     .breakdown-grid {
         display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1.5rem;
     }
 
+    /* Modern Card Layout for each question */
     .soal-detail-card {
         background: white;
-        border-radius: 20px;
+        border-radius: var(--radius-lg);
         padding: 1.75rem;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03);
-        border: 1px solid #f1f5f9;
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1.5rem;
-        transition: transform 0.2s;
+        flex-direction: column;
+        gap: 1.25rem;
+        position: relative;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
     }
 
     .soal-detail-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.05);
-    }
-
-    .soal-left-side {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+        border-color: #cbd5e1;
     }
 
     .soal-number-badge {
-        width: 48px;
-        height: 48px;
-        background: #f1f5f9;
-        color: #475569;
+        position: absolute;
+        top: -12px;
+        left: 20px;
+        background: var(--primary-gradient);
+        color: white;
         border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        padding: 0.25rem 0.85rem;
         font-weight: 800;
-        font-size: 1.2rem;
-    }
-
-    .soal-target-label {
-        font-size: 1.75rem;
-        font-weight: 900;
-        color: #1e293b;
-        background: #f8fafc;
-        border: 2px dashed #cbd5e1;
-        padding: 0.25rem 1rem;
-        border-radius: 10px;
-        min-width: 60px;
-        text-align: center;
-    }
-
-    .soal-meta {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .soal-meta .meta-title {
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: #334155;
-    }
-
-    .soal-meta .meta-subtitle {
-        font-size: 0.9rem;
-        color: #64748b;
-        font-weight: 500;
-    }
-
-    .soal-canvas-preview {
-        width: 90px;
-        height: 65px;
-        border: 2px solid #e2e8f0;
-        border-radius: 10px;
-        object-fit: contain;
-        background: white;
-    }
-
-    .soal-badge {
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
         font-size: 0.85rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
     }
 
-    .soal-badge.correct {
-        background: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-    }
-
-    .soal-badge.incorrect {
-        background: #fff5f5;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-    }
-
-    /* Actions and Retry control */
+    /* Actions panel */
     .actions-panel {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 1rem;
-        margin-top: 3rem;
+        margin-top: 3.5rem;
     }
 
     .btn-action {
         width: 100%;
-        max-width: 320px;
-        padding: 1.1rem;
-        border-radius: 16px;
+        max-width: 340px;
+        padding: 1.15rem;
+        border-radius: 18px;
         font-weight: 800;
         font-size: 1.15rem;
         text-decoration: none;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 0.6rem;
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         border: none;
         cursor: pointer;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-    }
-
-    .btn-action.primary {
-        background: var(--primary);
-        color: white;
-    }
-
-    .btn-action.primary:hover {
-        background: #4f46e5;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 15px -3px rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     }
 
     .btn-action.success {
-        background: var(--success);
+        background: var(--success-gradient);
         color: white;
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25);
     }
 
     .btn-action.success:hover {
-        background: #059669;
         transform: translateY(-2px);
-        box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
     }
 
     .btn-action.secondary {
@@ -316,6 +249,7 @@
     .btn-action.secondary:hover {
         background: #f8fafc;
         border-color: #cbd5e1;
+        transform: translateY(-2px);
     }
 
     .btn-action.disabled {
@@ -326,15 +260,22 @@
     }
 
     .attempt-limit-info {
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         color: #64748b;
-        font-weight: 600;
+        font-weight: 700;
         margin-top: -0.25rem;
     }
 
     @keyframes scaleUp {
-        from { transform: scale(0.8); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
+        from {
+            transform: scale(0.85);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
     }
 </style>
 {% endblock %}
@@ -343,129 +284,197 @@
 <div class="container">
     <div class="result-header-card">
         <!-- Avatar/Emoticon Anak-anak -->
-        <div class="status-avatar {% if latihan.izinkan_lihat_hasil and jawaban.nilai >= 70 %}perfect{% else %}neutral{% endif %}">
+        <div
+            class="status-avatar {% if latihan.izinkan_lihat_hasil and jawaban.nilai >= 70 %}perfect{% else %}neutral{% endif %}">
             {% if latihan.izinkan_lihat_hasil %}
-                {% if jawaban.nilai >= 70 %}
-                    🎉
-                {% else %}
-                    👍
-                {% endif %}
+            {% if jawaban.nilai >= 70 %}
+            🎉
             {% else %}
-                🚀
+            👍
+            {% endif %}
+            {% else %}
+            🚀
             {% endif %}
         </div>
 
         <h1>Latihan Selesai!</h1>
-        <p class="subtitle">Bagus sekali, kamu sudah mengumpulkan semua jawabanmu!</p>
+        <p class="subtitle">Bagus sekali, kamu sudah menyelesaikan latihan ini! 🌟</p>
 
         <!-- Informasi Waktu & Percobaan -->
-        <div style="background: #f8fafc; border-radius: 16px; padding: 1rem 1.5rem; display: inline-flex; align-items: center; gap: 1.5rem; font-weight: 700; color: #475569; border: 1px solid #e2e8f0; margin-bottom: 2rem;">
-            <div>📅 {{ jawaban.dikumpulkan_pada.strftime('%d/%m/%Y %H:%M') }}</div>
+        <div
+            style="background: #f8fafc; border-radius: 18px; padding: 0.85rem 1.5rem; display: inline-flex; align-items: center; gap: 1.5rem; font-weight: 700; color: #475569; border: 2px solid #e2e8f0; margin-bottom: 2.5rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span>📅</span> {{ jawaban.dikumpulkan_pada.strftime('%d/%m/%Y %H:%M') }}
+            </div>
             <div style="width: 2px; height: 20px; background: #cbd5e1;"></div>
-            <div>🔄 Percobaan ke-{{ jawaban.attempts_count }}</div>
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span>🔄</span> Percobaan ke-{{ jawaban.attempts_count }}
+            </div>
         </div>
+
+        <!-- Progress Belajar Siswa -->
+        {% if latihan.izinkan_lihat_hasil and total_soal > 0 %}
+        <div style="max-width: 500px; margin: 0 auto 2.5rem auto;">
+            <div
+                style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.9rem; color: #475569; margin-bottom: 0.5rem;">
+                <span>Progres Belajar</span>
+                <span>{{ total_benar }} dari {{ total_soal }} Benar ({{ (total_benar / total_soal * 100)|round|int
+                    }}%)</span>
+            </div>
+            <div class="progress-container" style="width: 100%; height: 16px; background: #e2e8f0; border-radius: 999px; overflow: hidden; border: 2px solid #cbd5e1;">
+                <div class="progress-fill" 
+                    style="--progress-width: {{ (total_benar / total_soal * 100)|round|int }}%; 
+                            width: var(--progress-width); 
+                            height: 100%; 
+                            background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+                            border-radius: 999px; 
+                            transition: width 1s ease;">
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- STATS / SCORE GRID (Hanya jika diizinkan melihat hasil) -->
         {% if latihan.izinkan_lihat_hasil %}
-            <div class="stats-grid">
-                <div class="stat-card score">
-                    <div class="val">{{ jawaban.nilai }}</div>
-                    <div class="label">Nilai Rata-rata</div>
-                </div>
-                <div class="stat-card correct">
-                    <div class="val">{{ total_benar }}</div>
-                    <div class="label">Jawaban Benar</div>
-                </div>
-                <div class="stat-card incorrect">
-                    <div class="val">{{ total_salah }}</div>
-                    <div class="label">Jawaban Salah</div>
-                </div>
+        <div class="stats-grid">
+            <div class="stat-card score">
+                <div class="val">{{ jawaban.nilai }}</div>
+                <div class="label">Nilai Rata-rata</div>
             </div>
+            <div class="stat-card correct">
+                <div class="val">{{ total_benar }}</div>
+                <div class="label">Jawaban Benar</div>
+            </div>
+            <div class="stat-card incorrect">
+                <div class="val">{{ total_salah }}</div>
+                <div class="label">Jawaban Salah</div>
+            </div>
+        </div>
         {% else %}
-            <!-- Pesan Sederhana ketika Hasil Disembunyikan Guru -->
-            <div style="background: #eff6ff; border-radius: 20px; padding: 2rem; border: 1px solid #bfdbfe; max-width: 600px; margin: 0 auto 2rem auto; text-align: left;">
-                <h3 style="color: #1e3a8a; margin-top: 0; font-weight: 800; font-size: 1.25rem;">Jawabanmu Telah Tersimpan</h3>
-                <p style="color: #1e40af; margin-bottom: 0; font-size: 1rem; line-height: 1.5; font-weight: 500;">
-                    Latihanmu telah berhasil diselesaikan dengan baik! Guru telah mengatur agar nilai tidak langsung ditampilkan. Kamu bisa menanyakan nilaimu langsung ke Gurumu. Terima kasih sudah belajar!
-                </p>
-            </div>
+        <!-- Pesan Sederhana ketika Hasil Disembunyikan Guru -->
+        <div
+            style="background: #eff6ff; border-radius: 24px; padding: 2.25rem; border: 2px solid #bfdbfe; max-width: 600px; margin: 0 auto 2rem auto; text-align: left; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.05);">
+            <h3
+                style="color: #1e3a8a; margin-top: 0; font-weight: 900; font-size: 1.35rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>✨</span> Jawabanmu Telah Tersimpan
+            </h3>
+            <p style="color: #1e40af; margin-bottom: 0; font-size: 1rem; line-height: 1.6; font-weight: 600;">
+                Latihanmu telah berhasil diselesaikan dengan baik! Guru telah mengatur agar nilai tidak langsung
+                ditampilkan. Kamu bisa menanyakan nilaimu langsung ke Gurumu. Terima kasih sudah belajar!
+            </p>
+        </div>
         {% endif %}
     </div>
 
     <!-- DETAIL BREAKDOWN PER SOAL (Hanya jika diizinkan melihat hasil & berformat JSON) -->
     {% if latihan.izinkan_lihat_hasil and is_json %}
-        <h2 class="breakdown-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Analisis Lembar Jawaban
-        </h2>
-        
-        <div class="breakdown-grid">
-            {% for item in detail_jawaban %}
-                <div class="soal-detail-card">
-                    <div class="soal-left-side">
-                        <!-- Nomor -->
-                        <div class="soal-number-badge">{{ loop.index }}</div>
-                        
-                        <!-- Target Soal -->
-                        <div class="soal-target-label">{{ item.soal }}</div>
+    <h2 class="breakdown-title">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round" style="color: #3b82f6;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+        </svg>
+        Hasil Pekerjaanmu 📝
+    </h2>
 
-                        <!-- Coretan Preview -->
-                        {% if item.image %}
-                            <img src="{{ item.image }}" class="soal-canvas-preview" title="Hasil tulisan tangan Anda" alt="Kanvas Corel" />
-                        {% endif %}
+    <div class="breakdown-grid">
+        {% for item in detail_jawaban %}
+        <div class="soal-detail-card">
+            <!-- Nomor Soal -->
+            <div class="soal-number-badge">Soal #{{ loop.index }}</div>
 
-                        <!-- Meta Info -->
-                        <div class="soal-meta">
-                            <span class="meta-title">Jawaban: <strong>{{ item.jawaban }}</strong></span>
-                            <span class="meta-subtitle">Akurasi deteksi: {{ item.nilai }}%</span>
-                        </div>
-                    </div>
-
-                    <!-- Badge Status Benar/Salah -->
-                    <div>
-                        {% if item.benar %}
-                            <span class="soal-badge correct">
-                                Benar
-                            </span>
-                        {% else %}
-                            <span class="soal-badge incorrect">
-                                ❌ Salah
-                            </span>
-                        {% endif %}
-                    </div>
+            <!-- Kata Target -->
+            <div style="text-align: center; margin-top: 0.5rem;">
+                <div
+                    style="font-size: 0.8rem; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 1px;">
+                    Target Soal</div>
+                <div
+                    style="font-size: 1.8rem; font-weight: 900; color: #3b82f6; background: #eff6ff; border: 2px solid #cbd5e1; border-radius: 14px; padding: 0.4rem 1.25rem; display: inline-block; margin-top: 0.4rem; letter-spacing: 0.5px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                    {{ item.soal }}
                 </div>
-            {% endfor %}
+            </div>
+
+            <!-- Hasil Coretan/Tulisan Siswa -->
+            <div style="text-align: center; display: flex; flex-direction: column; gap: 0.4rem; flex: 1;">
+                <div
+                    style="font-size: 0.8rem; text-transform: uppercase; font-weight: 800; color: #64748b; letter-spacing: 1px;">
+                    Hasil Tulisan</div>
+                <div
+                    style="border: 2px solid #e2e8f0; border-radius: 18px; padding: 0.5rem; background: #ffffff; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: inset 0 2px 6px rgba(0,0,0,0.03); min-height: 130px;">
+                    {% if item.image %}
+                    <img src="{{ item.image }}"
+                        style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px;"
+                        alt="Coretan Siswa" />
+                    {% else %}
+                    <div
+                        style="display: flex; flex-direction: column; align-items: center; gap: 0.25rem; color: #94a3b8;">
+                        <span style="font-size: 1.5rem;">✍️</span>
+                        <span style="font-size: 0.75rem; font-weight: 700;">Tidak ada coretan</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Status Benar/Salah & Akurasi -->
+            <div
+                style="text-align: center; margin-top: auto; display: flex; flex-direction: column; gap: 0.4rem; align-items: center;">
+                {% if item.benar %}
+                <div
+                    style="background: #ecfdf5; border: 2px solid #10b981; color: #065f46; border-radius: 9999px; padding: 0.4rem 1.2rem; font-size: 0.9rem; font-weight: 900; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.08);">
+                    🎉 Benar ({{ item.nilai }}% mirip)
+                </div>
+                {% else %}
+                <div
+                    style="background: #fff5f5; border: 2px solid #ef4444; color: #991b1b; border-radius: 9999px; padding: 0.4rem 1.2rem; font-size: 0.9rem; font-weight: 900; display: inline-flex; align-items: center; gap: 0.35rem; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.08);">
+                    ❌ Salah ({{ item.nilai }}% mirip)
+                </div>
+                {% endif %}
+            </div>
         </div>
+        {% endfor %}
+    </div>
     {% endif %}
 
     <!-- ACTIONS PANEL -->
     <div class="actions-panel">
         <!-- 1. Tombol Coba Lagi (Retry) -->
         {% if latihan.izinkan_retry %}
-            {% if latihan.max_attempt == -1 or jawaban.attempts_count < latihan.max_attempt %}
-                <a href="/murid/latihan/{{ latihan.id }}/kerjakan" class="btn-action success">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                    Coba Lagi Latihan
-                </a>
-                {% if latihan.max_attempt != -1 %}
-                    <span class="attempt-limit-info">Percobaan: {{ jawaban.attempts_count }} / {{ latihan.max_attempt }}</span>
-                {% else %}
-                    <span class="attempt-limit-info">Percobaan tidak terbatas (Sering berlatih agar lebih mahir!)</span>
-                {% endif %}
+        {% if latihan.max_attempt == -1 or jawaban.attempts_count < latihan.max_attempt %} <a
+            href="/murid/latihan/{{ latihan.id }}/kerjakan" class="btn-action success">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
+            Coba Lagi Latihan 🔄
+            </a>
+            {% if latihan.max_attempt != -1 %}
+            <span class="attempt-limit-info">Percobaan: {{ jawaban.attempts_count }} / {{ latihan.max_attempt }}</span>
             {% else %}
-                <button class="btn-action disabled">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    Batas Percobaan Habis
-                </button>
-                <span class="attempt-limit-info" style="color: var(--danger)">Kamu sudah menggunakan semua {{ latihan.max_attempt }} percobaan</span>
+            <span class="attempt-limit-info">Percobaan tidak terbatas (Sering berlatih agar lebih mahir!)</span>
             {% endif %}
-        {% endif %}
+            {% else %}
+            <button class="btn-action disabled">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Batas Percobaan Habis 🔒
+            </button>
+            <span class="attempt-limit-info" style="color: var(--danger-gradient)">Kamu sudah menggunakan semua {{
+                latihan.max_attempt }} percobaan</span>
+            {% endif %}
+            {% endif %}
 
-        <!-- 2. Tombol Kembali ke Daftar Latihan -->
-        <a href="/murid/kelas/{{ kelas.id }}/latihan" class="btn-action secondary">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Kembali ke Kelas
-        </a>
+            <!-- 2. Tombol Kembali ke Daftar Latihan -->
+            <a href="/murid/kelas/{{ kelas.id }}/latihan" class="btn-action secondary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Kembali ke Kelas 🏠
+            </a>
     </div>
 </div>
 {% endblock %}

@@ -143,10 +143,17 @@
    * dalam elemen yang sama — bandingkan target hasil closest() dengan lastTarget.
    */
   const onHover = createDebounce(function (e) { // [FIX-2] closure debounce
-    const target = e.target.closest(INTERACTIVE_SELECTOR);
+    const el = e.target instanceof Element
+      ? e.target
+      : e.target?.parentElement;
+
+    if (!el) return;
+
+    const target = (e.target instanceof Element) ? e.target.closest(INTERACTIVE_SELECTOR) : null;
+
     if (!target) return;
 
-    // Abaikan jika masih di elemen yang sama (pindah ke child)
+    // Abaikan jika masih di elemen yang sama
     if (target === state.lastTarget) return;
     state.lastTarget = target;
 
@@ -156,17 +163,22 @@
     const text = getElementText(target);
     if (text) speak(text);
   }, DEBOUNCE_DELAY);
-
   /** Click handler — tidak di-debounce agar responsif */
   function onClick(e) {
-    const target = e.target.closest(INTERACTIVE_SELECTOR);
+    const el = e.target instanceof Element
+      ? e.target
+      : e.target?.parentElement;
+
+    if (!el) return;
+
+    const target = el.closest(INTERACTIVE_SELECTOR);
+
     if (!target) return;
     if (target.closest('#gestra-tts-widget')) return;
 
     const text = getElementText(target);
     if (text) speak(text);
   }
-
   // Pasang listener di document — otomatis support dynamic content
   document.addEventListener('mouseover', onHover, { passive: true });
   document.addEventListener('click', onClick, { passive: false });

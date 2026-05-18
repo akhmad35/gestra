@@ -4,6 +4,22 @@ import cv2
 import tensorflow as tf
 import string
 
+# --- DESERIALIZATION BUG PATCH (WAJIB) ---
+# Mengatasi NameError: name 'imagenet_utils' is not defined saat load model MobileNetV2
+try:
+    import keras.applications.mobilenet_v2
+    import keras.applications.imagenet_utils
+    keras.applications.mobilenet_v2.imagenet_utils = keras.applications.imagenet_utils
+except ImportError:
+    pass
+
+try:
+    import tensorflow.keras.applications.mobilenet_v2 as tf_mn2
+    import tensorflow.keras.applications.imagenet_utils as tf_iu
+    tf_mn2.imagenet_utils = tf_iu
+except ImportError:
+    pass
+
 # Konfigurasi Environment
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -13,7 +29,7 @@ LOADED_MODELS = {}
 # Path models
 MODEL_PATHS = {
     "number": {
-        "path": "models/CNN_Dataset_Huruf_Nomor.keras",
+        "path": "models/CNN_Dataset_Nomor.keras",
         "labels": list(string.digits)
     },
     "upper": {
@@ -61,6 +77,8 @@ def preprocess_canvas(canvas):
     img_input = canvas_rgb.astype("float32") 
     img_input = np.expand_dims(img_input, axis=0)
 
+    # Buat direktori debug jika belum ada
+    os.makedirs("assets/debug", exist_ok=True)
     cv2.imwrite("assets/debug/vsi_ai_final.png", thresh) 
     return img_input
 
@@ -73,12 +91,15 @@ def predict_from_canvas(canvas, mode, target=None): # Tambahkan parameter target
         img_prepared = preprocess_canvas(canvas)
         
         if img_prepared is None:
+            print("[PREDICT] Kanvas Kosong (Piksel hitam < 50)")
             return "Kosong", 0.0
         
         # Melakukan Prediksi
         preds = model.predict(img_prepared, verbose=0)[0]
         idx = int(np.argmax(preds))
         confidence = float(preds[idx])
+        
+        print(f"[PREDICT] Mode: {mode}, Raw Prediction: {labels[idx]} ({confidence:.4f}), Target: {target}")
         
         if target:
             target_clean = str(target).strip().lower()
@@ -89,7 +110,12 @@ def predict_from_canvas(canvas, mode, target=None): # Tambahkan parameter target
             if predicted_clean == target_clean:
                 return labels[idx], confidence
             
-            # B. Jika AI menebak huruf LAIN dan confidence rendah (< 80%)
+            # B. Jika AI menebak huruf LAIN dan confidence tinggi (>= 80%)
+            # Kembalikan tebakan asli model agar validator bisa memberikan feedback 'Kurang Tepat' dengan benar
+            if confidence >= 0.80:
+                return labels[idx], confidence
+                
+            # C. Jika AI menebak huruf LAIN dan confidence rendah (< 80%)
             # Langsung anggap Tidak Jelas dan skor 0 (Hukuman)
             return "Tidak Jelas", 0.0
 
@@ -97,5 +123,7 @@ def predict_from_canvas(canvas, mode, target=None): # Tambahkan parameter target
         return result, confidence
         
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error pada predict_from_canvas: {e}")
+        import traceback
+        traceback.print_exc()
         return "Error", 0.0

@@ -193,6 +193,17 @@ async def kerjakan_latihan_page(
         except:
             pass
 
+    target = request.query_params.get("target")
+    index = request.query_params.get("index")
+
+    if (not target or not index) and len(soal_list) > 0:
+        import urllib.parse
+        first_word = soal_list[0].get("label", "")
+        return RedirectResponse(
+            url=f"/murid/latihan/{latihan_id}/kerjakan?target={urllib.parse.quote(first_word)}&index=0",
+            status_code=303
+        )
+
     return templates.TemplateResponse(
         request=request,
         name="murid/kerjakan-latihan.html",
