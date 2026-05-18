@@ -306,15 +306,15 @@
   <div class="cards-grid">
     
     <!-- 1. SPEED QUIZ -->
-    <a href="/murid/quiz-random/start?timer=true" class="aktivitas-card card-speed" id="card-speed-quiz">
+    <a href="/murid/pilih-quiz?mode=speed" class="aktivitas-card card-speed" id="card-speed-quiz">
       <span class="card-icon">⏱️</span>
       <h2 class="card-title">Speed Quiz</h2>
       <span class="card-subtitle">Quiz dengan timer</span>
       <p class="card-desc">
-        Uji kecepatan menulismu! Kuis cepat dengan tantangan waktu di setiap soal. Sangat menantang dan seru! ⚡
+        Uji kecepatan menulismu! Pilih jenis quiz terlebih dahulu sebelum mulai. ⚡
       </p>
       <div class="card-btn">
-        <span>Mulai Main</span>
+        <span>Pilih Quiz</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3" />
         </svg>
@@ -322,15 +322,15 @@
     </a>
 
     <!-- 2. QUIZ RANDOM -->
-    <a href="/murid/quiz-random/start" class="aktivitas-card card-random" id="card-quiz-random">
+    <a href="/murid/pilih-quiz?mode=random" class="aktivitas-card card-random" id="card-quiz-random">
       <span class="card-icon">🎲</span>
       <h2 class="card-title">Quiz Random</h2>
       <span class="card-subtitle">Latihan acak</span>
       <p class="card-desc">
-        Latihan menulis acak biasa tanpa tekanan waktu. Santai dan menyenangkan untuk mengasah kelancaran jarimu! ✨
+        Latihan menulis acak biasa tanpa tekanan waktu. Pertama pilih jenis quiz, lalu mulai! ✨
       </p>
       <div class="card-btn">
-        <span>Mulai Latihan</span>
+        <span>Pilih Quiz</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="5 3 19 12 5 21 5 3" />
         </svg>
@@ -435,8 +435,8 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const cardsConfig = {
-        'card-speed-quiz': { emoji: '⏱️', text: 'Menyiapkan Speed Quiz cepat... ⚡' },
-        'card-quiz-random': { emoji: '🎲', text: 'Mengacak soal-soal seru... ✨' },
+        'card-speed-quiz': { emoji: '⏱️', text: 'Membuka pilihan Speed Quiz... ⚡' },
+        'card-quiz-random': { emoji: '🎲', text: 'Membuka pilihan Quiz Random... ✨' },
         'card-gabung-kelas': { emoji: '🏫', text: 'Membuka pintu kelas... 🎒' },
         'riwayat-back': { emoji: '🏠', text: 'Kembali ke beranda... ✏️' }
       };

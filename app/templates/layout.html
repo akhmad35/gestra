@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,6 +10,7 @@
   <link rel="stylesheet" href="{{ url_for('static', path='css/tts.css') }}" />
   {% block extra_css %}{% endblock %}
 </head>
+
 <body class="{% block body_class %}{% endblock %}">
 
   {% block navbar %}
@@ -27,19 +29,23 @@
     </div>
     <div class="navbar-nav">
 
-      <a href="/beranda" class="nav-btn {% if request.url.path == '/beranda' %}active{% else %}inactive{% endif %}" id="nav-beranda">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-          <polyline points="9 22 9 12 15 12 15 22"/>
+      {% set is_guru = user and user.role == 'guru' %}
+      {% set target_url = '/guru/dashboard' if is_guru else '/beranda' %}
+      {% set is_active = (request.url.path == '/guru/dashboard' and is_guru) or (request.url.path == '/beranda' and not is_guru) %}
+
+      <a href="{{ target_url }}" class="nav-btn {% if is_active %}active{% else %}inactive{% endif %}" id="nav-beranda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
         </svg>
         Beranda
       </a>
-      <a href="/profil" class="nav-btn {% if request.url.path == '/profil' %}active{% else %}inactive{% endif %}" id="nav-profil">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
+      <a href="/profil" class="nav-btn {% if request.url.path == '/profil' %}active{% else %}inactive{% endif %}"
+        id="nav-profil">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
         </svg>
         Profil
       </a>
@@ -54,4 +60,5 @@
   <script src="{{ url_for('static', path='js/back-button.js') }}"></script>
   {% block extra_js %}{% endblock %}
 </body>
+
 </html>

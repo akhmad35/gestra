@@ -42,6 +42,83 @@ async def start_random_quiz(request: Request, db: Session = Depends(get_db), tim
     
     return RedirectResponse(url=f"/murid/quiz/kerjakan/{session.id}")
 
+
+def _random_huruf_target():
+    selected_mode = random.choice(["upper", "lower"])
+    target_char = random.choice(string.ascii_uppercase if selected_mode == "upper" else string.ascii_lowercase)
+    return selected_mode, target_char
+
+
+def _random_kata_target():
+    kata_bank = [
+        "buku", "kucing", "rumah", "pelangi", "senyum", "apel", "bunga", "bola", "jari", "pohon"
+    ]
+    return random.choice(kata_bank)
+
+
+@router.get("/quiz-huruf/start")
+async def start_quiz_huruf(request: Request, db: Session = Depends(get_db), timer: bool = False):
+    """Mulai quiz huruf, dengan mode speed atau random sesuai query parameter."""
+    user = get_current_user(request, db)
+    if not user or user.role != "murid":
+        return RedirectResponse(url="/login")
+
+    mode_char, target = _random_huruf_target()
+    query = f"target={target}&mode={mode_char}"
+    if timer:
+        query += "&timer=true"
+
+    return RedirectResponse(
+        url=f"/canvas-latihan-huruf?{query}",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
+
+
+@router.get("/quiz-kata/start")
+async def start_quiz_kata(request: Request, db: Session = Depends(get_db), timer: bool = False):
+    """Mulai quiz kata, dengan mode speed atau random sesuai query parameter."""
+    user = get_current_user(request, db)
+    if not user or user.role != "murid":
+        return RedirectResponse(url="/login")
+
+    target = _random_kata_target()
+    query = f"target={target}"
+    if timer:
+        query += "&timer=true"
+
+    return RedirectResponse(
+        url=f"/canvas-latihan-kata?{query}",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
+
+
+@router.get("/quiz-gabungan/start")
+async def start_quiz_gabungan(request: Request, db: Session = Depends(get_db), timer: bool = False):
+    """Mulai quiz gabungan: mix antara latihan huruf dan latihan kata."""
+    user = get_current_user(request, db)
+    if not user or user.role != "murid":
+        return RedirectResponse(url="/login")
+
+    if random.choice([True, False]):
+        mode_char, target = _random_huruf_target()
+        query = f"target={target}&mode={mode_char}"
+        if timer:
+            query += "&timer=true"
+        return RedirectResponse(
+            url=f"/canvas-latihan-huruf?{query}",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+
+    target = _random_kata_target()
+    query = f"target={target}"
+    if timer:
+        query += "&timer=true"
+    return RedirectResponse(
+        url=f"/canvas-latihan-kata?{query}",
+        status_code=status.HTTP_303_SEE_OTHER
+    )
+
+
 @router.get("/quiz/kerjakan/{session_id}", response_class=HTMLResponse)
 async def kerjakan_quiz(request: Request, session_id: int, db: Session = Depends(get_db)):
     """Halaman kuis yang menggunakan canvas existing"""
