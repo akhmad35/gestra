@@ -190,7 +190,17 @@ async def final_word_validation(request: Request, db: Session = Depends(get_db))
                     logger.error(f"[predict-word] Canvas decode fallback failed: {ex}")
 
         is_correct = bool(target) and prediction.lower() == target.lower()
-        final_score = 100 if is_correct else 0
+        
+        if is_correct:
+            # Jika ada skor per huruf, hitung rata-ratanya
+            if individual_scores:
+                final_score = sum(individual_scores) / len(individual_scores)
+            else:
+                final_score = 100
+        else:
+            final_score = 0
+            
+        final_score = int(final_score)
 
         db_id = None
         if data.get("latihan_id") is not None and data.get("siswa_id") is not None:

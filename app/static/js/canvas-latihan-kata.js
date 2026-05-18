@@ -71,9 +71,15 @@
     }
 
     function calculateFinalScore() {
-        if (!letterScores.length) return 0;
+        if (!letterScores || letterScores.length === 0) return 0;
+    
+        // Debug: Cek isi array skor di console (F12)
+        console.log("Isi Skor Per Huruf:", letterScores); 
+        
         const sum = letterScores.reduce((total, score) => total + Number(score || 0), 0);
-        return Math.round(sum / letterScores.length);
+        const avg = sum / letterScores.length;
+        
+        return Math.round(avg);
     }
 
     function setButtonState(isBusy) {
@@ -166,11 +172,13 @@
     let currentLetterIndex = 0;
     let collectedPredictions = "";
     let letterScores = [];
+    let letterPenalties = [];
 
     // Inisialisasi tampilan awal
     function initWordTraining() {
         if (letterScores.length === 0) {
             letterScores = new Array(targetWord.length).fill(0);
+            letterPenalties = new Array(targetWord.length).fill(0); // <--- Inisialisasi penalti
         }
 
         const wordDisplay = document.getElementById('word-target-display');
@@ -251,19 +259,25 @@
             console.log(`Status Akhir: ${data.status}`);
             console.groupEnd();
 
-            const currentScore = computeLetterScore(Boolean(data.correct), data.confidence);
-            letterScores[currentLetterIndex] = currentScore;
+           const currentScore = computeLetterScore(Boolean(data.correct), data.confidence);
 
             if (!data.correct) {
+                letterPenalties[currentLetterIndex] += 10;
+                console.log(`Salah! Penalti huruf ${currentLetterIndex + 1} sekarang: ${letterPenalties[currentLetterIndex]}`);
                 const errorTitle = data.status || "Kurang Tepat";
-                const speakMsg = data.message || (data.status === "Hampir Benar" ? "Hampir benar 👍" : `Coba lagi ya 😊`);
-                speak(speakMsg);
 
                 showRetryModal(errorTitle, currentTarget);
                 resetCanvas();
                 setButtonState(false);
                 return;
             }
+            let finalScoreThisLetter = currentScore - letterPenalties[currentLetterIndex];
+
+            // Jangan sampai nilainya minus, minimal 0
+            if (finalScoreThisLetter < 0) finalScoreThisLetter = 0;
+
+            letterScores[currentLetterIndex] = finalScoreThisLetter;
+            console.log(`Berhasil! Skor Akhir Huruf ${currentTarget}: ${finalScoreThisLetter}`);
 
             collectedPredictions += currentTarget;
             updateRibbon();
@@ -381,31 +395,28 @@
         const title = document.getElementById("modal-title");
         const confidenceText = document.getElementById("modal-confidence");
 
-        if (!modal || !title) {
-            console.error("Elemen modal hasil tidak ditemukan.");
-            return;
-        }
-
-        const btnSelesai = modal.querySelector(".btn-cek-nilai");
-        if (btnSelesai) btnSelesai.style.display = "inline-block";
-
         const isCorrect = Boolean(data && data.correct);
-        const similarity = Number.isFinite(Number(data?.score))
-            ? Math.round(Number(data.score))
-            : (isCorrect ? 100 : 0);
+        
+        // PERBAIKAN: Gunakan data.score yang dikirim, jika tidak ada baru hitung manual
+        let finalDisplayScore = 0;
+        if (data && typeof data.score !== 'undefined' && data.score !== null) {
+            finalDisplayScore = Math.round(data.score);
+        } else {
+            // Fallback ke hitungan lokal jika server tidak kirim nilai
+            finalDisplayScore = isCorrect ? calculateFinalScore() : 0;
+        }
 
         if (isCorrect) {
             title.innerText = "Hebat! Kamu Menulis Tanpa Banyak Kesalahan!";
             title.style.color = "#16a34a";
-            speak(`Luar biasa! Kamu berhasil menulis kata ${targetWord}`);
         } else {
             title.innerText = "Coba Lagi!";
             title.style.color = "#dc2626";
-            speak(`Ayo coba lagi, tulis kata ${targetWord} dengan lebih rapi`);
         }
 
         if (confidenceText) {
-            confidenceText.innerText = `Nilai Kamu: ${similarity}`;
+            // Tampilkan nilai asli hasil rata-rata
+            confidenceText.innerText = `Nilai Kamu: ${finalDisplayScore}`;
         }
 
         modal.style.display = "flex";
