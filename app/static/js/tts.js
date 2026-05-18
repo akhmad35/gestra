@@ -149,7 +149,7 @@
 
     if (!el) return;
 
-    const target = el.closest(INTERACTIVE_SELECTOR);
+    const target = (e.target instanceof Element) ? e.target.closest(INTERACTIVE_SELECTOR) : null;
 
     if (!target) return;
 

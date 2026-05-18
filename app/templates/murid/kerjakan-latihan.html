@@ -159,15 +159,15 @@
 
     // 3. Monkey-patch finalValidation to transition questions or complete the quiz
     finalValidation = async function() {
-        // Calculate the score of the completed word based on individual letter attempts
-        const finalScore = letterScores.reduce((a, b) => a + b, 0) / targetWord.length;
+        const ribbonMatch = collectedPredictions.toLowerCase() === targetWord.toLowerCase();
+        const finalScore = ribbonMatch ? 100 : 0;
 
         let answers = JSON.parse(sessionStorage.getItem('gestra_answers') || '[]');
         answers[currentIndex] = {
             soal: targetWord,
             jawaban: collectedPredictions,
-            benar: finalScore >= 80,
-            nilai: Math.round(finalScore),
+            benar: ribbonMatch,
+            nilai: finalScore,
             image: paintCanvas.toDataURL('image/png')
         };
         sessionStorage.setItem('gestra_answers', JSON.stringify(answers));
