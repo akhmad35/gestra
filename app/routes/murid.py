@@ -480,3 +480,21 @@ async def aktivitas_menu(request: Request, db: Session = Depends(get_db)):
     if not user or user.role != "murid":
         return RedirectResponse(url="/login")
     return templates.TemplateResponse(request=request, name="murid/menu-aktivitas.html", context={"user": user})
+
+
+@router.get("/pilih-quiz", response_class=HTMLResponse)
+async def pilih_quiz(request: Request, db: Session = Depends(get_db)):
+    """Halaman pemilihan jenis quiz setelah memilih mode speed atau random."""
+    user = get_current_user(request, db)
+    if not user or user.role != "murid":
+        return RedirectResponse(url="/login")
+
+    mode = request.query_params.get("mode", "random")
+    if mode not in {"speed", "random"}:
+        mode = "random"
+
+    return templates.TemplateResponse(
+        request=request,
+        name="murid/pilih-quiz.html",
+        context={"user": user, "mode": mode}
+    )
