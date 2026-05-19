@@ -4,10 +4,51 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', path='css/canvas-latihan-kata.css') }}" />
+<style>
+    /* Stats and Timer bar */
+    .quiz-stats-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 0.85rem 1.75rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.04);
+        border: 2px solid #E2E8F0;
+    }
+    .quiz-timer {
+        font-weight: 800;
+        color: #ef4444;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-size: 1.2rem;
+    }
+    .quiz-timer svg {
+        animation: pulse-timer 1.5s infinite ease-in-out;
+    }
+    @keyframes pulse-timer {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.15); opacity: 0.8; }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 <main class="page-wrapper" style="max-width: 1000px;">
+    {% if is_timer %}
+    <div class="quiz-stats-bar" style="justify-content: center;">
+        <div class="quiz-timer" id="quiz-timer-display">
+            <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Waktu Tersisa: &nbsp;<span id="timer-val">{% if level == 'easy' %}60{% elif level == 'hard' %}15{% else %}30{% endif %}</span>s
+        </div>
+    </div>
+    {% endif %}
+
     <div class="card canvas-container">
         <div class="info-header" style="margin-bottom: 0; border: none; padding: 0;">
             <div class="info-header-text">
@@ -100,6 +141,54 @@
     <div id="debug-images-container"></div>
 </div>
 {% endblock %}
+
+{% if is_timer %}
+<script>
+    // Difficulty Level Mapping
+    const levelMapping = {
+        'easy': 60,
+        'medium': 30,
+        'hard': 15
+    };
+    const chosenLevel = "{{ level or 'medium' }}";
+    const timeLimit = levelMapping[chosenLevel] || 30;
+
+    window.timeLeft = timeLimit;
+    window.timerInterval = null;
+
+    window.startTimer = function() {
+        if (window.timerInterval) clearInterval(window.timerInterval);
+        window.timeLeft = timeLimit;
+        const timerDisplay = document.getElementById('timer-val');
+        if (timerDisplay) timerDisplay.innerText = window.timeLeft;
+
+        window.timerInterval = setInterval(() => {
+            window.timeLeft--;
+            if (timerDisplay) timerDisplay.innerText = window.timeLeft;
+            
+            if (window.timeLeft <= 0) {
+                clearInterval(window.timerInterval);
+                // Automatically submit current letter
+                if (typeof periksaTulisan === 'function') {
+                    periksaTulisan();
+                }
+            }
+        }, 1000);
+    };
+
+    window.stopTimer = function() {
+        if (window.timerInterval) {
+            clearInterval(window.timerInterval);
+            window.timerInterval = null;
+        }
+    };
+
+    // Auto-start on load
+    document.addEventListener('DOMContentLoaded', () => {
+        window.startTimer();
+    });
+</script>
+{% endif %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js"></script>

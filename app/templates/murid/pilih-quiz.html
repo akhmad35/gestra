@@ -329,7 +329,11 @@
   </header>
 
   <div class="quiz-grid">
-    <a href="/murid/quiz-huruf/start{% if mode == 'speed' %}?timer=true{% endif %}" class="quiz-card card-letter quiz-card-huruf" data-card="quiz-huruf">
+    {% if mode == 'speed' %}
+    <a href="/murid/pilih-level?type=huruf" class="quiz-card card-letter quiz-card-huruf" data-card="quiz-huruf">
+    {% else %}
+    <a href="/murid/quiz-huruf/start?timer=true&level=medium" class="quiz-card card-letter quiz-card-huruf" data-card="quiz-huruf">
+    {% endif %}
       <div class="card-badge">Quiz Huruf</div>
       <div class="quiz-icon">🔤</div>
       <h2 class="quiz-title">Latihan Huruf</h2>
@@ -337,7 +341,11 @@
       <span class="cta-button">Mulai Huruf</span>
     </a>
 
-    <a href="/murid/quiz-kata/start{% if mode == 'speed' %}?timer=true{% endif %}" class="quiz-card card-word quiz-card-kata" data-card="quiz-kata">
+    {% if mode == 'speed' %}
+    <a href="/murid/pilih-level?type=kata" class="quiz-card card-word quiz-card-kata" data-card="quiz-kata">
+    {% else %}
+    <a href="/murid/quiz-kata/start?timer=true&level=medium" class="quiz-card card-word quiz-card-kata" data-card="quiz-kata">
+    {% endif %}
       <div class="card-badge">Quiz Kata</div>
       <div class="quiz-icon">✍️</div>
       <h2 class="quiz-title">Latihan Kata</h2>
@@ -345,7 +353,11 @@
       <span class="cta-button">Mulai Kata</span>
     </a>
 
-    <a href="/murid/quiz-gabungan/start{% if mode == 'speed' %}?timer=true{% endif %}" class="quiz-card card-mix quiz-card-gabungan" data-card="quiz-gabungan">
+    {% if mode == 'speed' %}
+    <a href="/murid/pilih-level?type=gabungan" class="quiz-card card-mix quiz-card-gabungan" data-card="quiz-gabungan">
+    {% else %}
+    <a href="/murid/quiz-gabungan/start?timer=true&level=medium" class="quiz-card card-mix quiz-card-gabungan" data-card="quiz-gabungan">
+    {% endif %}
       <div class="card-badge">Quiz Gabungan</div>
       <div class="quiz-icon">🧩</div>
       <h2 class="quiz-title">Kombinasi Huruf & Kata</h2>

@@ -215,6 +215,9 @@
     }
 
     async function periksaTulisan() {
+        if (typeof window.stopTimer === 'function') {
+            window.stopTimer();
+        }
         const dataURL = paintCanvas.toDataURL('image/png');
         const btn = document.querySelector('.btn-primary');
 
@@ -289,6 +292,9 @@
                     resetCanvas();
                     initWordTraining();
                     setButtonState(false);
+                    if (typeof window.startTimer === 'function') {
+                        window.startTimer();
+                    }
                 }, 500);
             } else {
                 setTimeout(() => {
@@ -340,6 +346,10 @@
         modal.style.display = 'none';
         if (btnSelesai) btnSelesai.style.display = "inline-block"; // Munculkan kembali untuk modal akhir
         resetCanvas();
+
+        if (typeof window.startTimer === 'function') {
+            window.startTimer();
+        }
     }
 
     async function finalValidation() {

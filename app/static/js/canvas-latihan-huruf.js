@@ -223,8 +223,8 @@
     initCameraAndHandTracking();
 
     async function periksaTulisan() {
-        if (window.quizTimerInterval) {
-            clearInterval(window.quizTimerInterval);
+        if (typeof window.stopTimer === 'function') {
+            window.stopTimer();
         }
 
         const dataURL = paintCanvas.toDataURL('image/png');
@@ -484,18 +484,7 @@
         document.getElementById("modal-selesai").style.display = "none";
         resetCanvas();
 
-        // Jika dalam mode kuis timer, restart timernya
-        if (window.QUIZ_CONFIG && window.QUIZ_CONFIG.mode === "timer" && typeof window.timeLeft !== 'undefined') {
-            if (window.quizTimerInterval) clearInterval(window.quizTimerInterval);
-
-            window.quizTimerInterval = setInterval(() => {
-                window.timeLeft--;
-                const timerDisplay = document.getElementById('timer-val');
-                if (timerDisplay) timerDisplay.innerText = window.timeLeft;
-                if (window.timeLeft <= 0) {
-                    clearInterval(window.quizTimerInterval);
-                    if (typeof handleTimeout === 'function') handleTimeout();
-                }
-            }, 1000);
+        if (typeof window.startTimer === 'function') {
+            window.startTimer();
         }
     }   

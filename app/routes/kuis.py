@@ -57,16 +57,22 @@ def _random_kata_target():
 
 
 @router.get("/quiz-huruf/start")
-async def start_quiz_huruf(request: Request, db: Session = Depends(get_db), timer: bool = False):
+async def start_quiz_huruf(request: Request, db: Session = Depends(get_db), timer: bool = True, level: str = None):
     """Mulai quiz huruf, dengan mode speed atau random sesuai query parameter."""
     user = get_current_user(request, db)
     if not user or user.role != "murid":
         return RedirectResponse(url="/login")
 
+    # Validation: if timer is True but level is not chosen or invalid, redirect to pilih-level
+    if timer and level not in {"easy", "medium", "hard"}:
+        return RedirectResponse(url="/murid/pilih-level?type=huruf")
+
     mode_char, target = _random_huruf_target()
     query = f"target={target}&mode={mode_char}"
     if timer:
         query += "&timer=true"
+    if level:
+        query += f"&level={level}"
 
     return RedirectResponse(
         url=f"/canvas-latihan-huruf?{query}",
@@ -75,16 +81,22 @@ async def start_quiz_huruf(request: Request, db: Session = Depends(get_db), time
 
 
 @router.get("/quiz-kata/start")
-async def start_quiz_kata(request: Request, db: Session = Depends(get_db), timer: bool = False):
+async def start_quiz_kata(request: Request, db: Session = Depends(get_db), timer: bool = True, level: str = None):
     """Mulai quiz kata, dengan mode speed atau random sesuai query parameter."""
     user = get_current_user(request, db)
     if not user or user.role != "murid":
         return RedirectResponse(url="/login")
 
+    # Validation: if timer is True but level is not chosen or invalid, redirect to pilih-level
+    if timer and level not in {"easy", "medium", "hard"}:
+        return RedirectResponse(url="/murid/pilih-level?type=kata")
+
     target = _random_kata_target()
     query = f"target={target}"
     if timer:
         query += "&timer=true"
+    if level:
+        query += f"&level={level}"
 
     return RedirectResponse(
         url=f"/canvas-latihan-kata?{query}",
@@ -93,17 +105,23 @@ async def start_quiz_kata(request: Request, db: Session = Depends(get_db), timer
 
 
 @router.get("/quiz-gabungan/start")
-async def start_quiz_gabungan(request: Request, db: Session = Depends(get_db), timer: bool = False):
+async def start_quiz_gabungan(request: Request, db: Session = Depends(get_db), timer: bool = True, level: str = None):
     """Mulai quiz gabungan: mix antara latihan huruf dan latihan kata."""
     user = get_current_user(request, db)
     if not user or user.role != "murid":
         return RedirectResponse(url="/login")
+
+    # Validation: if timer is True but level is not chosen or invalid, redirect to pilih-level
+    if timer and level not in {"easy", "medium", "hard"}:
+        return RedirectResponse(url="/murid/pilih-level?type=gabungan")
 
     if random.choice([True, False]):
         mode_char, target = _random_huruf_target()
         query = f"target={target}&mode={mode_char}"
         if timer:
             query += "&timer=true"
+        if level:
+            query += f"&level={level}"
         return RedirectResponse(
             url=f"/canvas-latihan-huruf?{query}",
             status_code=status.HTTP_303_SEE_OTHER
@@ -113,6 +131,8 @@ async def start_quiz_gabungan(request: Request, db: Session = Depends(get_db), t
     query = f"target={target}"
     if timer:
         query += "&timer=true"
+    if level:
+        query += f"&level={level}"
     return RedirectResponse(
         url=f"/canvas-latihan-kata?{query}",
         status_code=status.HTTP_303_SEE_OTHER

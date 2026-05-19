@@ -70,7 +70,11 @@ async def canvas_latihan_huruf(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/login")
-    return templates.TemplateResponse(request, "canvas-latihan-huruf.html", {"user": user})
+    timer = request.query_params.get("timer") == "true"
+    level = request.query_params.get("level", "medium")
+    if level not in {"easy", "medium", "hard"}:
+        level = "medium"
+    return templates.TemplateResponse(request, "canvas-latihan-huruf.html", {"user": user, "is_timer": timer, "level": level})
 
 @router.get("/canvas-latihan")
 async def legacy_canvas_latihan_redirect(request: Request, db: Session = Depends(get_db)):
@@ -105,7 +109,11 @@ async def canvas_latihan_kata(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     if not user:
         return RedirectResponse(url="/login")
-    return templates.TemplateResponse(request, "canvas-latihan-kata.html", {"user": user})
+    timer = request.query_params.get("timer") == "true"
+    level = request.query_params.get("level", "medium")
+    if level not in {"easy", "medium", "hard"}:
+        level = "medium"
+    return templates.TemplateResponse(request, "canvas-latihan-kata.html", {"user": user, "is_timer": timer, "level": level})
 
 @router.get("/canvas-latihan-kata.html")
 async def legacy_canvas_latihan_kata_html_redirect(request: Request, db: Session = Depends(get_db)):

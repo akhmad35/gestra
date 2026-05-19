@@ -1,0 +1,448 @@
+{% extends "layout.html" %}
+
+{% block title %}GESTRA — Pilih Tingkat Kesulitan{% endblock %}
+
+{% block description %}Pilih tingkat kesulitan untuk Speed Quiz kamu agar belajarmu makin seru!{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --bg-page: linear-gradient(180deg, #E8F2FF 0%, #F9FBFF 100%);
+    --card-easy: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    --card-medium: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+    --card-hard: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+    --accent-easy: #10B981;
+    --accent-medium: #F59E0B;
+    --accent-hard: #EF4444;
+    --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.08);
+    --radius-xl: 32px;
+  }
+
+  body {
+    background: var(--bg-page);
+  }
+
+  .pilih-level-shell {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+    min-height: calc(100vh - 100px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pilih-level-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    animation: fadeInDown 0.8s ease-out;
+  }
+
+  .pilih-level-header h1 {
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: #0F172A;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.6px;
+  }
+
+  .pilih-level-header p {
+    font-size: 1.15rem;
+    color: #475569;
+    max-width: 600px;
+    margin: 0 auto;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  .pilih-level-header .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #3B82F6;
+    margin-top: 1rem;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+    border: 1.5px solid #DBEAFE;
+  }
+
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .level-card {
+    text-decoration: none;
+    border-radius: var(--radius-xl);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.006);
+    border: 3px solid white;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    min-height: 380px;
+    overflow: hidden;
+  }
+
+  .level-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .level-card-easy {
+    background: var(--card-easy);
+  }
+  .level-card-easy:hover {
+    border-color: var(--accent-easy);
+    box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15);
+    transform: translateY(-8px);
+  }
+
+  .level-card-medium {
+    background: var(--card-medium);
+  }
+  .level-card-medium:hover {
+    border-color: var(--accent-medium);
+    box-shadow: 0 20px 40px rgba(245, 158, 11, 0.15);
+    transform: translateY(-8px);
+  }
+
+  .level-card-hard {
+    background: var(--card-hard);
+  }
+  .level-card-hard:hover {
+    border-color: var(--accent-hard);
+    box-shadow: 0 20px 40px rgba(239, 68, 68, 0.15);
+    transform: translateY(-8px);
+  }
+
+  .level-badge {
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    background: white;
+    padding: 0.35rem 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    z-index: 2;
+  }
+
+  .level-card-easy .level-badge { color: var(--accent-easy); }
+  .level-card-medium .level-badge { color: var(--accent-medium); }
+  .level-card-hard .level-badge { color: var(--accent-hard); }
+
+  .level-icon {
+    font-size: 4.5rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+    z-index: 2;
+  }
+  .level-card:hover .level-icon {
+    transform: scale(1.15) rotate(4deg);
+  }
+
+  .level-title {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #0F172A;
+    margin-bottom: 0.75rem;
+    z-index: 2;
+  }
+
+  .level-description {
+    font-size: 1rem;
+    color: #475569;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+    z-index: 2;
+    max-width: 240px;
+  }
+
+  .timer-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: white;
+    padding: 0.6rem 1.25rem;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0F172A;
+    border: 2px solid transparent;
+    z-index: 2;
+    transition: all 0.3s ease;
+  }
+
+  .level-card-easy .timer-tag { border-color: #A7F3D0; color: #065F46; }
+  .level-card-medium .timer-tag { border-color: #FDE68A; color: #92400E; }
+  .level-card-hard .timer-tag { border-color: #FCA5A5; color: #991B1B; }
+
+  .level-card:hover .timer-tag {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .back-btn-container {
+    margin-top: 4rem;
+    display: flex;
+    justify-content: center;
+    animation: fadeInUp 1s ease-out;
+  }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: white;
+    color: #64748B;
+    font-size: 1.05rem;
+    font-weight: 800;
+    padding: 0.85rem 1.75rem;
+    border-radius: 20px;
+    border: 2px solid #E2E8F0;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-back:hover {
+    color: #1E293B;
+    border-color: #CBD5E1;
+    transform: translateX(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
+  }
+
+  /* ── Loader Overlay ── */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .loading-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .loading-card {
+    background: white;
+    padding: 3rem 2.5rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    border: 2px solid #E2E8F0;
+    text-align: center;
+    max-width: 420px;
+    width: 90%;
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .loading-overlay.active .loading-card {
+    transform: scale(1);
+  }
+
+  .loading-card h2 {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: #0F172A;
+    margin: 1.25rem 0 0.5rem;
+  }
+
+  .loading-card p {
+    font-size: 1rem;
+    color: #64748B;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+
+  .loading-progress {
+    height: 6px;
+    background: #E2E8F0;
+    border-radius: 999px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .loading-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 35%;
+    background: linear-gradient(90deg, #3B82F6, #60A5FA);
+    border-radius: 999px;
+    animation: shimmer 1.5s infinite ease-in-out;
+  }
+
+  @keyframes shimmer {
+    0% { left: -35%; }
+    100% { left: 100%; }
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pilih-level-shell">
+  <header class="pilih-level-header">
+    <h1>Pilih Level Kuis Kecepatanmu</h1>
+    <p>
+      Tantang dirimu untuk menulis lebih cepat! Pilih tingkat kesulitan yang sesuai dengan kemampuanmu.
+    </p>
+    <div class="pill">
+      <svg style="width:16px;height:16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Speed Quiz — {{ quiz_type | capitalize }}
+    </div>
+  </header>
+
+  <div class="level-grid">
+    <!-- Level Mudah -->
+    <a href="/murid/quiz-{{ quiz_type }}/start?timer=true&level=easy" class="level-card level-card-easy" onclick="showLoader(event, 'Mudah')">
+      <div class="level-badge">Level Santai</div>
+      <div class="level-icon">🟢</div>
+      <h2 class="level-title">Mudah</h2>
+      <p class="level-description">Sip! Banyak waktu untuk berlatih menulis dengan tenang.</p>
+      <div class="timer-tag">
+        <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        60 Detik / Soal
+      </div>
+    </a>
+
+    <!-- Level Sedang -->
+    <a href="/murid/quiz-{{ quiz_type }}/start?timer=true&level=medium" class="level-card level-card-medium" onclick="showLoader(event, 'Sedang')">
+      <div class="level-badge">Standard</div>
+      <div class="level-icon">🟡</div>
+      <h2 class="level-title">Sedang</h2>
+      <p class="level-description">Tantangan standard GESTRA untuk menguji ketangkasan jarimu.</p>
+      <div class="timer-tag">
+        <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        30 Detik / Soal
+      </div>
+    </a>
+
+    <!-- Level Sulit -->
+    <a href="/murid/quiz-{{ quiz_type }}/start?timer=true&level=hard" class="level-card level-card-hard" onclick="showLoader(event, 'Sulit')">
+      <div class="level-badge">Tantangan Kilat</div>
+      <div class="level-icon">🔴</div>
+      <h2 class="level-title">Sulit</h2>
+      <p class="level-description">Luar biasa! Tulis secepat kilat sebelum waktumu habis.</p>
+      <div class="timer-tag">
+        <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        15 Detik / Soal
+      </div>
+    </a>
+  </div>
+
+  <div class="back-btn-container">
+    <a href="/murid/pilih-quiz?mode=speed" class="btn-back">
+      <svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Kembali Pilih Jenis Kuis
+    </a>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="level-loading-overlay">
+  <div class="loading-card">
+    <div style="font-size: 4.5rem;" id="loading-emoji">🚀</div>
+    <h2 id="loading-title">Menyiapkan Level...</h2>
+    <p id="loading-desc">Tunggu sebentar ya! Kami siapkan latihan terbaik untukmu.</p>
+    <div class="loading-progress"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function showLoader(event, levelName) {
+    event.preventDefault();
+    const url = event.currentTarget.getAttribute('href');
+    const overlay = document.getElementById('level-loading-overlay');
+    const emojiEl = document.getElementById('loading-emoji');
+    const titleEl = document.getElementById('loading-title');
+    const descEl = document.getElementById('loading-desc');
+    
+    // Set level-specific loading text & emoji
+    if (levelName === 'Mudah') {
+      emojiEl.innerText = '🎈';
+      titleEl.innerText = 'Membuka Level Mudah...';
+      descEl.innerText = 'Persiapkan dirimu untuk belajar dengan santai!';
+    } else if (levelName === 'Sedang') {
+      emojiEl.innerText = '⚡';
+      titleEl.innerText = 'Membuka Level Sedang...';
+      descEl.innerText = 'Ketangkasan standard GESTRA akan segera dimulai!';
+    } else if (levelName === 'Sulit') {
+      emojiEl.innerText = '🔥';
+      titleEl.innerText = 'Membuka Level Sulit!';
+      descEl.innerText = 'Waw! Tulis secepat kilat ya, tantangan menantimu!';
+    }
+    
+    overlay.classList.add('active');
+    
+    setTimeout(() => {
+      window.location.href = url;
+    }, 1200);
+  }
+</script>
+{% endblock %}

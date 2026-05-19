@@ -498,3 +498,21 @@ async def pilih_quiz(request: Request, db: Session = Depends(get_db)):
         name="murid/pilih-quiz.html",
         context={"user": user, "mode": mode}
     )
+
+
+@router.get("/pilih-level", response_class=HTMLResponse)
+async def pilih_level(request: Request, db: Session = Depends(get_db)):
+    """Halaman pemilihan level kesulitan sebelum masuk ke Speed Quiz."""
+    user = get_current_user(request, db)
+    if not user or user.role != "murid":
+        return RedirectResponse(url="/login")
+
+    quiz_type = request.query_params.get("type")
+    if quiz_type not in {"huruf", "kata", "gabungan"}:
+        return RedirectResponse(url="/murid/pilih-quiz?mode=speed")
+
+    return templates.TemplateResponse(
+        request=request,
+        name="murid/pilih-level.html",
+        context={"user": user, "quiz_type": quiz_type}
+    )

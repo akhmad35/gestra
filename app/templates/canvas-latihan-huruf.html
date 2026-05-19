@@ -60,13 +60,24 @@
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
             </svg>
-            <span id="timer-val">30</span>s
+            <span id="timer-val">{% if level == 'easy' %}60{% elif level == 'hard' %}15{% else %}30{% endif %}</span>s
         </div>
         {% endif %}
         <div class="quiz-score">Skor: {{ session.skor_akhir }}</div>
     </div>
     <div class="progress-bar-container">
         <div class="progress-bar-fill" style="width: {{ (current_question_no - 1) / session.total_soal * 100 }}%"></div>
+    </div>
+    {% elif is_timer %}
+    <!-- Single Question Timer Header -->
+    <div class="quiz-stats-bar" style="justify-content: center;">
+        <div class="quiz-timer" id="quiz-timer-display">
+            <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Waktu Tersisa: &nbsp;<span id="timer-val">{% if level == 'easy' %}60{% elif level == 'hard' %}15{% else %}30{% endif %}</span>s
+        </div>
     </div>
     {% endif %}
 
@@ -131,26 +142,51 @@
     </div>
 </main>
 
-{% if is_quiz and is_timer %}
+{% if is_timer %}
 <script>
-    // Quiz Timer Logic - Per Question (30 Seconds)
-    window.timeLeft = 30;
-    const timerDisplay = document.getElementById('timer-val');
-    
-    // Simpan interval ke window agar bisa diakses periksaTulisan
-    window.quizTimerInterval = setInterval(() => {
-        window.timeLeft--;
-        if (timerDisplay) timerDisplay.innerText = window.timeLeft;
-        
-        if (window.timeLeft <= 0) {
-            clearInterval(window.quizTimerInterval);
-            handleTimeout();
-        }
-    }, 1000);
+    // Difficulty Level Mapping
+    const levelMapping = {
+        'easy': 60,
+        'medium': 30,
+        'hard': 15
+    };
+    const chosenLevel = "{{ level or 'medium' }}";
+    const timeLimit = levelMapping[chosenLevel] || 30;
 
-    async function handleTimeout() {
-        // Hentikan timer
+    window.timeLeft = timeLimit;
+    window.quizTimerInterval = null;
+
+    window.startTimer = function() {
         if (window.quizTimerInterval) clearInterval(window.quizTimerInterval);
+        window.timeLeft = timeLimit;
+        const timerDisplay = document.querySelectorAll('#timer-val');
+        timerDisplay.forEach(el => el.innerText = window.timeLeft);
+
+        window.quizTimerInterval = setInterval(() => {
+            window.timeLeft--;
+            if (timerDisplay) timerDisplay.innerText = window.timeLeft;
+            
+            if (window.timeLeft <= 0) {
+                clearInterval(window.quizTimerInterval);
+                if (typeof handleTimeout === 'function') {
+                    handleTimeout();
+                } else if (typeof periksaTulisan === 'function') {
+                    periksaTulisan();
+                }
+            }
+        }, 1000);
+    };
+
+    window.stopTimer = function() {
+        if (window.quizTimerInterval) {
+            clearInterval(window.quizTimerInterval);
+            window.quizTimerInterval = null;
+        }
+    };
+
+    {% if is_quiz %}
+    async function handleTimeout() {
+        window.stopTimer();
         
         // Kirim hasil "Salah" karena timeout
         try {
@@ -194,6 +230,12 @@
             window.location.reload();
         }
     }
+    {% endif %}
+
+    // Auto-start on load
+    document.addEventListener('DOMContentLoaded', () => {
+        window.startTimer();
+    });
 </script>
 {% endif %}
 
