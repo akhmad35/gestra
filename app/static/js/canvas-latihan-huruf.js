@@ -34,7 +34,7 @@
 
     const targetChar = config.target || urlParams.get('target') || 'A';
     const currentMode = config.modeChar || urlParams.get('mode') || 'upper';
-    const isQuiz = (config.isQuiz === true);
+    const isQuiz = (config.isQuiz === true) || (urlParams.get('quiz') === 'true');
     const sessionId = config.sessionId || null;
 
     console.log("Quiz Mode Active:", isQuiz, "| Session:", sessionId);
@@ -444,36 +444,70 @@
         }
 
         // === ATUR VISIBILITY TOMBOL ===
-        if (btnNext) {
-            btnNext.style.display = isSuccess ? 'inline-block' : 'none';
-            btnNext.disabled = false;
-            btnNext.innerText = "Lanjut ke Soal Berikutnya";
-        }
-        if (btnRetry) {
-            btnRetry.style.display = isSuccess ? 'none' : 'inline-block';
-            btnRetry.disabled = false;
-            btnRetry.innerText = "Coba Lagi";
-        }
+        const isQuizMode = isQuiz;
+        const defaultActions = document.getElementById("modal-actions-default");
 
-        // === SET URL UNTUK NEXT BUTTON ===
-        if (btnNext) {
-            if (data.next_url) {
+        if (isQuizMode) {
+            if (defaultActions) defaultActions.style.display = "none";
+            
+            // Tampilkan tombol Coba Lagi jika jawaban salah
+            if (btnRetry) {
+                btnRetry.style.display = isSuccess ? "none" : "inline-block";
+                btnRetry.onclick = function() {
+                    closeKuisSelesaiModal();
+                };
+            }
+            
+            if (btnNext) {
+                btnNext.style.display = "inline-block";
+                btnNext.disabled = false;
+                btnNext.innerText = "Lanjut ke Soal Berikutnya";
+                
+                let nextUrl = data.next_url;
+                if (!nextUrl) {
+                    const isTimerVal = config.isTimer || (urlParams.get('timer') === 'true');
+                    const levelVal = config.level || urlParams.get('level') || 'medium';
+                    nextUrl = `/murid/quiz-huruf/start?timer=${isTimerVal}&level=${levelVal}`;
+                }
+                
+                const navigateToNext = () => {
+                    btnNext.disabled = true;
+                    btnNext.innerText = "Memuat...";
+                    const separator = nextUrl.includes('?') ? '&' : '?';
+                    window.location.href = nextUrl + separator + "q=" + Date.now();
+                };
+                
                 btnNext.onclick = function (e) {
                     e.preventDefault();
-                    this.disabled = true;
-                    this.innerText = "Memuat...";
-                    console.log("Navigating to next question:", data.next_url);
-                    const separator = data.next_url.includes('?') ? '&' : '?';
-                    const finalUrl = data.next_url + separator + "q=" + Date.now();
-                    window.location.href = finalUrl;
+                    navigateToNext();
                 };
-            } else {
-                btnNext.onclick = function (e) {
-                    e.preventDefault();
-                    this.disabled = true;
-                    this.innerText = "Memuat...";
-                    window.location.href = '/murid/riwayat-nilai';
+                
+                // Bersihkan timer auto-advance sebelumnya jika ada
+                if (window.quizAutoAdvanceTimeout) {
+                    clearTimeout(window.quizAutoAdvanceTimeout);
+                }
+                
+                // Auto-advance setelah 3 detik HANYA jika jawaban benar (isSuccess adalah true)
+                if (isSuccess) {
+                    window.quizAutoAdvanceTimeout = setTimeout(() => {
+                        if (modal.style.display === "flex" && !btnNext.disabled) {
+                            navigateToNext();
+                        }
+                    }, 3000);
+                }
+            }
+        } else {
+            if (defaultActions) defaultActions.style.display = "flex";
+            if (btnNext) btnNext.style.display = "none";
+            if (btnRetry) {
+                btnRetry.style.display = isSuccess ? "none" : "inline-block";
+                btnRetry.onclick = function() {
+                    closeKuisSelesaiModal();
                 };
+            }
+            const checkBtn = document.getElementById("btn-default-check");
+            if (checkBtn) {
+                checkBtn.style.display = isSuccess ? "inline-block" : "none";
             }
         }
 
@@ -481,10 +515,64 @@
     }
 
     function closeKuisSelesaiModal() {
+        // Bersihkan timer auto-advance jika ada
+        if (window.quizAutoAdvanceTimeout) {
+            clearTimeout(window.quizAutoAdvanceTimeout);
+            window.quizAutoAdvanceTimeout = null;
+        }
+
         document.getElementById("modal-selesai").style.display = "none";
         resetCanvas();
 
         if (typeof window.startTimer === 'function') {
             window.startTimer();
         }
-    }   
+    }
+
+    // Fungsi untuk Lewati Soal
+    window.lewatiSoal = async function() {
+        if (typeof window.stopTimer === 'function') window.stopTimer();
+        
+        const btnLewati = document.getElementById('btn-lewati');
+        if (btnLewati) {
+            btnLewati.innerText = "Memuat...";
+            btnLewati.disabled = true;
+        }
+        
+        if (!isQuiz || !config.sessionId) {
+            window.location.reload();
+            return;
+        }
+        
+        try {
+            const endpoint = `/murid/quiz/submit/${config.sessionId}`;
+            const payload = {
+                image: "",
+                target: targetChar,
+                mode: currentMode,
+                timeout: true,
+                prediction: "Skipped",
+                confidence: 0,
+                is_correct: false,
+                question_no: config.questionNo || 1
+            };
+
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await response.json();
+            
+            if (data && data.next_url) {
+                const separator = data.next_url.includes('?') ? '&' : '?';
+                window.location.href = data.next_url + separator + "q=" + Date.now();
+            } else {
+                window.location.reload();
+            }
+        } catch (e) {
+            console.error("Error skipping:", e);
+            window.location.reload();
+        }
+    };

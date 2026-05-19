@@ -57,7 +57,7 @@ def _random_kata_target():
 
 
 @router.get("/quiz-huruf/start")
-async def start_quiz_huruf(request: Request, db: Session = Depends(get_db), timer: bool = True, level: str = None):
+async def start_quiz_huruf(request: Request, db: Session = Depends(get_db), timer: bool = False, level: str = None):
     """Mulai quiz huruf, dengan mode speed atau random sesuai query parameter."""
     user = get_current_user(request, db)
     if not user or user.role != "murid":
@@ -67,21 +67,27 @@ async def start_quiz_huruf(request: Request, db: Session = Depends(get_db), time
     if timer and level not in {"easy", "medium", "hard"}:
         return RedirectResponse(url="/murid/pilih-level?type=huruf")
 
-    mode_char, target = _random_huruf_target()
-    query = f"target={target}&mode={mode_char}"
-    if timer:
-        query += "&timer=true"
-    if level:
-        query += f"&level={level}"
+    # Initialize a new QuizSession
+    session_mode = f"speed_huruf_{level}" if timer else "random_huruf"
+    session = QuizSession(
+        siswa_id=user.id,
+        mode=session_mode,
+        total_soal=10,
+        status="ongoing",
+        waktu_mulai=datetime.utcnow()
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
 
     return RedirectResponse(
-        url=f"/canvas-latihan-huruf?{query}",
+        url=f"/murid/quiz/kerjakan/{session.id}",
         status_code=status.HTTP_303_SEE_OTHER
     )
 
 
 @router.get("/quiz-kata/start")
-async def start_quiz_kata(request: Request, db: Session = Depends(get_db), timer: bool = True, level: str = None):
+async def start_quiz_kata(request: Request, db: Session = Depends(get_db), timer: bool = False, level: str = None):
     """Mulai quiz kata, dengan mode speed atau random sesuai query parameter."""
     user = get_current_user(request, db)
     if not user or user.role != "murid":
@@ -91,21 +97,27 @@ async def start_quiz_kata(request: Request, db: Session = Depends(get_db), timer
     if timer and level not in {"easy", "medium", "hard"}:
         return RedirectResponse(url="/murid/pilih-level?type=kata")
 
-    target = _random_kata_target()
-    query = f"target={target}"
-    if timer:
-        query += "&timer=true"
-    if level:
-        query += f"&level={level}"
+    # Initialize a new QuizSession
+    session_mode = f"speed_kata_{level}" if timer else "random_kata"
+    session = QuizSession(
+        siswa_id=user.id,
+        mode=session_mode,
+        total_soal=10,
+        status="ongoing",
+        waktu_mulai=datetime.utcnow()
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
 
     return RedirectResponse(
-        url=f"/canvas-latihan-kata?{query}",
+        url=f"/murid/quiz/kerjakan/{session.id}",
         status_code=status.HTTP_303_SEE_OTHER
     )
 
 
 @router.get("/quiz-gabungan/start")
-async def start_quiz_gabungan(request: Request, db: Session = Depends(get_db), timer: bool = True, level: str = None):
+async def start_quiz_gabungan(request: Request, db: Session = Depends(get_db), timer: bool = False, level: str = None):
     """Mulai quiz gabungan: mix antara latihan huruf dan latihan kata."""
     user = get_current_user(request, db)
     if not user or user.role != "murid":
@@ -115,26 +127,21 @@ async def start_quiz_gabungan(request: Request, db: Session = Depends(get_db), t
     if timer and level not in {"easy", "medium", "hard"}:
         return RedirectResponse(url="/murid/pilih-level?type=gabungan")
 
-    if random.choice([True, False]):
-        mode_char, target = _random_huruf_target()
-        query = f"target={target}&mode={mode_char}"
-        if timer:
-            query += "&timer=true"
-        if level:
-            query += f"&level={level}"
-        return RedirectResponse(
-            url=f"/canvas-latihan-huruf?{query}",
-            status_code=status.HTTP_303_SEE_OTHER
-        )
+    # Initialize a new QuizSession
+    session_mode = f"speed_gabungan_{level}" if timer else "random_gabungan"
+    session = QuizSession(
+        siswa_id=user.id,
+        mode=session_mode,
+        total_soal=10,
+        status="ongoing",
+        waktu_mulai=datetime.utcnow()
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
 
-    target = _random_kata_target()
-    query = f"target={target}"
-    if timer:
-        query += "&timer=true"
-    if level:
-        query += f"&level={level}"
     return RedirectResponse(
-        url=f"/canvas-latihan-kata?{query}",
+        url=f"/murid/quiz/kerjakan/{session.id}",
         status_code=status.HTTP_303_SEE_OTHER
     )
 
@@ -163,31 +170,55 @@ async def kerjakan_quiz(request: Request, session_id: int, db: Session = Depends
         db.commit()
         return RedirectResponse(url=f"/murid/quiz/hasil/{session.id}")
     
-    # Generate target acak untuk soal ini jika belum ada (biasanya belum ada karena flow-nya sequential)
-    mode_choices = ["upper", "lower", "number"]
-    selected_mode = random.choice(mode_choices)
+    # Parse mode details
+    mode_str = session.mode
+    is_timer = mode_str.startswith("speed") or "timer" in mode_str
     
-    if selected_mode == "upper":
-        target = random.choice(string.ascii_uppercase)
-    elif selected_mode == "lower":
-        target = random.choice(string.ascii_lowercase)
+    level = "medium"
+    if "easy" in mode_str:
+        level = "easy"
+    elif "hard" in mode_str:
+        level = "hard"
+        
+    # Tentukan jenis quiz (huruf, kata, gabungan)
+    if "kata" in mode_str:
+        quiz_type = "kata"
+    elif "gabungan" in mode_str:
+        quiz_type = "huruf" if current_question_no % 2 != 0 else "kata"
     else:
-        target = str(random.randint(0, 9))
+        quiz_type = "huruf"
+        
+    # Generate target acak
+    if quiz_type == "kata":
+        target = _random_kata_target()
+        selected_mode = "lower"
+        template_name = "canvas-latihan-kata.html"
+    else:
+        mode_choices = ["upper", "lower", "number"]
+        selected_mode = random.choice(mode_choices)
+        if selected_mode == "upper":
+            target = random.choice(string.ascii_uppercase)
+        elif selected_mode == "lower":
+            target = random.choice(string.ascii_lowercase)
+        else:
+            target = str(random.randint(0, 9))
+        template_name = "canvas-latihan-huruf.html"
     
-    # Gunakan template canvas-latihan-huruf.html tapi dengan konteks kuis
     return templates.TemplateResponse(
         request=request,
-        name="canvas-latihan-huruf.html",
+        name=template_name,
         context={
             "user": user,
             "is_quiz": True,
-            "is_timer": session.mode == "timer",
+            "is_timer": is_timer,
             "session": session,
             "current_question_no": current_question_no,
             "target": target,
-            "mode": selected_mode
+            "mode": selected_mode,
+            "level": level
         }
     )
+
 
 @router.post("/quiz/submit/{session_id}")
 async def submit_quiz_answer(
@@ -211,6 +242,7 @@ async def submit_quiz_answer(
         mode = data.get("mode")
         is_timeout = data.get("timeout", False)
         question_no = data.get("question_no")
+        is_word = data.get("is_word", False)
         
         # Gunakan nomor soal dari client jika ada, jika tidak fallback ke hitung manual
         current_no = question_no if question_no else (len(session.details) + 1)
@@ -227,7 +259,13 @@ async def submit_quiz_answer(
         status_msg = "unknown"
         message_msg = ""
         
-        if not is_timeout and image_data:
+        if is_word:
+            prediction = data.get("prediction", "None")
+            confidence = float(data.get("confidence", 0.0)) / 100.0
+            is_correct = data.get("is_correct", False)
+            status_msg = "Selesai"
+            message_msg = "Hebat!"
+        elif not is_timeout and image_data:
             # 1. Run Pipeline Validation (checks base64, decoding, and domain match)
             validation_res = run_pipeline_validation(image_data, mode, target)
             if not validation_res.get("valid", True):
@@ -263,8 +301,6 @@ async def submit_quiz_answer(
             # Update detail yang sudah ada (jika murid coba lagi di soal yang sama)
             existing_detail.prediction = prediction
             existing_detail.confidence = float(confidence * 100)
-            # Jika sebelumnya sudah benar, jangan biarkan jadi salah lagi (opsional)
-            # Tapi biasanya murid hanya coba lagi kalau salah.
             if not existing_detail.is_correct:
                 existing_detail.is_correct = is_correct
             detail = existing_detail
@@ -281,8 +317,6 @@ async def submit_quiz_answer(
             )
             db.add(detail)
         
-        # Update session counters (Benar/Salah)
-        # Hitung ulang dari semua detail untuk akurasi data
         db.commit()
         db.refresh(session)
         
@@ -292,7 +326,6 @@ async def submit_quiz_answer(
             
         db.commit()
         db.refresh(session)
-        db.refresh(session) # Pastikan data terbaru di-fetch
         
         # Check if kuis selesai
         total_dikerjakan = len(session.details)
@@ -319,6 +352,7 @@ async def submit_quiz_answer(
         print(f"Error in submit_quiz_answer: {e}")
         return JSONResponse(status_code=200, content=get_failsafe_response(message=f"Terjadi kesalahan sistem: {str(e)}"))
 
+
 @router.get("/quiz/hasil/{session_id}", response_class=HTMLResponse)
 async def quiz_hasil(request: Request, session_id: int, db: Session = Depends(get_db)):
     """Halaman hasil akhir kuis"""
@@ -333,15 +367,69 @@ async def quiz_hasil(request: Request, session_id: int, db: Session = Depends(ge
     # Hitung akurasi rata-rata
     avg_accuracy = sum([d.confidence for d in session.details]) / len(session.details) if session.details else 0
     
+    mode_str = session.mode
+    is_timer = mode_str.startswith("speed") or "timer" in mode_str
+    
+    # Parse jenis kuis
+    if "huruf" in mode_str:
+        jenis_kuis = "Huruf"
+    elif "kata" in mode_str:
+        jenis_kuis = "Kata"
+    elif "gabungan" in mode_str:
+        jenis_kuis = "Gabungan"
+    else:
+        jenis_kuis = "Umum"
+
+    # Parse level
+    level = "Bebas"
+    if "easy" in mode_str:
+        level = "Mudah"
+    elif "medium" in mode_str:
+        level = "Sedang"
+    elif "hard" in mode_str:
+        level = "Sulit"
+        
+    duration_formatted = f"{int(session.durasi_detik // 60)}m {int(session.durasi_detik % 60)}s" if session.durasi_detik else "0s"
+    persentase = round((session.benar_count / session.total_soal) * 100) if session.total_soal else 0
+    
+    # Dynamic retry url
+    retry_level = "medium"
+    if "easy" in mode_str:
+        retry_level = "easy"
+    elif "hard" in mode_str:
+        retry_level = "hard"
+        
+    if "speed_huruf" in mode_str:
+        retry_url = f"/murid/quiz-huruf/start?timer=true&level={retry_level}"
+    elif "speed_kata" in mode_str:
+        retry_url = f"/murid/quiz-kata/start?timer=true&level={retry_level}"
+    elif "speed_gabungan" in mode_str:
+        retry_url = f"/murid/quiz-gabungan/start?timer=true&level={retry_level}"
+    elif "random_huruf" in mode_str:
+        retry_url = "/murid/quiz-huruf/start"
+    elif "random_kata" in mode_str:
+        retry_url = "/murid/quiz-kata/start"
+    elif "random_gabungan" in mode_str:
+        retry_url = "/murid/quiz-gabungan/start"
+    else:
+        retry_url = "/murid/pilih-quiz"
+        
     return templates.TemplateResponse(
         request=request,
         name="murid/quiz-hasil.html",
         context={
             "user": user,
             "session": session,
-            "avg_accuracy": round(avg_accuracy, 1)
+            "avg_accuracy": round(avg_accuracy, 1),
+            "jenis_kuis": jenis_kuis,
+            "level": level,
+            "is_timer": is_timer,
+            "duration_formatted": duration_formatted,
+            "persentase": persentase,
+            "retry_url": retry_url
         }
     )
+
 
 @router.get("/quiz/detail/{session_id}", response_class=HTMLResponse)
 async def quiz_detail(request: Request, session_id: int, db: Session = Depends(get_db)):

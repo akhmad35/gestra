@@ -44,7 +44,7 @@
         font-size: 0.88rem;
         font-weight: 800;
         transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
         cursor: pointer;
         user-select: none;
     }
@@ -141,8 +141,15 @@
     }
 
     @keyframes float-decor {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50% { transform: translateY(-10px) rotate(5deg); }
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-10px) rotate(5deg);
+        }
     }
 
     /* ── Single-Page Sections (Views) ── */
@@ -169,7 +176,7 @@
         border: 2px solid #E2E8F0;
         border-radius: 28px;
         padding: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
     }
 
     .overall-stats-grid {
@@ -364,7 +371,7 @@
         text-align: center;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -383,8 +390,15 @@
     }
 
     @keyframes float-icon {
-        0%, 100% { transform: translateY(0) scale(1); }
-        50% { transform: translateY(-8px) scale(1.05); }
+
+        0%,
+        100% {
+            transform: translateY(0) scale(1);
+        }
+
+        50% {
+            transform: translateY(-8px) scale(1.05);
+        }
     }
 
     .category-card h3 {
@@ -418,7 +432,7 @@
         border-radius: 24px;
         padding: 24px;
         margin-bottom: 28px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
     }
 
     .chart-header {
@@ -459,7 +473,7 @@
         background: white;
         border: 2px solid #E2E8F0;
         border-radius: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
         position: relative;
         overflow: hidden;
@@ -480,9 +494,17 @@
         width: 6px;
     }
 
-    .history-card.type-latihan::before { background: #3B82F6; }
-    .history-card.type-quiz-random::before { background: #10B981; }
-    .history-card.type-speed-quiz::before { background: #F59E0B; }
+    .history-card.type-latihan::before {
+        background: #3B82F6;
+    }
+
+    .history-card.type-quiz-random::before {
+        background: #10B981;
+    }
+
+    .history-card.type-speed-quiz::before {
+        background: #F59E0B;
+    }
 
     .history-main {
         min-width: 0;
@@ -506,9 +528,20 @@
         text-transform: uppercase;
     }
 
-    .badge-latihan { background: #DBEAFE; color: #1E40AF; }
-    .badge-quiz-random { background: #D1FAE5; color: #065F46; }
-    .badge-speed-quiz { background: #FEF3C7; color: #92400E; }
+    .badge-latihan {
+        background: #DBEAFE;
+        color: #1E40AF;
+    }
+
+    .badge-quiz-random {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .badge-speed-quiz {
+        background: #FEF3C7;
+        color: #92400E;
+    }
 
     .history-title {
         color: #1E293B;
@@ -611,8 +644,15 @@
     }
 
     @keyframes empty-pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.08); }
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.08);
+        }
     }
 
     .empty-state h2 {
@@ -755,7 +795,7 @@
         font-size: 1.6rem;
         font-weight: 900;
         color: #4F46E5;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
     }
 
     .modal-summary-text h4 {
@@ -819,7 +859,7 @@
         border-radius: 20px;
         padding: 16px 20px;
         margin-bottom: 14px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         display: flex;
         flex-direction: column;
         gap: 12px;
@@ -850,7 +890,7 @@
         justify-content: space-between;
         align-items: center;
         padding-bottom: 8px;
-        border-bottom: 1px dashed rgba(0,0,0,0.06);
+        border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
     }
 
     .question-number-badge {
@@ -863,12 +903,23 @@
         justify-content: center;
         font-weight: 900;
         font-size: 0.82rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
 
-    .detail-question-card.status-correct .question-number-badge { color: #15803D; border: 1.5px solid #BBF7D0; }
-    .detail-question-card.status-incorrect .question-number-badge { color: #B91C1C; border: 1.5px solid #FCA5A5; }
-    .detail-question-card.status-locked .question-number-badge { color: #475569; border: 1.5px solid #CBD5E1; }
+    .detail-question-card.status-correct .question-number-badge {
+        color: #15803D;
+        border: 1.5px solid #BBF7D0;
+    }
+
+    .detail-question-card.status-incorrect .question-number-badge {
+        color: #B91C1C;
+        border: 1.5px solid #FCA5A5;
+    }
+
+    .detail-question-card.status-locked .question-number-badge {
+        color: #475569;
+        border: 1.5px solid #CBD5E1;
+    }
 
     .question-status-pill {
         font-size: 0.75rem;
@@ -881,9 +932,20 @@
         gap: 4px;
     }
 
-    .detail-question-card.status-correct .question-status-pill { background: #D1FAE5; color: #065F46; }
-    .detail-question-card.status-incorrect .question-status-pill { background: #FEE2E2; color: #991B1B; }
-    .detail-question-card.status-locked .question-status-pill { background: #E2E8F0; color: #334155; }
+    .detail-question-card.status-correct .question-status-pill {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .detail-question-card.status-incorrect .question-status-pill {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .detail-question-card.status-locked .question-status-pill {
+        background: #E2E8F0;
+        color: #334155;
+    }
 
     .question-card-content {
         display: grid;
@@ -912,9 +974,17 @@
         color: #1E293B;
     }
 
-    .detail-question-card.status-correct .question-data-value { color: #1E293B; }
-    .detail-question-card.status-incorrect .question-data-value.val-student { color: #EF4444; }
-    .detail-question-card.status-incorrect .question-data-value.val-key { color: #10B981; }
+    .detail-question-card.status-correct .question-data-value {
+        color: #1E293B;
+    }
+
+    .detail-question-card.status-incorrect .question-data-value.val-student {
+        color: #EF4444;
+    }
+
+    .detail-question-card.status-incorrect .question-data-value.val-key {
+        color: #10B981;
+    }
 
     .question-locked-message-container {
         display: flex;
@@ -957,6 +1027,7 @@
     }
 
     @media (max-width: 600px) {
+
         .category-grid,
         .subcategory-grid {
             grid-template-columns: 1fr;
@@ -997,11 +1068,12 @@
 {% block content %}
 <div class="riwayat-page">
     <div class="riwayat-container">
-        
+
         <!-- Navigation Toolbar -->
         <nav class="nav-toolbar">
             <div class="riwayat-back-btn" onclick="goBack()" title="Kembali">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
@@ -1025,10 +1097,10 @@
 
         <!-- ================= SECTION 0: LEVEL MAIN (PILIHAN UTAMA) ================= -->
         <section class="view-section active show" id="view-main">
-            
+
             <!-- Overall Student Scoreboard & Charts Section at the Top of Landing View -->
             <div class="overall-dashboard">
-                
+
                 <!-- 4 Ceria Stats Cards -->
                 <div class="overall-stats-grid">
                     <div class="overall-stat-card">
@@ -1066,7 +1138,7 @@
 
                 <!-- Learning Progress Bar & Line Chart Stack Row -->
                 <div class="dashboard-interactive-row">
-                    
+
                     <!-- Progress Belajarku Column -->
                     <div class="learning-progress-column">
                         <div class="progress-column-header">
@@ -1083,7 +1155,8 @@
                             </div>
                         </div>
                         <p class="encouraging-text" id="overall-progress-encouraging">
-                            Yuk asah kemampuan menulismu! Setiap coretan kuas di canvas membantumu menjadi bintang menulis! 🎨🚀
+                            Yuk asah kemampuan menulismu! Setiap coretan kuas di canvas membantumu menjadi bintang
+                            menulis! 🎨🚀
                         </p>
                     </div>
 
@@ -1091,10 +1164,12 @@
                     <div class="learning-chart-column">
                         <div class="chart-column-header">
                             <h3>📈 Grafik Kemajuan Belajarku</h3>
-                            <span style="color: #64748B; font-size: 0.85rem; font-weight: 700;">Tren Skor Keseluruhan</span>
+                            <span style="color: #64748B; font-size: 0.85rem; font-weight: 700;">Tren Skor
+                                Keseluruhan</span>
                         </div>
                         <div class="overall-chart-container">
-                            <svg id="overall-progress-chart" width="100%" height="100%" style="overflow: visible;"></svg>
+                            <svg id="overall-progress-chart" width="100%" height="100%"
+                                style="overflow: visible;"></svg>
                         </div>
                     </div>
 
@@ -1107,7 +1182,7 @@
             </div>
 
             <div class="category-grid">
-                
+
                 <!-- LATIHAN MENULIS CARD -->
                 <div class="category-card" onclick="navigateToView('view-menulis-sub')">
                     <div class="card-icon">✍️</div>
@@ -1135,7 +1210,7 @@
         <!-- ================= SECTION 1: LATIHAN MENULIS SUB-MENU ================= -->
         <section class="view-section" id="view-menulis-sub">
             <div class="subcategory-grid">
-                
+
                 <!-- HURUF CARD -->
                 <div class="category-card" onclick="openList('handwriting_huruf')">
                     <div class="card-icon">🔤</div>
@@ -1156,7 +1231,7 @@
         <!-- ================= SECTION 2: QUIZ SUB-MENU ================= -->
         <section class="view-section" id="view-quiz-sub">
             <div class="subcategory-grid">
-                
+
                 <!-- QUIZ RANDOM CARD -->
                 <div class="category-card" onclick="openList('quiz_random')">
                     <div class="card-icon">✨</div>
@@ -1176,7 +1251,7 @@
 
         <!-- ================= SECTION 3: LIST DATA NILAI ================= -->
         <section class="view-section" id="view-list">
-            
+
             <!-- Dynamic Progress Chart -->
             <div class="chart-section" id="chart-wrapper">
                 <div class="chart-header">
@@ -1190,59 +1265,58 @@
 
             <!-- List container -->
             <div class="history-list" id="history-container">
-                
+
                 <!-- Jinja2 Latihan Kelas / Homework -->
                 {% if riwayat_list %}
-                    {% for item in riwayat_list %}
-                        <article class="history-card type-latihan" 
-                                 data-timestamp="{{ item.dikumpulkan_pada.strftime('%Y-%m-%dT%H:%M:%S') }}"
-                                 data-category="{{ item.latihan.tipe_soal if item.latihan else 'handwriting_huruf' }}"
-                                 data-is-kelas="{{ 'true' if item.kelas_id else 'false' }}"
-                                 data-details-json='{
+                {% for item in riwayat_list %}
+                <article class="history-card type-latihan"
+                    data-timestamp="{{ item.dikumpulkan_pada.strftime('%Y-%m-%dT%H:%M:%S') }}"
+                    data-category="{{ item.latihan.tipe_soal if item.latihan else 'handwriting_huruf' }}"
+                    data-is-kelas="{{ 'true' if item.kelas_id else 'false' }}" data-details-json='{
                                      "judul": {{ (item.latihan.judul if item.latihan else "Latihan Menulis")|tojson }},
                                      "tipe": "Latihan Menulis",
                                      "target": {{ (item.latihan.pertanyaan if item.latihan else "")|tojson }},
                                      "jawaban": {{ item.jawaban|tojson if item.jawaban else "" }},
                                      "jawaban_kunci": {{ (item.latihan.jawaban_kunci if (item.latihan and item.latihan.jawaban_kunci) else (item.latihan.pertanyaan if item.latihan else ""))|tojson }},
                                      "nilai": {{ item.nilai }},
-                                     "benar": {{ 'true' if item.benar else 'false' }},
-                                     "attempts": {{ item.attempts_count }},
-                                     "kelas": {{ (item.kelas.nama_kelas if item.kelas else "Latihan Umum")|tojson }},
-                                     "tanggal": "{{ item.dikumpulkan_pada.strftime('%d %b %Y, %H:%M') }}",
-                                     "izinkan_lihat_hasil": {{ 'true' if (item.latihan and item.latihan.izinkan_lihat_hasil) else 'true' }}
-                                 }'>
-                            <div class="history-main">
-                                <div class="history-title-row">
-                                    <span class="history-badge badge-latihan">✍️ {{ 'Huruf' if (item.latihan and item.latihan.tipe_soal == 'handwriting_huruf') else 'Kata' }}</span>
-                                    <h2 class="history-title">{{ item.latihan.judul if item.latihan else 'Latihan Menulis' }}</h2>
-                                </div>
-                                <div class="history-meta">
-                                    <span>📅 {{ item.dikumpulkan_pada.strftime('%d %b %Y, %H:%M') }}</span>
-                                    <span>🏫 {{ item.kelas.nama_kelas if item.kelas else 'Latihan Umum' }}</span>
-                                    <span>🔄 Percobaan ke-{{ item.attempts_count }}</span>
-                                </div>
-                            </div>
-                            <div class="score-panel">
-                                <div class="score-box">
-                                    <span class="score-value">{{ item.nilai }}</span>
-                                    <span class="score-label">Nilai</span>
-                                </div>
-                                <button type="button" class="btn-detail" onclick="openDetailModal(this)">
-                                    Lihat Detail
-                                </button>
-                            </div>
-                        </article>
-                    {% endfor %}
+                                     "benar": {{ ' true' if item.benar else 'false' }}, "attempts" : {{
+                    item.attempts_count }}, "kelas" : {{ (item.kelas.nama_kelas if item.kelas else "Latihan Umum"
+                    )|tojson }}, "tanggal" : "{{ item.dikumpulkan_pada.strftime('%d %b %Y, %H:%M') }}"
+                    , "izinkan_lihat_hasil" : {{ 'true' if (item.latihan and item.latihan.izinkan_lihat_hasil)
+                    else 'true' }} }'>
+                    <div class="history-main">
+                        <div class="history-title-row">
+                            <span class="history-badge badge-latihan">✍️ {{ 'Huruf' if (item.latihan and
+                                item.latihan.tipe_soal == 'handwriting_huruf') else 'Kata' }}</span>
+                            <h2 class="history-title">{{ item.latihan.judul if item.latihan else 'Latihan Menulis' }}
+                            </h2>
+                        </div>
+                        <div class="history-meta">
+                            <span>📅 {{ item.dikumpulkan_pada.strftime('%d %b %Y, %H:%M') }}</span>
+                            <span>🏫 {{ item.kelas.nama_kelas if item.kelas else 'Latihan Umum' }}</span>
+                            <span>🔄 Percobaan ke-{{ item.attempts_count }}</span>
+                        </div>
+                    </div>
+                    <div class="score-panel">
+                        <div class="score-box">
+                            <span class="score-value">{{ item.nilai }}</span>
+                            <span class="score-label">Nilai</span>
+                        </div>
+                        <button type="button" class="btn-detail" onclick="openDetailModal(this)">
+                            Lihat Detail
+                        </button>
+                    </div>
+                </article>
+                {% endfor %}
                 {% endif %}
 
                 <!-- Jinja2 Quiz Sessions -->
                 {% if quiz_sessions %}
-                    {% for session in quiz_sessions %}
-                        <article class="history-card type-{{ 'speed-quiz' if session.mode == 'timer' else 'quiz-random' }}" 
-                                 data-timestamp="{{ session.waktu_mulai.strftime('%Y-%m-%dT%H:%M:%S') }}"
-                                 data-category="{{ 'speed_quiz' if session.mode == 'timer' else 'quiz_random' }}"
-                                 data-is-kelas="false"
-                                 data-details-json='{
+                {% for session in quiz_sessions %}
+                <article class="history-card type-{{ 'speed-quiz' if session.mode == 'timer' else 'quiz-random' }}"
+                    data-timestamp="{{ session.waktu_mulai.strftime('%Y-%m-%dT%H:%M:%S') }}"
+                    data-category="{{ 'speed_quiz' if session.mode == 'timer' else 'quiz_random' }}"
+                    data-is-kelas="false" data-details-json='{
                                      "judul": "{{ "Speed Quiz ⏱️" if session.mode == "timer" else "Quiz Random 🎲" }}",
                                      "tipe": "{{ "Speed Quiz" if session.mode == "timer" else "Quiz Acak" }}",
                                      "skor": {{ session.skor_akhir }},
@@ -1250,44 +1324,36 @@
                                      "salah": {{ session.salah_count }},
                                      "total": {{ session.total_soal }},
                                      "durasi": {{ session.durasi_detik }},
-                                     "tanggal": "{{ session.waktu_mulai.strftime('%d %b %Y, %H:%M') }}",
-                                     "izinkan_lihat_hasil": true,
-                                     "questions": [
-                                         {% for d in session.details %}
-                                         {
-                                             "nomor": {{ d.nomor_soal }},
-                                             "target": {{ d.target_char|tojson }},
-                                             "prediction": {{ (d.prediction if d.prediction else "")|tojson }},
-                                             "confidence": {{ d.confidence }},
-                                             "correct": {{ 'true' if d.is_correct else 'false' }}
-                                         }{{ "," if not loop.last else "" }}
-                                         {% endfor %}
-                                     ]
-                                 }'>
-                            <div class="history-main">
-                                <div class="history-title-row">
-                                    <span class="history-badge badge-{{ 'speed-quiz' if session.mode == 'timer' else 'quiz-random' }}">
-                                        {{ '⏱️ Speed' if session.mode == 'timer' else '🎲 Acak' }}
-                                    </span>
-                                    <h2 class="history-title">Kuis GESTRA #{{ session.id }}</h2>
-                                </div>
-                                <div class="history-meta">
-                                    <span>📅 {{ session.waktu_mulai.strftime('%d %b %Y, %H:%M') }}</span>
-                                    <span>🎯 {{ session.benar_count }}/{{ session.total_soal }} Benar</span>
-                                    <span>⏱️ {{ session.durasi_detik }} Detik</span>
-                                </div>
-                            </div>
-                            <div class="score-panel">
-                                <div class="score-box">
-                                    <span class="score-value">{{ session.skor_akhir }}</span>
-                                    <span class="score-label">Skor</span>
-                                </div>
-                                <button type="button" class="btn-detail" onclick="openDetailModal(this)">
-                                    Lihat Detail
-                                </button>
-                            </div>
-                        </article>
-                    {% endfor %}
+                                     "tanggal": "{{ session.waktu_mulai.strftime(' %d %b %Y, %H:%M')
+                    }}", "izinkan_lihat_hasil" : true, "questions" : [ {% for d in session.details %} { "nomor" : {{
+                    d.nomor_soal }}, "target" : {{ d.target_char|tojson }}, "prediction" : {{ (d.prediction if
+                    d.prediction else "" )|tojson }}, "confidence" : {{ d.confidence }}, "correct" : {{ 'true' if
+                    d.is_correct else 'false' }} }{{ "," if not loop.last else "" }} {% endfor %} ] }'>
+                    <div class="history-main">
+                        <div class="history-title-row">
+                            <span
+                                class="history-badge badge-{{ 'speed-quiz' if session.mode == 'timer' else 'quiz-random' }}">
+                                {{ '⏱️ Speed' if session.mode == 'timer' else '🎲 Acak' }}
+                            </span>
+                            <h2 class="history-title">Kuis GESTRA #{{ session.id }}</h2>
+                        </div>
+                        <div class="history-meta">
+                            <span>📅 {{ session.waktu_mulai.strftime('%d %b %Y, %H:%M') }}</span>
+                            <span>🎯 {{ session.benar_count }}/{{ session.total_soal }} Benar</span>
+                            <span>⏱️ {{ session.durasi_detik }} Detik</span>
+                        </div>
+                    </div>
+                    <div class="score-panel">
+                        <div class="score-box">
+                            <span class="score-value">{{ session.skor_akhir }}</span>
+                            <span class="score-label">Skor</span>
+                        </div>
+                        <button type="button" class="btn-detail" onclick="openDetailModal(this)">
+                            Lihat Detail
+                        </button>
+                    </div>
+                </article>
+                {% endfor %}
                 {% endif %}
 
             </div>
@@ -1377,7 +1443,7 @@
     function sortCardsChronologically() {
         const container = document.getElementById('history-container');
         const cards = Array.from(container.children);
-        
+
         cards.sort((a, b) => {
             const timeA = new Date(a.getAttribute('data-timestamp'));
             const timeB = new Date(b.getAttribute('data-timestamp'));
@@ -1392,7 +1458,7 @@
     function calculateOverallStats() {
         const container = document.getElementById('history-container');
         const cards = Array.from(container.children);
-        
+
         let totalLatihan = 0;
         let totalKuis = 0;
         let scoreSum = 0;
@@ -1433,7 +1499,7 @@
         // Write Stat values
         document.getElementById('overall-latihan-count').innerText = totalLatihan;
         document.getElementById('overall-kuis-count').innerText = totalKuis;
-        
+
         const avg = scoreCount > 0 ? Math.round(scoreSum / scoreCount) : 0;
         document.getElementById('overall-nilai-avg').innerText = avg;
 
@@ -1444,7 +1510,7 @@
         const progressPercent = totalQuestionsAnswered > 0 ? Math.round((totalCorrectAnswers / totalQuestionsAnswered) * 100) : 0;
         document.getElementById('progress-correct-soal-label').innerText = `${totalCorrectAnswers} / ${totalQuestionsAnswered} Soal Benar`;
         document.getElementById('progress-percent-label').innerText = `${progressPercent}%`;
-        
+
         setTimeout(() => {
             document.getElementById('overall-progress-bar-fill').style.width = `${progressPercent}%`;
         }, 300);
@@ -1498,9 +1564,9 @@
 
         let pathD = `M ${points[0].x} ${points[0].y}`;
         for (let i = 1; i < points.length; i++) {
-            const cpX1 = points[i-1].x + (points[i].x - points[i-1].x) / 2;
-            const cpY1 = points[i-1].y;
-            const cpX2 = points[i-1].x + (points[i].x - points[i-1].x) / 2;
+            const cpX1 = points[i - 1].x + (points[i].x - points[i - 1].x) / 2;
+            const cpY1 = points[i - 1].y;
+            const cpX2 = points[i - 1].x + (points[i].x - points[i - 1].x) / 2;
             const cpY2 = points[i].y;
             pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${points[i].x} ${points[i].y}`;
         }
@@ -1521,7 +1587,7 @@
             <line x1="${padding}" y1="${height - padding - (50 * (height - 2 * padding) / maxVal)}" x2="${width - padding}" y2="${height - padding - (50 * (height - 2 * padding) / maxVal)}" stroke="#F1F5F9" stroke-width="1" stroke-dasharray="4"/>
             <line x1="${padding}" y1="${height - padding - (100 * (height - 2 * padding) / maxVal)}" x2="${width - padding}" y2="${height - padding - (100 * (height - 2 * padding) / maxVal)}" stroke="#E2E8F0" stroke-width="1"/>
             
-            <path d="${pathD} L ${points[points.length-1].x} ${height - padding} L ${points[0].x} ${height - padding} Z" fill="url(#overall-chart-grad)"/>
+            <path d="${pathD} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z" fill="url(#overall-chart-grad)"/>
             <path d="${pathD}" fill="none" stroke="url(#overall-line-grad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
         `;
 
@@ -1541,7 +1607,7 @@
     function navigateToView(viewId) {
         const currentSection = document.getElementById(activeView);
         const nextSection = document.getElementById(viewId === 'view-list' ? 'view-list' : viewId);
-        
+
         if (!nextSection) return;
 
         // Transition: Fade Out current active view
@@ -1551,7 +1617,7 @@
             setTimeout(() => {
                 currentSection.classList.remove('show');
                 currentSection.classList.remove('active');
-                
+
                 // Show next section
                 activeView = viewId;
                 showSection(nextSection, viewId);
@@ -1658,7 +1724,7 @@
 
     function goBack() {
         if (activeView === 'view-main') {
-            window.location.href = '/murid/dashboard';
+            window.location.href = '/beranda';
         } else if (activeView === 'view-menulis-sub' || activeView === 'view-quiz-sub') {
             navigateToView('view-main');
         } else if (activeView === 'view-list') {
@@ -1676,7 +1742,7 @@
     function openList(category) {
         activeLeafNode = category;
         navigateToView('view-list');
-        
+
         const container = document.getElementById('history-container');
         const cards = Array.from(container.children);
         let visibleCount = 0;
@@ -1735,14 +1801,14 @@
         const chartWrapper = document.getElementById('chart-wrapper');
         const chartSvg = document.getElementById('perkembangan-chart');
         const chartTitle = document.getElementById('chart-title');
-        
+
         if (scores.length < 2) {
             chartWrapper.style.display = 'none';
             return;
         }
-        
+
         chartWrapper.style.display = 'block';
-        
+
         // Dynamic title hook
         let categoryName = 'Nilaimu';
         if (activeLeafNode === 'handwriting_huruf') categoryName = 'Menulis Huruf 🔤';
@@ -1766,9 +1832,9 @@
 
         let pathD = `M ${points[0].x} ${points[0].y}`;
         for (let i = 1; i < points.length; i++) {
-            const cpX1 = points[i-1].x + (points[i].x - points[i-1].x) / 2;
-            const cpY1 = points[i-1].y;
-            const cpX2 = points[i-1].x + (points[i].x - points[i-1].x) / 2;
+            const cpX1 = points[i - 1].x + (points[i].x - points[i - 1].x) / 2;
+            const cpY1 = points[i - 1].y;
+            const cpX2 = points[i - 1].x + (points[i].x - points[i - 1].x) / 2;
             const cpY2 = points[i].y;
             pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${points[i].x} ${points[i].y}`;
         }
@@ -1793,7 +1859,7 @@
             <text x="${padding - 10}" y="${height - padding - (50 * (height - 2 * padding) / maxVal) + 4}" font-size="10" font-weight="800" fill="#94A3B8" text-anchor="end">50</text>
             <text x="${padding - 10}" y="${height - padding - (100 * (height - 2 * padding) / maxVal) + 4}" font-size="10" font-weight="800" fill="#94A3B8" text-anchor="end">100</text>
             
-            <path d="${pathD} L ${points[points.length-1].x} ${height - padding} L ${points[0].x} ${height - padding} Z" fill="url(#chart-grad)"/>
+            <path d="${pathD} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z" fill="url(#chart-grad)"/>
             
             <path d="${pathD}" fill="none" stroke="url(#line-grad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
         `;
@@ -1929,7 +1995,7 @@
                 // Render Single Homework Latihan Card
                 const statusClass = (data.benar && data.benar !== 'false') ? 'status-correct' : 'status-incorrect';
                 const icon = (data.benar && data.benar !== 'false') ? '✅ Benar' : '❌ Salah';
-                
+
                 html += `
                     <div class="detail-question-card ${statusClass}">
                         <div class="question-card-top-row">

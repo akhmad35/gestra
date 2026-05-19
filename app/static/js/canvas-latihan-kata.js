@@ -33,8 +33,12 @@
     const octx = cameraOverlay.getContext('2d');
 
     // Ambil parameter kata dari URL
+    const config = window.QUIZ_CONFIG || {};
+    console.log("GESTRA Quiz Config:", config);
+
     const urlParams = new URLSearchParams(window.location.search);
-    const targetWord = urlParams.get('target') || '';
+    const targetWord = config.target || urlParams.get('target') || '';
+    const isQuiz = (config.isQuiz === true) || (urlParams.get('quiz') === 'true');
 
     // Update Tampilan Target di UI
     const targetDisplay = document.querySelector('.display-target');
@@ -316,8 +320,9 @@
 
         const title = document.getElementById("modal-title");
         const confidenceText = document.getElementById("modal-confidence");
-
-        const btnSelesai = modal.querySelector(".btn-cek-nilai");
+        const btnNext = document.getElementById('btn-next-quiz');
+        const btnRetry = document.getElementById('btn-retry-quiz');
+        const defaultActions = document.getElementById("modal-actions-default");
 
         if (title) {
             title.innerText = errorTitle;
@@ -331,7 +336,24 @@
                 ${targetChar}</span>`;
         }
 
-        if (btnSelesai) btnSelesai.style.display = "none";
+        if (isQuiz) {
+            if (defaultActions) defaultActions.style.display = "none";
+            if (btnNext) btnNext.style.display = "none"; // Belum selesai seluruh kata, jadi tidak ada next quiz
+            if (btnRetry) {
+                btnRetry.style.display = "inline-block";
+                btnRetry.onclick = function() {
+                    closeKuisSelesaiModal();
+                };
+            }
+        } else {
+            if (defaultActions) defaultActions.style.display = "flex";
+            if (btnNext) btnNext.style.display = "none";
+            if (btnRetry) btnRetry.style.display = "none";
+            const checkBtn = document.getElementById("btn-default-check");
+            if (checkBtn) {
+                checkBtn.style.display = "none";
+            }
+        }
 
         const imgContainer = document.getElementById("debug-images-container");
         if (imgContainer) imgContainer.innerHTML = "";
@@ -340,6 +362,12 @@
     }
 
     function closeKuisSelesaiModal() {
+        // Bersihkan timer auto-advance jika ada
+        if (window.quizAutoAdvanceTimeout) {
+            clearTimeout(window.quizAutoAdvanceTimeout);
+            window.quizAutoAdvanceTimeout = null;
+        }
+
         const modal = document.getElementById('modal-selesai');
         const btnSelesai = modal.querySelector(".btn-cek-nilai");
 
@@ -366,14 +394,29 @@
         };
 
         try {
-            const response = await fetch("/predict-word", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
+            let endpoint = "/predict-word";
+            let payload = {
+                target: finalTarget,
+                prediction: finalPrediction,
+                individual_scores: letterScores
+            };
+
+            if (isQuiz && config.sessionId) {
+                endpoint = `/murid/quiz/submit/${config.sessionId}`;
+                payload = {
                     target: finalTarget,
                     prediction: finalPrediction,
-                    individual_scores: letterScores
-                })
+                    confidence: localScore,
+                    is_correct: finalCorrect,
+                    question_no: config.questionNo || 1,
+                    is_word: true
+                };
+            }
+
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
             });
 
             let data = fallbackResult;
@@ -391,8 +434,10 @@
             showModalResult({
                 correct: Boolean(data.correct),
                 score: localScore,
+                confidence: data.confidence,
                 prediction: data.prediction ?? finalPrediction,
                 target: data.target ?? finalTarget,
+                next_url: data.next_url
             });
         } catch (error) {
             console.error("Gagal validasi akhir:", error);
@@ -404,30 +449,265 @@
         const modal = document.getElementById("modal-selesai");
         const title = document.getElementById("modal-title");
         const confidenceText = document.getElementById("modal-confidence");
+        const btnNext = document.getElementById('btn-next-quiz');
+        const btnRetry = document.getElementById('btn-retry-quiz');
 
         const isCorrect = Boolean(data && data.correct);
         
-        // PERBAIKAN: Gunakan data.score yang dikirim, jika tidak ada baru hitung manual
         let finalDisplayScore = 0;
         if (data && typeof data.score !== 'undefined' && data.score !== null) {
             finalDisplayScore = Math.round(data.score);
+        } else if (data && typeof data.confidence !== 'undefined' && data.confidence !== null) {
+            finalDisplayScore = Math.round(data.confidence);
         } else {
-            // Fallback ke hitungan lokal jika server tidak kirim nilai
             finalDisplayScore = isCorrect ? calculateFinalScore() : 0;
         }
 
-        if (isCorrect) {
-            title.innerText = "Hebat! Kamu Menulis Tanpa Banyak Kesalahan!";
-            title.style.color = "#16a34a";
-        } else {
-            title.innerText = "Coba Lagi!";
-            title.style.color = "#dc2626";
+        // === INJEKSI GAYA KHUSUS MODAL (Seperti di Huruf) ===
+        const styleId = "gestra-modal-custom-styles-kata";
+        if (!document.getElementById(styleId)) {
+            const style = document.createElement("style");
+            style.id = styleId;
+            style.textContent = `
+                #modal-custom-desc {
+                    font-size: 1.15rem;
+                    color: #475569;
+                    margin: 15px 0 10px 0;
+                    line-height: 1.5;
+                    font-weight: 500;
+                }
+                .letter-badge-success {
+                    color: #16a34a;
+                    font-weight: 800;
+                    font-size: 1.35rem;
+                    background: #f0fdf4;
+                    border: 2px solid #bbf7d0;
+                    padding: 3px 10px;
+                    border-radius: 8px;
+                    display: inline-block;
+                    margin: 0 4px;
+                }
+                .letter-badge-fail {
+                    color: #dc2626;
+                    font-weight: 800;
+                    font-size: 1.35rem;
+                    background: #fef2f2;
+                    border: 2px solid #fecaca;
+                    padding: 3px 10px;
+                    border-radius: 8px;
+                    display: inline-block;
+                    margin: 0 4px;
+                }
+                #modal-custom-score {
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    margin: 10px 0 20px 0;
+                }
+                .score-badge-success {
+                    background: #16a34a;
+                    color: white;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-weight: 800;
+                    box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);
+                }
+                .score-badge-fail {
+                    background: #dc2626;
+                    color: white;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-weight: 800;
+                    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
+                }
+            `;
+            document.head.appendChild(style);
         }
 
-        if (confidenceText) {
-            // Tampilkan nilai asli hasil rata-rata
-            confidenceText.innerText = `Nilai Kamu: ${finalDisplayScore}`;
+        const modalBox = modal.querySelector(".modal-box");
+        if (modalBox) {
+            let descEl = document.getElementById("modal-custom-desc");
+            if (!descEl) {
+                descEl = document.createElement("p");
+                descEl.id = "modal-custom-desc";
+                modalBox.insertBefore(descEl, confidenceText);
+            }
+
+            let scoreEl = document.getElementById("modal-custom-score");
+            if (!scoreEl) {
+                scoreEl = document.createElement("p");
+                scoreEl.id = "modal-custom-score";
+                modalBox.insertBefore(scoreEl, confidenceText);
+            }
+
+            const label = data.prediction && data.prediction !== "Kosong" ? data.prediction.toUpperCase() : "Kosong";
+
+            if (isCorrect) {
+                title.textContent = 'Luar Biasa!';
+                title.style.color = '#16a34a';
+                const iconContainer = document.getElementById('result-icon');
+                if (iconContainer) iconContainer.innerHTML = '🌟';
+
+                descEl.innerHTML = `Kamu berhasil menulis kata <span class="letter-badge-success">${label}</span>`;
+                scoreEl.innerHTML = `Nilai Akhir: <span class="score-badge-success">${finalDisplayScore}</span>`;
+
+                speak(`Luar biasa! Kamu berhasil menulis kata tanpa banyak kesalahan.`);
+            } else {
+                title.textContent = 'Coba lagi';
+                title.style.color = '#dc2626';
+                const iconContainer = document.getElementById('result-icon');
+                if (iconContainer) iconContainer.innerHTML = '❌';
+
+                descEl.innerHTML = `Kamu menulis kata <span class="letter-badge-fail">${label}</span>`;
+                scoreEl.innerHTML = `Nilai Akhir: <span class="score-badge-fail">${finalDisplayScore}</span>`;
+
+                speak(`Coba lagi ya, menulis kata masih ada beberapa kesalahan.`);
+            }
+
+            if (isCorrect) {
+                confidenceText.innerHTML = `Tingkat Keyakinan: <strong>${finalDisplayScore}%</strong>`;
+            } else {
+                confidenceText.innerHTML = '';
+            }
+        }
+
+        // === ATUR VISIBILITY TOMBOL ===
+        const isQuizMode = isQuiz;
+        const defaultActions = document.getElementById("modal-actions-default");
+
+        if (isQuizMode) {
+            if (defaultActions) defaultActions.style.display = "none";
+            
+            // Tampilkan tombol Coba Lagi jika jawaban salah
+            if (btnRetry) {
+                btnRetry.style.display = isCorrect ? "none" : "inline-block";
+                btnRetry.onclick = function() {
+                    // Reset kata states ke awal
+                    currentLetterIndex = 0;
+                    collectedPredictions = "";
+                    letterScores = new Array(targetWord.length).fill(0);
+                    letterPenalties = new Array(targetWord.length).fill(0);
+                    
+                    closeKuisSelesaiModal();
+                    initWordTraining();
+                    
+                    // Reset timer kembali (KHUSUS speed quiz)
+                    if (typeof window.startTimer === 'function') {
+                        window.startTimer();
+                    }
+                };
+            }
+            
+            if (btnNext) {
+                btnNext.style.display = "inline-block";
+                btnNext.disabled = false;
+                btnNext.innerText = "Lanjut ke Soal Berikutnya";
+                
+                let nextUrl = data.next_url;
+                if (!nextUrl) {
+                    const isTimerVal = config.isTimer || (urlParams.get('timer') === 'true');
+                    const levelVal = config.level || urlParams.get('level') || 'medium';
+                    nextUrl = `/murid/quiz-kata/start?timer=${isTimerVal}&level=${levelVal}`;
+                }
+                
+                const navigateToNext = () => {
+                    btnNext.disabled = true;
+                    btnNext.innerText = "Memuat...";
+                    const separator = nextUrl.includes('?') ? '&' : '?';
+                    window.location.href = nextUrl + separator + "q=" + Date.now();
+                };
+                
+                btnNext.onclick = function (e) {
+                    e.preventDefault();
+                    navigateToNext();
+                };
+                
+                // Bersihkan timer auto-advance sebelumnya jika ada
+                if (window.quizAutoAdvanceTimeout) {
+                    clearTimeout(window.quizAutoAdvanceTimeout);
+                }
+                
+                // Auto-advance setelah 3 detik HANYA jika jawaban benar (isCorrect adalah true)
+                if (isCorrect) {
+                    window.quizAutoAdvanceTimeout = setTimeout(() => {
+                        if (modal.style.display === "flex" && !btnNext.disabled) {
+                            navigateToNext();
+                        }
+                    }, 3000);
+                }
+            }
+        } else {
+            if (defaultActions) defaultActions.style.display = "flex";
+            if (btnNext) btnNext.style.display = "none";
+            if (btnRetry) {
+                btnRetry.style.display = isCorrect ? "none" : "inline-block";
+                btnRetry.onclick = function() {
+                    // Reset kata states ke awal
+                    currentLetterIndex = 0;
+                    collectedPredictions = "";
+                    letterScores = new Array(targetWord.length).fill(0);
+                    letterPenalties = new Array(targetWord.length).fill(0);
+                    
+                    closeKuisSelesaiModal();
+                    initWordTraining();
+                    
+                    if (typeof window.startTimer === 'function') {
+                        window.startTimer();
+                    }
+                };
+            }
+            const checkBtn = document.getElementById("btn-default-check");
+            if (checkBtn) {
+                checkBtn.style.display = isCorrect ? "inline-block" : "none";
+            }
         }
 
         modal.style.display = "flex";
     }
+
+    // Fungsi untuk Lewati Soal
+    window.lewatiSoal = async function() {
+        if (typeof window.stopTimer === 'function') window.stopTimer();
+        
+        const btnLewati = document.getElementById('btn-lewati');
+        if (btnLewati) {
+            btnLewati.innerText = "Memuat...";
+            btnLewati.disabled = true;
+        }
+        
+        if (!isQuiz || !config.sessionId) {
+            window.location.reload();
+            return;
+        }
+        
+        try {
+            const endpoint = `/murid/quiz/submit/${config.sessionId}`;
+            const payload = {
+                target: targetWord,
+                mode: config.modeChar,
+                prediction: "Skipped",
+                confidence: 0,
+                is_correct: false,
+                question_no: config.questionNo || 1,
+                is_word: true,
+                timeout: true
+            };
+
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            
+            const data = await response.json();
+            
+            if (data && data.next_url) {
+                const separator = data.next_url.includes('?') ? '&' : '?';
+                window.location.href = data.next_url + separator + "q=" + Date.now();
+            } else {
+                window.location.reload();
+            }
+        } catch (e) {
+            console.error("Error skipping:", e);
+            window.location.reload();
+        }
+    };

@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}GESTRA — {% if is_quiz %}Kuis Random{% else %}Tulis Huruf{% endif %}{% endblock %}
+{% block title %}GESTRA — {% if is_quiz is defined and is_quiz %}Kuis Random{% else %}Tulis Huruf{% endif %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', path='css/canvas-latihan-huruf.css') }}" />
@@ -48,27 +48,38 @@
 {% endblock %}
 
 {% block content %}
+<script>
+    window.QUIZ_CONFIG = {
+        isQuiz: {% if is_quiz is defined and is_quiz %}true{% else %}false{% endif %},
+        sessionId: {% if session is defined and session and session.id %}{{ session.id }}{% else %}null{% endif %},
+        questionNo: {% if current_question_no is defined %}{{ current_question_no }}{% else %}1{% endif %},
+        target: "{% if target is defined %}{{ target }}{% endif %}",
+        modeChar: "{% if mode is defined %}{{ mode }}{% else %}upper{% endif %}",
+        isTimer: {% if is_timer is defined and is_timer %}true{% else %}false{% endif %},
+        level: "{% if level is defined and level %}{{ level }}{% else %}medium{% endif %}"
+    };
+</script>
 <main class="page-wrapper" style="max-width: 1000px;">
 
-    {% if is_quiz %}
+    {% if is_quiz is defined and is_quiz %}
     <!-- Quiz Header -->
     <div class="quiz-stats-bar">
-        <div class="quiz-progress">Soal {{ current_question_no }} / {{ session.total_soal }}</div>
-        {% if is_timer %}
+        <div class="quiz-progress">Soal {% if current_question_no is defined %}{{ current_question_no }}{% else %}1{% endif %} / {% if session is defined and session and session.total_soal %}{{ session.total_soal }}{% else %}10{% endif %}</div>
+        {% if is_timer is defined and is_timer %}
         <div class="quiz-timer" id="quiz-timer-display">
             <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
             </svg>
-            <span id="timer-val">{% if level == 'easy' %}60{% elif level == 'hard' %}15{% else %}30{% endif %}</span>s
+            <span id="timer-val">{% if level is defined and level == 'easy' %}60{% elif level is defined and level == 'hard' %}15{% else %}30{% endif %}</span>s
         </div>
         {% endif %}
-        <div class="quiz-score">Skor: {{ session.skor_akhir }}</div>
+        <div class="quiz-score">Skor: {% if session is defined and session and session.skor_akhir %}{{ session.skor_akhir }}{% else %}0{% endif %}</div>
     </div>
     <div class="progress-bar-container">
-        <div class="progress-bar-fill" style="width: {{ (current_question_no - 1) / session.total_soal * 100 }}%"></div>
+        <div class="progress-bar-fill" style="width: {{ (((current_question_no if current_question_no is defined else 1) - 1) / (session.total_soal if (session is defined and session and session.total_soal) else 10) * 100) }}%"></div>
     </div>
-    {% elif is_timer %}
+    {% elif is_timer is defined and is_timer %}
     <!-- Single Question Timer Header -->
     <div class="quiz-stats-bar" style="justify-content: center;">
         <div class="quiz-timer" id="quiz-timer-display">
@@ -76,7 +87,7 @@
                 <circle cx="12" cy="12" r="10"/>
                 <polyline points="12 6 12 12 16 14"/>
             </svg>
-            Waktu Tersisa: &nbsp;<span id="timer-val">{% if level == 'easy' %}60{% elif level == 'hard' %}15{% else %}30{% endif %}</span>s
+            Waktu Tersisa: &nbsp;<span id="timer-val">{% if level is defined and level == 'easy' %}60{% elif level is defined and level == 'hard' %}15{% else %}30{% endif %}</span>s
         </div>
     </div>
     {% endif %}
@@ -87,7 +98,7 @@
         <div class="info-header-text">
           <h2 style="font-size: 1.6rem;">
             <span style="color:#3B82F6; border: 2px solid #E2E8F0; border-radius: 8px; padding: 2px 10px; font-size:1.4rem;">?</span>
-            {% if is_quiz %}
+            {% if is_quiz is defined and is_quiz %}
                 Tulis huruf/angka yang muncul!
             {% else %}
                 Tulis huruf dibawah ini
@@ -135,14 +146,25 @@
         </div>
       </div>
     </div>
-    <div class="action-bar">
+    <div class="action-bar" style="display: flex; gap: 16px; justify-content: center; align-items: center; margin-top: 20px;">
+      <button onclick="resetCanvas()" style="font-size: 1.1rem; padding: 16px 36px; border-radius: 12px; background: #f1f5f9; color: #475569; border: 2px solid #e2e8f0; font-weight: 800; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+        <svg style="width:20px;height:20px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+        Hapus Tulisan
+      </button>
       <button class="btn-primary" id="btn-periksa" onclick="periksaTulisan()" style="font-size: 1.1rem; padding: 16px 48px; border-radius: 12px;">
         Periksa Tulisan
       </button>
+      {% if is_quiz is defined and is_quiz %}
+      <button class="btn-kembali" id="btn-lewati" onclick="lewatiSoal()" style="font-size: 1.1rem; padding: 16px 48px; border-radius: 12px; margin: 0; background: #e2e8f0; color: #475569; border: none; font-weight: 800; transition: all 0.3s ease;" onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#e2e8f0'">
+        Lewati
+      </button>
+      {% endif %}
     </div>
 </main>
 
-{% if is_timer %}
+{% if is_timer is defined and is_timer %}
 <script>
     // Difficulty Level Mapping
     const levelMapping = {
@@ -150,7 +172,7 @@
         'medium': 30,
         'hard': 15
     };
-    const chosenLevel = "{{ level or 'medium' }}";
+    const chosenLevel = "{% if level is defined and level %}{{ level }}{% else %}medium{% endif %}";
     const timeLimit = levelMapping[chosenLevel] || 30;
 
     window.timeLeft = timeLimit;
@@ -159,12 +181,12 @@
     window.startTimer = function() {
         if (window.quizTimerInterval) clearInterval(window.quizTimerInterval);
         window.timeLeft = timeLimit;
-        const timerDisplay = document.querySelectorAll('#timer-val');
-        timerDisplay.forEach(el => el.innerText = window.timeLeft);
+        const timerDisplays = document.querySelectorAll('#timer-val');
+        timerDisplays.forEach(el => el.innerText = window.timeLeft);
 
         window.quizTimerInterval = setInterval(() => {
             window.timeLeft--;
-            if (timerDisplay) timerDisplay.innerText = window.timeLeft;
+            timerDisplays.forEach(el => el.innerText = window.timeLeft);
             
             if (window.timeLeft <= 0) {
                 clearInterval(window.quizTimerInterval);
@@ -184,19 +206,19 @@
         }
     };
 
-    {% if is_quiz %}
+    {% if is_quiz is defined and is_quiz %}
     async function handleTimeout() {
         window.stopTimer();
         
         // Kirim hasil "Salah" karena timeout
         try {
-            const response = await fetch(`/murid/quiz/submit/{{ session.id }}`, {
+            const response = await fetch(`/murid/quiz/submit/{% if session is defined and session and session.id %}{{ session.id }}{% endif %}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     image: "", 
-                    target: "{{ target }}",
-                    mode: "{{ mode }}",
+                    target: "{% if target is defined %}{{ target }}{% endif %}",
+                    mode: "{% if mode is defined %}{{ mode }}{% endif %}",
                     timeout: true
                 })
             });
@@ -242,19 +264,18 @@
 <!-- ── Modal Kuis Selesai (Diperbarui untuk Quiz Flow) ── -->
 <div id="modal-selesai" class="modal-overlay" style="display:none;">
   <div class="modal-box kuis-selesai">
+    <div class="star-icon" id="result-icon" style="font-size: 3.5rem; margin-bottom: 10px; text-align: center;">🌟</div>
     <h3 id="modal-title">Kuis Selesai!</h3>
     <p id="modal-confidence" style="font-weight: 600; color: #64748b; margin-bottom: 20px;"></p>
 
-    <div class="modal-actions" id="modal-actions-quiz">
-      {% if is_quiz %}
-        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
-          <button class="btn-primary" id="btn-next-quiz" style="width: 100%;">Lanjut ke Soal Berikutnya</button>
-          <button class="btn-kembali" id="btn-retry-quiz" onclick="closeKuisSelesaiModal()" style="width: 100%; display: none;">Coba Lagi</button>
-        </div>
-      {% else %}
-        <button class="btn-kembali" onclick="closeKuisSelesaiModal()">Kembali</button>
-        <button class="btn-cek-nilai" onclick="window.location.href='/murid/riwayat-nilai'">Cek Nilai</button>
-      {% endif %}
+    <div class="modal-actions" id="modal-actions-quiz" style="display: flex; flex-direction: row; gap: 12px; width: 100%; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 15px;">
+      <button class="btn-kembali" id="btn-retry-quiz" onclick="closeKuisSelesaiModal()" style="flex: 1; min-width: 140px; margin: 0; display: none;">Coba Lagi</button>
+      <button class="btn-primary" id="btn-next-quiz" style="flex: 1; min-width: 140px; margin: 0; display: none;">Lanjut ke Soal Berikutnya</button>
+      
+      <div id="modal-actions-default" style="display: flex; gap: 10px; width: 100%; justify-content: center;">
+        <button class="btn-kembali" id="btn-default-back" onclick="closeKuisSelesaiModal()" style="flex: 1;">Kembali</button>
+        <button class="btn-cek-nilai" id="btn-default-check" onclick="window.location.href='/murid/riwayat-nilai'" style="flex: 1;">Cek Nilai</button>
+      </div>
     </div>
   </div>
 </div>

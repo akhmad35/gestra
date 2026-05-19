@@ -5,6 +5,7 @@
 {% block extra_css %}
 <style>
     .result-container {
+        --primary-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
         max-width: 800px;
         margin: 3rem auto;
         padding: 0 1rem;
@@ -86,8 +87,16 @@
         transition: all 0.2s;
     }
     .btn-primary {
-        background: var(--primary-gradient);
-        color: white;
+        background: white !important;
+        color: #2563eb !important;
+        border: 2px solid #2563eb !important;
+        box-shadow: none !important;
+    }
+    .btn-primary:hover {
+        background: #2563eb !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2) !important;
     }
     .btn-secondary {
         background: #f1f5f9;
@@ -123,9 +132,9 @@
         </div>
 
         <div class="action-btns">
-            <a href="/murid/quiz-random/start" class="btn-action btn-primary">Coba Lagi</a>
+            <a href="{{ retry_url }}" class="btn-action btn-primary">Coba Lagi</a>
             <a href="/murid/riwayat-nilai" class="btn-action btn-secondary">Lihat Riwayat</a>
-            <a href="/murid/dashboard" class="btn-action btn-secondary">Dashboard</a>
+            <!-- <a href="/murid/dashboard" class="btn-action btn-secondary">Dashboard</a> -->
         </div>
     </div>
 </div>

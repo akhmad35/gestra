@@ -384,6 +384,7 @@
     </div>
   </div> -->
 
+  {% if user and user.role != 'guru' %}
   <!-- Row of Primary Quick Links Actions -->
   <div class="profile-action-row">
     <a href="/murid/riwayat-nilai" class="profile-action-btn profile-action-btn-primary">
@@ -393,6 +394,7 @@
       🏠 Kembali ke Dashboard
     </a> -->
   </div>
+  {% endif %}
 
   <!-- Section Title for Settings -->
   <h3 class="section-title" style="margin-bottom: 16px;">Pengaturan & Bantuan</h3>
